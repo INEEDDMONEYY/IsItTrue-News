@@ -49,7 +49,7 @@ export const LATEST_POSTS: Article[] = Array.from({ length: 4 }).map((_, i) => (
   stats: { views: 1200, comments: 30, shares: 12 },
 }))
 
-export const TRENDING_ARTICLES: Article[] = Array.from({ length: 6 }).map((_, i) => ({
+export const TRENDING_ARTICLES: Article[] = Array.from({ length: 12 }).map((_, i) => ({
   id: `trend-${i}`,
   slug: `trending-${i}`,
   title: 'Our Sources Make The Difference In Every Story We Publish',

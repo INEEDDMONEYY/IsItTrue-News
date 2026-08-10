@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { FeaturedArticle } from '../components/FeaturedArticle'
 import { LatestPostsList } from '../components/LatestPostsList'
 import { CategorySidebar } from '../components/CategorySidebar'
@@ -6,17 +5,22 @@ import { ArticleCard } from '../components/ArticleCard'
 import { VideoSection } from '../components/VideoSection'
 import { EditorsPicksCarousel } from '../components/EditorsPicksCarousel'
 import { useCategories } from '@/features/categories/hooks/useCategories'
+import { usePagination } from '@/hooks/usePagination'
+import { Pagination } from '@/components/ui/Pagination'
 import {
   FEATURED_ARTICLE,
   LATEST_POSTS,
   TRENDING_ARTICLES,
 } from '../data/mockHome'
 
-const TOTAL_PAGES = 5
+const PAGE_SIZE = 6
 
 export function HomePage() {
-  const [page, setPage] = useState(1)
   const { categories } = useCategories()
+  const { page, setPage, totalPages, paginatedItems } = usePagination(
+    TRENDING_ARTICLES,
+    PAGE_SIZE,
+  )
 
   return (
     <div className="py-6 md:py-10 flex flex-col gap-10">
@@ -40,29 +44,12 @@ export function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {TRENDING_ARTICLES.map((article) => (
+            {paginatedItems.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-2 mt-8">
-            {Array.from({ length: TOTAL_PAGES }).map((_, i) => {
-              const n = i + 1
-              return (
-                <button
-                  key={n}
-                  onClick={() => setPage(n)}
-                  className={`w-8 h-8 rounded-full text-sm transition-colors ${
-                    page === n
-                      ? 'bg-accent text-white'
-                      : 'text-text-muted hover:bg-surface-2'
-                  }`}
-                >
-                  {n}
-                </button>
-              )
-            })}
-          </div>
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       </section>
     </div>

@@ -7,8 +7,11 @@ import { adaptPublicArticle } from '@/features/articles/utils/adaptPublicArticle
 import { ArticleCard } from '@/features/home/components/ArticleCard'
 import { FEATURED_ARTICLE, LATEST_POSTS, TRENDING_ARTICLES } from '@/features/home/data/mockHome'
 import type { Article } from '@/shared/types/article.types'
+import { usePagination } from '@/hooks/usePagination'
+import { Pagination } from '@/components/ui/Pagination'
 
 const MOCK_POOL: Article[] = [FEATURED_ARTICLE, ...LATEST_POSTS, ...TRENDING_ARTICLES]
+const PAGE_SIZE = 6
 
 export function CategoryPage() {
   const { slug = '' } = useParams<{ slug: string }>()
@@ -35,6 +38,7 @@ export function CategoryPage() {
   }, [adaptedReal, slug])
 
   const articles = [...adaptedReal, ...mockFill]
+  const { page, setPage, totalPages, paginatedItems } = usePagination(articles, PAGE_SIZE, slug)
 
   return (
     <div className="py-6 md:py-10 flex flex-col gap-6">
@@ -57,10 +61,12 @@ export function CategoryPage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {articles.map((article) => (
+        {paginatedItems.map((article) => (
           <ArticleCard key={article.id} article={article} />
         ))}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   )
 }

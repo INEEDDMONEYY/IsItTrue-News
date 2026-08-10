@@ -3,7 +3,7 @@ import type { Category } from '@/shared/types/article.types'
 
 export function CategorySidebar({ categories }: { categories: Category[] }) {
   return (
-    <div className="rounded-2xl border border-card-border bg-card p-4">
+    <div className="gradient-border-card rounded-2xl bg-card p-4">
       <h3 className="text-sm font-semibold text-card-heading mb-3">Category</h3>
       <ul className="flex flex-col gap-1">
         {categories.map((cat) => (

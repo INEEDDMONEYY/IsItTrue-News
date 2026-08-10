@@ -19,3 +19,31 @@
     300% 100%;
   animation: gradient-border-spin 6s linear infinite;
 }
+
+/* Same animated border, tinted to sit on a --color-card / --color-surface
+   background instead of --color-bg. */
+.gradient-border-card {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--color-card), var(--color-card)),
+    linear-gradient(90deg, #3b82f6, #dc2626, #a855f7, #ec4899, #3b82f6);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size:
+    100% 100%,
+    300% 100%;
+  animation: gradient-border-spin 6s linear infinite;
+}
+
+.gradient-border-surface {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--color-surface), var(--color-surface)),
+    linear-gradient(90deg, #3b82f6, #dc2626, #a855f7, #ec4899, #3b82f6);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size:
+    100% 100%,
+    300% 100%;
+  animation: gradient-border-spin 6s linear infinite;
+}

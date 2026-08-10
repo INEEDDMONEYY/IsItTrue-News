@@ -53,6 +53,9 @@ import { ProfileIdentityPage } from '@/features/profile/pages/ProfileIdentityPag
 import { DraftsPage } from '@/features/authors/pages/DraftsPage'
 import { SubmissionQueuePage } from '@/features/authors/pages/SubmissionQueuePage'
 import { PitchCenterPage } from '@/features/authors/pages/PitchCenterPage'
+import { VideoPage } from '@/features/videos/pages/VideoPage'
+import { NewslettersPage } from '@/features/newsletter/pages/NewslettersPage'
+import VideosPage from '@/features/videos/pages/VideosPage'
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +70,9 @@ export const router = createBrowserRouter([
       { path: 'article/:slug', element: <ArticlePage /> },
       { path: 'category/:slug', element: <CategoryPage /> },
       { path: 'tag/:slug', element: <TagPage /> },
+      { path: 'videos', element: <VideosPage /> },
+      { path: 'videos/:id', element: <VideoPage /> },
+      { path: 'newsletter', element: <NewslettersPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'careers', element: <CareersPage /> },
       { path: 'contact', element: <ContactPage /> },

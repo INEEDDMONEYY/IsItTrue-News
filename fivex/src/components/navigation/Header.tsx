@@ -11,6 +11,8 @@ const NAV_LINKS = [
   { label: 'For You', to: '/for-you' },
   { label: 'Local', to: '/local' },
   { label: 'Fact Checks', to: '/fact-checks' },
+  { label: 'Videos', to: '/videos' },
+  { label: 'Newsletters', to: '/newsletter' },
 ]
 
 export function Header() {

@@ -6,6 +6,10 @@ import { publicArticlesApi } from '@/features/articles/api/publicArticles.api'
 import { adaptPublicArticle } from '@/features/articles/utils/adaptPublicArticle'
 import { ArticleCard } from '@/features/home/components/ArticleCard'
 import { TRENDING_ARTICLES } from '@/features/home/data/mockHome'
+import { usePagination } from '@/hooks/usePagination'
+import { Pagination } from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 6
 
 export function TagPage() {
   const { slug = '' } = useParams<{ slug: string }>()
@@ -27,6 +31,11 @@ export function TagPage() {
   // also like" section rather than pretending they match the tag.
   const trendingFill = TRENDING_ARTICLES.filter(
     (article) => !adaptedReal.some((real) => real.id === article.id),
+  )
+  const { page, setPage, totalPages, paginatedItems } = usePagination(
+    trendingFill,
+    PAGE_SIZE,
+    slug,
   )
 
   return (
@@ -58,10 +67,12 @@ export function TagPage() {
       <div className="flex flex-col gap-3 pt-2 border-t border-border">
         <h2 className="text-sm font-semibold text-heading">You might also like</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {trendingFill.map((article) => (
+          {paginatedItems.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
         </div>
+
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </div>
   )

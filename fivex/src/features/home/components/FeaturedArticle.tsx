@@ -12,7 +12,7 @@ export function FeaturedArticle({ article }: { article: Article }) {
   return (
     <Link
       to={`/article/${article.slug}`}
-      className="group relative block rounded-2xl overflow-hidden border border-border bg-surface aspect-[16/10] md:aspect-[16/9]"
+      className="gradient-border-surface group relative block rounded-2xl overflow-hidden aspect-[16/10] md:aspect-[16/9]"
     >
       <img
         src={article.thumbnailUrl}
