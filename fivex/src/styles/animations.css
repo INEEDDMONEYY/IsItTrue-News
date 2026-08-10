@@ -1,0 +1,21 @@
+@keyframes gradient-border-spin {
+  to {
+    background-position: 300% 50%;
+  }
+}
+
+/* Animated blue -> red -> purple -> pink border, used for the header's
+   category chips. Uses the double-background trick so it works on rounded
+   pills without an extra wrapper element. */
+.gradient-border-chip {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--color-bg), var(--color-bg)),
+    linear-gradient(90deg, #3b82f6, #dc2626, #a855f7, #ec4899, #3b82f6);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size:
+    100% 100%,
+    300% 100%;
+  animation: gradient-border-spin 6s linear infinite;
+}

@@ -5,8 +5,8 @@ import { CategorySidebar } from '../components/CategorySidebar'
 import { ArticleCard } from '../components/ArticleCard'
 import { VideoSection } from '../components/VideoSection'
 import { EditorsPicksCarousel } from '../components/EditorsPicksCarousel'
+import { useCategories } from '@/features/categories/hooks/useCategories'
 import {
-  CATEGORIES,
   FEATURED_ARTICLE,
   LATEST_POSTS,
   TRENDING_ARTICLES,
@@ -16,6 +16,7 @@ const TOTAL_PAGES = 5
 
 export function HomePage() {
   const [page, setPage] = useState(1)
+  const { categories } = useCategories()
 
   return (
     <div className="py-6 md:py-10 flex flex-col gap-10">
@@ -29,7 +30,7 @@ export function HomePage() {
       <EditorsPicksCarousel articles={TRENDING_ARTICLES} />
 
       <section className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
-        <CategorySidebar categories={CATEGORIES} />
+        <CategorySidebar categories={categories} />
 
         <div>
           <div className="flex items-center justify-between mb-4">

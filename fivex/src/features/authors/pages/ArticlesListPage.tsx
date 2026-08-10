@@ -2,20 +2,23 @@ import { Link } from 'react-router-dom'
 import { Eye, FilePlus2, Trash2 } from 'lucide-react'
 import { useAuthorArticles } from '../hooks/useAuthorArticles'
 import { FactCheckIndicator } from '../components/FactCheckIndicator'
-import type { ArticleStatus } from '../types/authorArticle.types'
+import type { AuthorArticleStatus } from '../types/authorArticle.types'
 
-const STATUS_STYLES: Record<ArticleStatus, { label: string; className: string }> = {
+const STATUS_STYLES: Record<AuthorArticleStatus, { label: string; className: string }> = {
   published: { label: 'Published', className: 'bg-verified/10 text-verified border-verified/30' },
-  pending_review: { label: 'Pending Review', className: 'bg-pending/10 text-pending border-pending/30' },
+  approved: { label: 'Approved', className: 'bg-verified/10 text-verified border-verified/30' },
+  submitted: { label: 'Submitted', className: 'bg-pending/10 text-pending border-pending/30' },
+  'in-review': { label: 'In Review', className: 'bg-pending/10 text-pending border-pending/30' },
+  rejected: { label: 'Rejected', className: 'bg-disputed/10 text-disputed border-disputed/30' },
   draft: { label: 'Draft', className: 'bg-card-2 text-card-text-muted border-card-border' },
 }
 
 export function ArticlesListPage() {
-  const { articles, deleteArticle } = useAuthorArticles()
+  const { articles, deleteDraft } = useAuthorArticles()
 
   const handleDelete = (id: string, title: string) => {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return
-    deleteArticle(id)
+    deleteDraft(id)
   }
 
   return (
@@ -40,7 +43,7 @@ export function ArticlesListPage() {
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Fact-Check</th>
-              <th className="px-4 py-3 font-medium">Views</th>
+              <th className="px-4 py-3 font-medium">Words</th>
               <th className="px-4 py-3 font-medium">Created</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
             </tr>
@@ -59,11 +62,11 @@ export function ArticlesListPage() {
                   </td>
                   <td className="px-4 py-3">
                     <FactCheckIndicator
-                      status={article.factCheckStatus}
-                      rejectionReason={article.factCheckRejectionReason}
+                      status={article.factCheck.status}
+                      issuesFound={article.factCheck.issuesFound}
                     />
                   </td>
-                  <td className="px-4 py-3 text-card-text-muted">{article.views.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-card-text-muted">{article.metrics.wordCount.toLocaleString()}</td>
                   <td className="px-4 py-3 text-card-text-muted">
                     {new Date(article.createdAt).toLocaleDateString()}
                   </td>

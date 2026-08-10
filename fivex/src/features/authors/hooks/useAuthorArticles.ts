@@ -1,47 +1,119 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { articlesApi } from '../api/articles.api'
-import type { ArticleStatus, CreateArticleInput } from '../types/authorArticle.types'
 
-const QUERY_KEY = ['articles', 'mine']
+import { useMemo, useState } from 'react'
 
-/**
- * The signed-in author's own articles, backed by the real /api/articles
- * endpoints (create/list/update-status/delete). React Query handles caching
- * and refetches the list after each mutation.
- */
+import { mockAuthorArticles } from '../data/mockAuthorArticles'
+import type {
+  AuthorArticle,
+  AuthorArticleStatus,
+} from '../types/authorArticle.types'
+
 export function useAuthorArticles() {
-  const queryClient = useQueryClient()
-  const { data, isLoading, error } = useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: articlesApi.listMine,
-  })
+  const [articles, setArticles] =
+    useState<AuthorArticle[]>(mockAuthorArticles)
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+  const [search, setSearch] = useState('')
 
-  const createMutation = useMutation({
-    mutationFn: (input: CreateArticleInput) => articlesApi.create(input),
-    onSuccess: invalidate,
-  })
+  const [status, setStatus] = useState<
+    AuthorArticleStatus | 'all'
+  >('all')
 
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: ArticleStatus }) =>
-      articlesApi.updateStatus(id, status),
-    onSuccess: invalidate,
-  })
+  const [category, setCategory] = useState('all')
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => articlesApi.remove(id),
-    onSuccess: invalidate,
-  })
+  const [collaboration, setCollaboration] = useState<
+    'all' | 'solo' | 'collaborative'
+  >('all')
+
+  const categories = useMemo(() => {
+    return Array.from(
+      new Set(
+        articles
+          .map((article) => article.category)
+          .filter(Boolean),
+      ),
+    ) as string[]
+  }, [articles])
+
+  const drafts = useMemo(() => {
+    return articles.filter(
+      (article) =>
+        article.status !== 'submitted',
+    )
+  }, [articles])
+
+  const filteredDrafts = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase()
+
+    return drafts.filter((draft) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        draft.title.toLowerCase().includes(normalizedSearch) ||
+        draft.excerpt
+          ?.toLowerCase()
+          .includes(normalizedSearch) ||
+        draft.category
+          ?.toLowerCase()
+          .includes(normalizedSearch) ||
+        draft.collaboration.coAuthors.some((collaborator) =>
+          collaborator.name
+            .toLowerCase()
+            .includes(normalizedSearch),
+        )
+
+      const matchesStatus =
+        status === 'all' || draft.status === status
+
+      const matchesCategory =
+        category === 'all' ||
+        draft.category === category
+
+      const coAuthorCount = draft.collaboration.coAuthors.length
+
+      const matchesCollaboration =
+        collaboration === 'all' ||
+        (collaboration === 'solo' && coAuthorCount === 0) ||
+        (collaboration === 'collaborative' &&
+          coAuthorCount > 0)
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesCategory &&
+        matchesCollaboration
+      )
+    })
+  }, [
+    drafts,
+    search,
+    status,
+    category,
+    collaboration,
+  ])
+
+  const deleteDraft = (id: string) => {
+    setArticles((current) =>
+      current.filter((article) => article.id !== id),
+    )
+  }
 
   return {
-    articles: data ?? [],
-    isLoading,
-    error,
-    createArticle: (input: CreateArticleInput) => createMutation.mutateAsync(input),
-    updateStatus: (id: string, status: ArticleStatus) =>
-      updateStatusMutation.mutateAsync({ id, status }),
-    deleteArticle: (id: string) => deleteMutation.mutateAsync(id),
+    articles,
+    drafts: filteredDrafts,
+
+    search,
+    setSearch,
+
+    status,
+    setStatus,
+
+    category,
+    setCategory,
+
+    collaboration,
+    setCollaboration,
+
+    categories,
+
+    deleteDraft,
   }
 }
 

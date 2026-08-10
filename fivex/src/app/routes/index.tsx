@@ -4,6 +4,7 @@ import { AuthLayout } from '../layouts/AuthLayout'
 import { AdminLayout } from '../layouts/AdminLayout'
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { NotFoundPage } from '../pages/NotFoundPage'
+import { ErrorPage } from '../pages/ErrorPage'
 import { ProtectedRoute } from './ProtectedRoute'
 import { AdminRoute } from './AdminRoute'
 import { HomePage } from '@/features/home/pages/HomePage'
@@ -43,11 +44,21 @@ import { SubmitTicketPage } from '@/features/tickets/pages/SubmitTicketPage'
 import { PrivacyPolicyPage } from '@/features/legal/pages/PrivacyPolicyPage'
 import { TermsOfServicePage } from '@/features/legal/pages/TermsOfServicePage'
 import { CorrectionsPolicyPage } from '@/features/legal/pages/CorrectionsPolicyPage'
+import { MyCommentsPage } from '@/features/comments/pages/MyCommentsPage'
+import { MyVideosPage } from '@/features/videos/pages/MyVideosPage'
+import VideoStudioPage from '@/features/videos/pages/VideoStudioPage'
+import { AuthorSettingsPage } from '@/features/authors/pages/AuthorSettingsPage'
+import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage'
+import { ProfileIdentityPage } from '@/features/profile/pages/ProfileIdentityPage'
+import { DraftsPage } from '@/features/authors/pages/DraftsPage'
+import { SubmissionQueuePage } from '@/features/authors/pages/SubmissionQueuePage'
+import { PitchCenterPage } from '@/features/authors/pages/PitchCenterPage'
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <HomePage /> },
       { path: 'for-you', element: <ForYouPage /> },
@@ -74,6 +85,7 @@ export const router = createBrowserRouter([
   {
     path: 'admin',
     element: <AdminRoute />,
+    errorElement: <ErrorPage />,
     children: [
       {
         element: <AdminLayout />,
@@ -97,6 +109,7 @@ export const router = createBrowserRouter([
   {
     path: 'dashboard',
     element: <ProtectedRoute />,
+    errorElement: <ErrorPage />,
     children: [
       {
         element: <DashboardLayout />,
@@ -109,12 +122,22 @@ export const router = createBrowserRouter([
           { path: 'review', element: <ReviewQueuePage /> },
           { path: 'analytics', element: <DashboardAnalyticsPage /> },
           { path: 'bookmarks', element: <BookmarksPage /> },
+          { path: 'comments', element: <MyCommentsPage /> },
+          { path: 'videos', element: <MyVideosPage /> },
+          { path: 'videos/studio', element: <VideoStudioPage /> },
+          { path: 'notifications', element: <NotificationsPage /> },
+          { path: 'profile', element: <ProfileIdentityPage /> },
+          { path: 'author-settings', element: <AuthorSettingsPage /> },
+          { path: 'drafts', element: <DraftsPage /> },
+          { path: 'submissions', element: <SubmissionQueuePage /> },
+          { path: 'pitches', element: <PitchCenterPage /> },
         ],
       },
     ],
   },
   {
     element: <AuthLayout />,
+    errorElement: <ErrorPage />,
     children: [{ path: '/login', element: <LoginPage /> }],
   },
 ])

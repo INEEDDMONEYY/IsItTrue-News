@@ -3,7 +3,7 @@ import { NavLink, Link } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { getDashboardNav } from '../constants/dashboardNav'
-import logo from '@/assets/logos/isittrue-logo.jpg'
+import logo from '@/assets/icons/question-icon-removebg.png'
 
 const COLLAPSE_STORAGE_KEY = 'itt-dashboard-sidebar-collapsed'
 

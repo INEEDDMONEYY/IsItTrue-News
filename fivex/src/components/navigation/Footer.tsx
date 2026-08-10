@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import logo from '@/assets/logos/triring-logo.jpg'
+import logo from '@/assets/icons/question-icon-removebg.png'
 
 const FOOTER_COLUMNS = [
   {
