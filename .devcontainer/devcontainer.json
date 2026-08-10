@@ -1,0 +1,17 @@
+{
+  "name": "IsItTrue-News",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "forwardPorts": [5173, 4000],
+  "portsAttributes": {
+    "5173": {
+      "label": "Frontend (Vite)",
+      "onAutoForward": "openBrowserOnce",
+      "visibility": "public"
+    },
+    "4000": {
+      "label": "Backend (Express)",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    }
+  }
+}
