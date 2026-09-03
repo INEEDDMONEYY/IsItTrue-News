@@ -12,18 +12,27 @@ export interface PublicArticle {
   slug: string
   title: string
   excerpt: string
-  body: string
+  // Omitted by the backend when this reader has hit their free-plan monthly
+  // article cap — see `locked`.
+  body?: string
   category: string
   tags: string[]
   sourceLinks: string[]
   status: 'draft' | 'pending_review' | 'published'
   factCheckStatus?: 'none' | 'pending' | 'approved' | 'rejected'
+  factCheckReviewedBy?: { id: string; name: string }
   articleImageUrl?: string
   articleVideoUrl?: string
   videoThumbnailUrl?: string
   author: PublicArticleAuthor
   views: number
   likes: number
+  dislikes: number
+  shares: number
+  bookmarks: number
   publishedAt?: string
   createdAt: string
+  // True when the full body was withheld because a free-plan reader is
+  // past their monthly unlock cap. Headline/excerpt stay available either way.
+  locked: boolean
 }

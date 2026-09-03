@@ -1,5 +1,6 @@
+import { Types } from 'mongoose'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
-import { User, type UserDocument } from '../models/User.js'
+import { User, type UserDocument, type IAuthorProfile, type IReaderProfile } from '../models/User.js'
 
 export interface CreateUserInput {
   name: string
@@ -86,6 +87,170 @@ export const userRepository = {
     await User.updateOne({ _id: userId }, { $set: { name: name.trim() } })
   },
 
+  async updateAuthorProfile(userId: string, updates: Partial<IAuthorProfile>): Promise<void> {
+    const set: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(updates)) {
+      set[`authorProfile.${key}`] = value
+    }
+    await User.updateOne({ _id: userId }, { $set: set })
+  },
+
+  async updateReaderProfile(userId: string, updates: Partial<IReaderProfile>): Promise<void> {
+    const set: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(updates)) {
+      set[`readerProfile.${key}`] = value
+    }
+    await User.updateOne({ _id: userId }, { $set: set })
+  },
+
+  async setPhoneVerificationCode(
+    userId: string,
+    phone: string,
+    codeHash: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    await User.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          phone,
+          isPhoneVerified: false,
+          phoneVerificationCodeHash: codeHash,
+          phoneVerificationExpires: expiresAt,
+          phoneVerificationLastSentAt: new Date(),
+        },
+      },
+    )
+  },
+
+  async findByIdWithPhoneSecrets(id: string): Promise<UserDocument | null> {
+    return User.findById(id).select('+phoneVerificationCodeHash +phoneVerificationExpires')
+  },
+
+  async markPhoneVerified(userId: string): Promise<void> {
+    await User.updateOne(
+      { _id: userId },
+      {
+        $set: { isPhoneVerified: true },
+        $unset: { phoneVerificationCodeHash: '', phoneVerificationExpires: '' },
+      },
+    )
+  },
+
+  async completeAuthorOnboarding(
+    userId: string,
+    input: {
+      fullName: string
+      profilePhotoUrl: string
+      shortBio: string
+      socialLinks?: IAuthorProfile['socialLinks']
+    },
+  ): Promise<void> {
+    const now = new Date()
+    await User.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          name: input.fullName.trim(),
+          role: ROLES.AUTHOR,
+          'authorProfile.professionalName': input.fullName.trim(),
+          'authorProfile.profileImage': input.profilePhotoUrl,
+          'authorProfile.bio': input.shortBio,
+          ...(input.socialLinks ? { 'authorProfile.socialLinks': input.socialLinks } : {}),
+          'authorOnboarding.truthProtocolAcceptedAt': now,
+          'authorOnboarding.completedAt': now,
+        },
+      },
+    )
+  },
+
+  // Resets the monthly usage counters when the stored period has rolled into
+  // a new calendar month. Safe to call before every read/increment.
+  async resetUsageIfNeeded(userId: string): Promise<void> {
+    const user = await User.findById(userId).select('usage')
+    if (!user) return
+
+    const now = new Date()
+    const periodStart = user.usage?.periodStart ?? new Date(0)
+    const isNewMonth =
+      periodStart.getUTCFullYear() !== now.getUTCFullYear() ||
+      periodStart.getUTCMonth() !== now.getUTCMonth()
+
+    if (isNewMonth) {
+      await User.updateOne(
+        { _id: userId },
+        {
+          $set: {
+            'usage.videosWatchedThisMonth': 0,
+            'usage.unlockedArticleIds': [],
+            'usage.searchesThisMonth': 0,
+            'usage.commentsThisMonth': 0,
+            'usage.periodStart': now,
+          },
+        },
+      )
+    }
+  },
+
+  // Idempotent — unlocking an article the reader already unlocked this month
+  // doesn't consume another slot of their monthly cap.
+  async unlockArticleForUser(userId: string, articleId: string): Promise<void> {
+    await User.updateOne(
+      { _id: userId },
+      { $addToSet: { 'usage.unlockedArticleIds': new Types.ObjectId(articleId) } },
+    )
+  },
+
+  async incrementVideosWatched(userId: string): Promise<void> {
+    await this.resetUsageIfNeeded(userId)
+    await User.updateOne({ _id: userId }, { $inc: { 'usage.videosWatchedThisMonth': 1 } })
+  },
+
+  async incrementSearches(userId: string): Promise<void> {
+    await User.updateOne({ _id: userId }, { $inc: { 'usage.searchesThisMonth': 1 } })
+  },
+
+  async incrementComments(userId: string): Promise<void> {
+    await User.updateOne({ _id: userId }, { $inc: { 'usage.commentsThisMonth': 1 } })
+  },
+
+  // Persistent read/watch history (not part of the monthly-reset usage
+  // counters) — drives the reader's public profile "Library" tab. The pull
+  // then push keeps entries deduped and moves a re-read/re-watched item back
+  // to the front with an updated timestamp.
+  async recordArticleRead(userId: string, articleId: string): Promise<void> {
+    const oid = new Types.ObjectId(articleId)
+    await User.updateOne({ _id: userId }, { $pull: { readingHistory: { article: oid } } })
+    await User.updateOne(
+      { _id: userId },
+      {
+        $push: {
+          readingHistory: { $each: [{ article: oid, readAt: new Date() }], $position: 0, $slice: 200 },
+        },
+      },
+    )
+  },
+
+  async recordVideoWatch(userId: string, videoId: string): Promise<void> {
+    const oid = new Types.ObjectId(videoId)
+    await User.updateOne({ _id: userId }, { $pull: { watchHistory: { video: oid } } })
+    await User.updateOne(
+      { _id: userId },
+      {
+        $push: {
+          watchHistory: { $each: [{ video: oid, watchedAt: new Date() }], $position: 0, $slice: 200 },
+        },
+      },
+    )
+  },
+
+  async findHistoryById(userId: string): Promise<UserDocument | null> {
+    return User.findById(userId)
+      .select('readingHistory watchHistory')
+      .populate('readingHistory.article')
+      .populate('watchHistory.video')
+  },
+
   async updateEmail(userId: string, email: string): Promise<void> {
     await User.updateOne(
       { _id: userId },
@@ -103,6 +268,26 @@ export const userRepository = {
 
   async deleteById(userId: string): Promise<void> {
     await User.deleteOne({ _id: userId })
+  },
+
+  // Toggles whether `userId` follows `targetId` — mirrors the article/video
+  // like toggle pattern.
+  async toggleFollow(
+    targetId: string,
+    userId: string,
+  ): Promise<{ following: boolean; followersCount: number } | null> {
+    const target = await User.findById(targetId)
+    if (!target) return null
+
+    const alreadyFollowing = target.followers.some((id) => id.toString() === userId)
+    if (alreadyFollowing) {
+      target.followers = target.followers.filter((id) => id.toString() !== userId)
+    } else {
+      target.followers.push(new Types.ObjectId(userId))
+    }
+    await target.save()
+
+    return { following: !alreadyFollowing, followersCount: target.followers.length }
   },
 
   async countAdmins(excludingUserId?: string): Promise<number> {

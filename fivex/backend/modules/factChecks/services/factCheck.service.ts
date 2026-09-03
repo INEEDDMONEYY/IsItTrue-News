@@ -2,6 +2,7 @@ import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
 import { factCheckRepository } from '../repositories/factCheck.repository.js'
 import { articleRepository } from '../../articles/repositories/article.repository.js'
+import { notificationService } from '../../notifications/services/notification.service.js'
 import type { CreateFactCheckRequestInput } from '../validations/factCheck.validation.js'
 
 export const factCheckService = {
@@ -48,7 +49,21 @@ export const factCheckService = {
     }
 
     await factCheckRepository.setApproved(id, actingUser)
-    await articleRepository.setFactCheckApproved(factCheck.article.toString())
+    const article = await articleRepository.setFactCheckApproved(factCheck.article.toString(), actingUser)
+    if (article) {
+      await notificationService.notify({
+        recipient: article.author.toString(),
+        type: 'fact-check',
+        title: 'Fact check approved',
+        message: `Your article "${article.title}" passed fact-check review.`,
+        priority: 'normal',
+        action: 'view',
+        actionLabel: 'View article',
+        href: `/article/${article.slug}`,
+        relatedId: factCheck.article.toString(),
+        relatedType: 'article',
+      })
+    }
   },
 
   async reject(id: string, actingUser: string, reason: string) {
@@ -58,7 +73,21 @@ export const factCheckService = {
     }
 
     await factCheckRepository.setRejected(id, actingUser, reason)
-    await articleRepository.setFactCheckRejected(factCheck.article.toString(), reason)
+    const article = await articleRepository.setFactCheckRejected(factCheck.article.toString(), reason, actingUser)
+    if (article) {
+      await notificationService.notify({
+        recipient: article.author.toString(),
+        type: 'fact-check',
+        title: 'Fact check issues found',
+        message: `Your article "${article.title}" had fact-check issues: ${reason}`,
+        priority: 'high',
+        action: 'review',
+        actionLabel: 'Review issues',
+        href: `/article/${article.slug}`,
+        relatedId: factCheck.article.toString(),
+        relatedType: 'article',
+      })
+    }
   },
 }
 

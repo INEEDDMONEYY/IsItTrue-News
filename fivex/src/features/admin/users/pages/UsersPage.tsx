@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Search, Trash2 } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { getErrorMessage } from '@/lib/getErrorMessage'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { useUsersList } from '../../hooks/useUsersList'
 import { useDeleteUser, useUpdateUserRole } from '../../hooks/useUserMutations'
 import { USER_ROLE_OPTIONS, type UserRole } from '../../types/user.types'
@@ -56,7 +57,7 @@ export function UsersPage() {
         />
       </div>
 
-      {isLoading && <p className="text-sm text-text-muted">Loading users...</p>}
+      {isLoading && <PageLoader label="Loading users..." />}
 
       {error && <p className="text-sm text-disputed">{getErrorMessage(error, 'Failed to load users.')}</p>}
 

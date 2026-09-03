@@ -2,6 +2,7 @@
 import {
   BarChart3,
   BookOpen,
+  BookOpenText,
   BriefcaseBusiness,
   ClipboardCheck,
   FileCheck2,
@@ -26,6 +27,8 @@ import {
   CircleHelp,
   IdCard,
   ScrollText,
+  Megaphone,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -34,6 +37,7 @@ export interface DashboardNavItem {
   to: string
   icon: LucideIcon
   end?: boolean
+  premium?: boolean
 }
 
 /**
@@ -45,7 +49,9 @@ export function getDashboardNav(
   role: string | undefined,
 ): DashboardNavItem[] {
   /**
-   * Shared navigation available to every dashboard user.
+   * Navigation shared by every dashboard user. Readers don't get "My Videos"
+   * or "Community Guidelines" (see readerBase below) — those two are only
+   * spliced back in for authors/editors.
    */
   const base: DashboardNavItem[] = [
     {
@@ -65,11 +71,6 @@ export function getDashboardNav(
       icon: MessageSquare,
     },
     {
-      label: 'My Videos',
-      to: '/dashboard/videos',
-      icon: TvMinimalPlay,
-    },
-    {
       label: 'Notifications',
       to: '/dashboard/notifications',
       icon: Bell,
@@ -85,20 +86,34 @@ export function getDashboardNav(
       icon: CircleHelp,
     },
     {
-      label: 'Community Guidelines',
-      to: '/dashboard/community-guidelines',
-      icon: ScrollText,
-    },
-    {
       label: 'Settings',
       to: '/dashboard/settings',
       icon: Settings,
     },
   ]
 
+  // Only authors/editors get a video studio and are bound by the
+  // author-facing community guidelines link.
+  const videosAndGuidelines: DashboardNavItem[] = [
+    {
+      label: 'My Videos',
+      to: '/dashboard/videos',
+      icon: TvMinimalPlay,
+    },
+    {
+      label: 'Community Guidelines',
+      to: '/dashboard/community-guidelines',
+      icon: ScrollText,
+    },
+  ]
+
   if (role === 'author') {
     return [
-      ...base,
+      ...base.slice(0, 3),
+      ...videosAndGuidelines.slice(0, 1),
+      ...base.slice(3, 6),
+      ...videosAndGuidelines.slice(1),
+      ...base.slice(6),
 
       // Writing & Submissions
       {
@@ -116,6 +131,7 @@ export function getDashboardNav(
         label: 'My Drafts',
         to: '/dashboard/drafts',
         icon: PencilLine,
+        premium: true,
       },
       {
         label: 'Submission Queue',
@@ -126,13 +142,21 @@ export function getDashboardNav(
         label: 'Pitch Center',
         to: '/dashboard/pitches',
         icon: Target,
+        premium: true,
       },
 
       // Investigations & Verification
       {
         label: 'My Investigations',
-        to: '/dashboard/investigations',
+        to: '/author/investigations',
         icon: BriefcaseBusiness,
+        premium: true,
+      },
+      {
+        label: 'New Investigation',
+        to: '/author/investigations/new',
+        icon: FilePlus2,
+        premium: true,
       },
       {
         label: 'Fact Checks',
@@ -146,8 +170,9 @@ export function getDashboardNav(
       },
       {
         label: 'Evidence Vault',
-        to: '/dashboard/evidence',
+        to: '/author/evidence',
         icon: FolderLock,
+        premium: true,
       },
 
       // Collaboration
@@ -155,6 +180,7 @@ export function getDashboardNav(
         label: 'Collaboration Room',
         to: '/dashboard/collaboration',
         icon: UserPen,
+        premium: true,
       },
 
       // Published Work
@@ -169,13 +195,18 @@ export function getDashboardNav(
         label: 'Analytics',
         to: '/dashboard/analytics',
         icon: BarChart3,
+        premium: true,
       },
     ]
   }
 
   if (role === 'editor') {
     return [
-      ...base,
+      ...base.slice(0, 3),
+      ...videosAndGuidelines.slice(0, 1),
+      ...base.slice(3, 6),
+      ...videosAndGuidelines.slice(1),
+      ...base.slice(6),
 
       // Editorial Workflow
       {
@@ -217,7 +248,7 @@ export function getDashboardNav(
       },
       {
         label: 'Investigation Oversight',
-        to: '/dashboard/investigations',
+        to: '/author/investigations/review-queue',
         icon: BriefcaseBusiness,
       },
       {
@@ -245,7 +276,26 @@ export function getDashboardNav(
     ]
   }
 
-  // Reader (default)
-  return base
+  // Reader (default) — no video studio / community guidelines, but with a
+  // dedicated reading-experience settings page and a way to pitch coverage ideas.
+  return [
+    ...base.slice(0, -1),
+    {
+      label: 'Reader Settings',
+      to: '/dashboard/reader-settings',
+      icon: BookOpenText,
+    },
+    {
+      label: 'Topic Submission',
+      to: '/dashboard/topic-submission',
+      icon: Megaphone,
+    },
+    {
+      label: 'Become an Author',
+      to: '/dashboard/become-author',
+      icon: Sparkles,
+    },
+    ...base.slice(-1),
+  ]
 }
 

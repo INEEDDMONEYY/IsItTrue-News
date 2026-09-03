@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Check, Save, Settings2 } from 'lucide-react'
 
+import { PageLoader } from '@/components/loaders/PageLoader'
+import { Spinner } from '@/components/ui/Spinner'
 import { AuthorProfileSection } from '../components/settings/AuthorProfileSection'
 import { AuthorExpertiseSection } from '../components/settings/AuthorExpertiseSection'
 import { AuthorPublishingSection } from '../components/settings/AuthorPublishingSection'
@@ -11,6 +13,8 @@ import { useAuthorSettings } from '../hooks/useAuthorSettings'
 export function AuthorSettingsPage() {
   const {
     settings,
+    isLoading,
+    isSaving,
     updateProfile,
     updateExpertise,
     updatePublishing,
@@ -55,18 +59,24 @@ export function AuthorSettingsPage() {
         <button
           type="button"
           onClick={handleSave}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+          disabled={isSaving}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)] disabled:opacity-60"
         >
-          {saved ? (
+          {isSaving ? (
+            <Spinner size="sm" className="border-white/40 border-t-white" />
+          ) : saved ? (
             <Check className="h-4 w-4" />
           ) : (
             <Save className="h-4 w-4" />
           )}
 
-          {saved ? 'Saved' : 'Save Changes'}
+          {isSaving ? 'Saving...' : saved ? 'Saved' : 'Save Changes'}
         </button>
       </header>
 
+      {isLoading ? (
+        <PageLoader label="Loading your author profile..." />
+      ) : (
       <div className="space-y-6">
         <AuthorProfileSection
           profile={settings.profile}
@@ -90,6 +100,7 @@ export function AuthorSettingsPage() {
 
         <AuthorStatusSection status={settings.status} />
       </div>
+      )}
     </main>
   )
 }

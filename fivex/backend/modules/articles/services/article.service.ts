@@ -1,7 +1,9 @@
 import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
+import { FREE_PLAN_LIMITS } from '../../../shared/constants/plan.js'
 import { slugify } from '../../../utils/slug.js'
 import { articleRepository } from '../repositories/article.repository.js'
+import { userRepository } from '../../users/repositories/user.repository.js'
 import { ARTICLE_STATUSES, type ArticleStatus } from '../constants/articleStatus.js'
 import type { ArticleDocument } from '../models/Article.js'
 import { tagService } from '../../tags/services/tag.service.js'
@@ -18,6 +20,40 @@ function assertCanManage(article: ArticleDocument, actingUser: ActingUser) {
   if (!isOwner && !isPrivileged) {
     throw new AppError('You do not have permission to modify this article.', 403)
   }
+}
+
+// Headlines/excerpts, author profiles, and comments are always unlimited —
+// only the full article body is gated. Anonymous readers always get the
+// locked preview; signed-in free-plan readers get FREE_PLAN_LIMITS.articlesPerMonth
+// distinct unlocks per month; the article's own author/editors/admins/premium
+// readers are never gated.
+async function resolveArticleLock(
+  article: ArticleDocument,
+  actingUser?: ActingUser,
+): Promise<boolean> {
+  const isOwner = actingUser?.id === article.author.toString()
+  const isPrivileged = actingUser?.role === ROLES.ADMIN || actingUser?.role === ROLES.EDITOR
+  if (isOwner || isPrivileged) return false
+
+  if (!actingUser) return true
+
+  const viewer = await userRepository.findById(actingUser.id)
+  if (!viewer || viewer.plan !== 'free') return false
+
+
+  await userRepository.resetUsageIfNeeded(actingUser.id)
+  const fresh = await userRepository.findById(actingUser.id)
+  const articleId = article._id.toString()
+  const unlockedIds = fresh?.usage?.unlockedArticleIds ?? []
+  const alreadyUnlocked = unlockedIds.some((oid) => oid.toString() === articleId)
+  if (alreadyUnlocked) return false
+
+  if (unlockedIds.length >= FREE_PLAN_LIMITS.articlesPerMonth) {
+    return true
+  }
+
+  await userRepository.unlockArticleForUser(actingUser.id, articleId)
+  return false
 }
 
 export const articleService = {
@@ -75,6 +111,11 @@ export const articleService = {
     return articleRepository.findPublishedByTag(tag.name)
   },
 
+  // Public author profile page: only that author's published articles.
+  async listPublishedByAuthor(authorId: string) {
+    return articleRepository.findPublishedByAuthor(authorId)
+  },
+
   async listAll() {
     return articleRepository.findAll()
   },
@@ -93,7 +134,8 @@ export const articleService = {
     }
 
     if (article.status === ARTICLE_STATUSES.PUBLISHED) {
-      return article
+      const locked = await resolveArticleLock(article, actingUser)
+      return { article, locked }
     }
 
     const isOwner = actingUser?.id === article.author.toString()
@@ -103,7 +145,7 @@ export const articleService = {
       throw new AppError('Article not found.', 404)
     }
 
-    return article
+    return { article, locked: false }
   },
 
   async getArticleBySlug(slug: string, actingUser?: ActingUser) {
@@ -113,7 +155,8 @@ export const articleService = {
     }
 
     if (article.status === ARTICLE_STATUSES.PUBLISHED) {
-      return article
+      const locked = await resolveArticleLock(article, actingUser)
+      return { article, locked }
     }
 
     const isOwner = actingUser?.id === article.author.toString()
@@ -123,7 +166,7 @@ export const articleService = {
       throw new AppError('Article not found.', 404)
     }
 
-    return article
+    return { article, locked: false }
   },
 
   async toggleLike(id: string, userId: string) {
@@ -132,6 +175,34 @@ export const articleService = {
       throw new AppError('Article not found.', 404)
     }
     return result
+  },
+
+  async toggleDislike(id: string, userId: string) {
+    const result = await articleRepository.toggleDislike(id, userId)
+    if (!result) {
+      throw new AppError('Article not found.', 404)
+    }
+    return result
+  },
+
+  async incrementShare(id: string) {
+    const sharesCount = await articleRepository.incrementShares(id)
+    if (sharesCount === null) {
+      throw new AppError('Article not found.', 404)
+    }
+    return sharesCount
+  },
+
+  async toggleBookmark(id: string, userId: string) {
+    const result = await articleRepository.toggleBookmark(id, userId)
+    if (!result) {
+      throw new AppError('Article not found.', 404)
+    }
+    return result
+  },
+
+  async listBookmarked(userId: string) {
+    return articleRepository.findBookmarkedByUser(userId)
   },
 
   async updateArticle(
@@ -189,11 +260,21 @@ export const articleService = {
     await articleRepository.deleteById(id)
   },
 
-  async recordView(id: string) {
+  async recordView(id: string, viewerId?: string) {
     const article = await articleRepository.findById(id)
     if (!article || article.status !== ARTICLE_STATUSES.PUBLISHED) {
       throw new AppError('Article not found.', 404)
     }
     await articleRepository.incrementViews(id)
+
+    if (viewerId) {
+      await userRepository.recordArticleRead(viewerId, id)
+    }
+  },
+
+  // Public author-profile page: a reader's liked articles (used in place of
+  // "authored articles" for the reader role, since readers don't publish).
+  async listLikedByUser(userId: string) {
+    return articleRepository.findLikedByUser(userId)
   },
 }

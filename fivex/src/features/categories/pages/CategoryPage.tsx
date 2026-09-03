@@ -9,6 +9,7 @@ import { FEATURED_ARTICLE, LATEST_POSTS, TRENDING_ARTICLES } from '@/features/ho
 import type { Article } from '@/shared/types/article.types'
 import { usePagination } from '@/hooks/usePagination'
 import { Pagination } from '@/components/ui/Pagination'
+import { PageLoader } from '@/components/loaders/PageLoader'
 
 const MOCK_POOL: Article[] = [FEATURED_ARTICLE, ...LATEST_POSTS, ...TRENDING_ARTICLES]
 const PAGE_SIZE = 6
@@ -54,7 +55,7 @@ export function CategoryPage() {
         </p>
       </div>
 
-      {isLoading && <p className="text-sm text-text-muted">Loading articles...</p>}
+      {isLoading && <PageLoader label="Loading articles..." />}
 
       {!isLoading && articles.length === 0 && (
         <p className="text-sm text-text-muted">No stories in this category yet.</p>

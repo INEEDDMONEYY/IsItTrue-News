@@ -38,3 +38,78 @@ export const changePasswordSchema = z.object({
 })
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
+
+const socialLinksSchema = z
+  .object({
+    twitter: z.string().trim().max(200).optional(),
+    linkedin: z.string().trim().max(200).optional(),
+    instagram: z.string().trim().max(200).optional(),
+  })
+  .optional()
+
+export const updateAuthorProfileSchema = z.object({
+  professionalName: z.string().trim().max(80).optional(),
+  bio: z.string().trim().max(1000).optional(),
+  location: z.string().trim().max(120).optional(),
+  website: z.string().trim().max(300).optional(),
+  profileImage: z.string().trim().max(500).optional(),
+  bannerImage: z.string().trim().max(500).optional(),
+  socialLinks: socialLinksSchema,
+  primaryBeats: z.array(z.string().trim()).optional(),
+  secondaryBeats: z.array(z.string().trim()).optional(),
+  areasOfExpertise: z.array(z.string().trim()).optional(),
+  geographicCoverage: z.array(z.string().trim()).optional(),
+  languages: z.array(z.string().trim()).optional(),
+  yearsOfExperience: z.number().min(0).max(80).optional(),
+  defaultCategory: z.string().trim().max(80).optional(),
+  defaultVisibility: z.enum(['draft', 'editorial-review']).optional(),
+  factCheckingEnabled: z.boolean().optional(),
+  sourceAttributionEnabled: z.boolean().optional(),
+  allowEditorialSuggestions: z.boolean().optional(),
+  editorialUpdates: z.boolean().optional(),
+  assignmentNotifications: z.boolean().optional(),
+  revisionNotifications: z.boolean().optional(),
+  collaborationNotifications: z.boolean().optional(),
+  investigationNotifications: z.boolean().optional(),
+})
+
+export type UpdateAuthorProfileInput = z.infer<typeof updateAuthorProfileSchema>
+
+export const updateReaderProfileSchema = z.object({
+  fontSize: z.enum(['small', 'medium', 'large']).optional(),
+  theme: z.enum(['light', 'dark', 'sepia']).optional(),
+  distractionFreeMode: z.boolean().optional(),
+  autoSaveProgress: z.boolean().optional(),
+  showEstimatedReadingTime: z.boolean().optional(),
+  summariesFirst: z.boolean().optional(),
+  topics: z.array(z.string().trim()).optional(),
+  regions: z.array(z.string().trim()).optional(),
+  formats: z.array(z.string().trim()).optional(),
+  depth: z.enum(['quick-summaries', 'full-investigative']).optional(),
+})
+
+export type UpdateReaderProfileInput = z.infer<typeof updateReaderProfileSchema>
+
+export const sendPhoneCodeSchema = z.object({
+  phone: z.string().trim().min(7, 'Please provide a valid phone number').max(20),
+})
+
+export type SendPhoneCodeInput = z.infer<typeof sendPhoneCodeSchema>
+
+export const verifyPhoneCodeSchema = z.object({
+  code: z.string().trim().length(6, 'The verification code must be 6 digits'),
+})
+
+export type VerifyPhoneCodeInput = z.infer<typeof verifyPhoneCodeSchema>
+
+export const becomeAuthorSchema = z.object({
+  fullName: z.string().trim().min(2, 'Full name must be at least 2 characters').max(80),
+  profilePhotoUrl: z.string().trim().min(1, 'A profile photo is required').max(500),
+  shortBio: z.string().trim().min(1, 'A short bio is required').max(1000),
+  socialLinks: socialLinksSchema,
+  acceptTruthProtocol: z
+    .boolean()
+    .refine((value) => value === true, 'You must accept the Truth Protocol to become an author'),
+})
+
+export type BecomeAuthorInput = z.infer<typeof becomeAuthorSchema>

@@ -59,9 +59,12 @@ export function AdminHeader() {
         <ExternalLink className="w-3.5 h-3.5" />
       </Link>
 
-      <button className="w-9 h-9 rounded-xl bg-surface border border-border flex items-center justify-center text-text-muted hover:text-text transition-colors">
+      <Link
+        to="/admin/notifications"
+        className="w-9 h-9 rounded-xl bg-surface border border-border flex items-center justify-center text-text-muted hover:text-text transition-colors"
+      >
         <Bell className="w-4 h-4" />
-      </button>
+      </Link>
 
       <div className="relative" ref={menuRef}>
         <button
@@ -90,7 +93,7 @@ export function AdminHeader() {
               <p className="text-xs text-text-dim truncate">{user?.email}</p>
             </div>
             <Link
-              to="/profile"
+              to={`/authors/${user?.id ?? ''}`}
               onClick={() => setIsMenuOpen(false)}
               role="menuitem"
               className="flex items-center gap-2.5 px-3.5 py-2 text-sm text-text hover:bg-surface-2 transition-colors"

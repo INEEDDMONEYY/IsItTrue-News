@@ -1,9 +1,11 @@
 import { Lightbulb } from 'lucide-react'
 
 import { EmptyStateCard } from '@/components/cards'
+import { PaywallGate } from '@/features/billing/components/PaywallGate'
 
 export function PitchCenterPage() {
   return (
+    <PaywallGate feature="pitchCenter">
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8">
         <p className="text-sm font-semibold text-[var(--color-accent)]">
@@ -26,5 +28,6 @@ export function PitchCenterPage() {
         description="Submitted story pitches and editor feedback will show up here."
       />
     </main>
+    </PaywallGate>
   )
 }

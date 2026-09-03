@@ -3,6 +3,7 @@ import {
   Search,
   MessageSquareText,
 } from 'lucide-react'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { CommentStats } from '@/features/comments/components/CommentStats'
 import { CommentTable } from '@/features/comments/components/CommentTable'
 import { CommentViewToggle } from '@/features/comments/components/CommentViewToggle'
@@ -15,6 +16,7 @@ export function MyCommentsPage() {
     filters,
     setView,
     setSearch,
+    isLoading,
   } = useMyComments()
 
   const pageTitle =
@@ -83,10 +85,14 @@ export function MyCommentsPage() {
             </div>
           </div>
 
-          <CommentTable
-            comments={comments}
-            view={filters.view}
-          />
+          {isLoading ? (
+            <PageLoader label="Loading comments..." />
+          ) : (
+            <CommentTable
+              comments={comments}
+              view={filters.view}
+            />
+          )}
         </section>
       </div>
     </main>

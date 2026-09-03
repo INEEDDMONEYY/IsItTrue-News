@@ -22,14 +22,45 @@ export const publicArticlesApi = {
     return data.articles
   },
 
-  getBySlug: async (slug: string): Promise<PublicArticle | null> => {
+  getBySlug: async (
+    slug: string,
+  ): Promise<{ article: PublicArticle; liked: boolean; disliked: boolean; bookmarked: boolean } | null> => {
     try {
-      const { data } = await apiClient.get<{ article: PublicArticle }>(
-        `/api/articles/slug/${encodeURIComponent(slug)}`,
-      )
-      return data.article
+      const { data } = await apiClient.get<{
+        article: PublicArticle
+        liked: boolean
+        disliked: boolean
+        bookmarked: boolean
+      }>(`/api/articles/slug/${encodeURIComponent(slug)}`)
+      return data
     } catch {
       return null
     }
+  },
+
+  toggleLike: async (id: string): Promise<{ liked: boolean; likesCount: number }> => {
+    const { data } = await apiClient.post<{ liked: boolean; likesCount: number }>(
+      `/api/articles/${id}/like`,
+    )
+    return data
+  },
+
+  toggleDislike: async (id: string): Promise<{ disliked: boolean; dislikesCount: number }> => {
+    const { data } = await apiClient.post<{ disliked: boolean; dislikesCount: number }>(
+      `/api/articles/${id}/dislike`,
+    )
+    return data
+  },
+
+  share: async (id: string): Promise<{ sharesCount: number }> => {
+    const { data } = await apiClient.post<{ sharesCount: number }>(`/api/articles/${id}/share`)
+    return data
+  },
+
+  toggleBookmark: async (id: string): Promise<{ bookmarked: boolean; bookmarksCount: number }> => {
+    const { data } = await apiClient.post<{ bookmarked: boolean; bookmarksCount: number }>(
+      `/api/articles/${id}/bookmark`,
+    )
+    return data
   },
 }

@@ -4,11 +4,16 @@ import { clearAuthCookies } from '../../../utils/cookies.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { userService } from '../services/user.service.js'
 import type {
+  BecomeAuthorInput,
   ChangeEmailInput,
   ChangePasswordInput,
   CreateUserInput,
+  SendPhoneCodeInput,
+  UpdateAuthorProfileInput,
   UpdateNameInput,
+  UpdateReaderProfileInput,
   UpdateRoleInput,
+  VerifyPhoneCodeInput,
 } from '../validations/user.validation.js'
 
 export const userController = {
@@ -55,6 +60,62 @@ export const userController = {
     res.status(200).json({ message: 'Name updated successfully.', user })
   }),
 
+  // Any signed-in user: update their author dashboard profile (bio, expertise,
+  // publishing defaults, notification preferences).
+  updateOwnAuthorProfile: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError('You must be signed in to access this resource.', 401)
+    }
+    const updates = req.body as UpdateAuthorProfileInput
+    const user = await userService.updateOwnAuthorProfile(req.user.id, updates)
+    res.status(200).json({ message: 'Author profile updated successfully.', user })
+  }),
+
+  // Any signed-in user: update their reader dashboard profile (reading
+  // experience settings, content preferences).
+  updateOwnReaderProfile: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError('You must be signed in to access this resource.', 401)
+    }
+    const updates = req.body as UpdateReaderProfileInput
+    const user = await userService.updateOwnReaderProfile(req.user.id, updates)
+    res.status(200).json({ message: 'Reading preferences updated successfully.', user })
+  }),
+
+  // Any signed-in user: their free-plan usage (articles/videos consumed this
+  // month) that drives the reader sidebar's usage tracker.
+  getOwnUsage: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError('You must be signed in to access this resource.', 401)
+    }
+    const usage = await userService.getOwnUsage(req.user.id)
+    res.status(200).json({ usage })
+  }),
+
+  // Public: anyone (signed in or not) can view an author's public profile.
+  getPublicProfile: asyncHandler(async (req: Request, res: Response) => {
+    const { user, isFollowing, stats } = await userService.getPublicProfile(
+      req.params.id,
+      req.user?.id,
+    )
+    res.status(200).json({ user, isFollowing, stats })
+  }),
+
+  // Any signed-in user: follow/unfollow another author.
+  toggleFollow: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError('You must be signed in to access this resource.', 401)
+    }
+    const result = await userService.toggleFollow(req.params.id, req.user.id)
+    res.status(200).json(result)
+  }),
+
+  // Public: every article/video/comment the target user has liked.
+  getLibrary: asyncHandler(async (req: Request, res: Response) => {
+    const items = await userService.getLibrary(req.params.id)
+    res.status(200).json({ items })
+  }),
+
   // Any signed-in user: change their own password.
   changeOwnPassword: asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
@@ -87,5 +148,38 @@ export const userController = {
     await userService.deleteOwnAccount(req.user.id)
     clearAuthCookies(res)
     res.status(200).json({ message: 'Account deleted successfully.' })
+  }),
+
+  // Any signed-in user: request a verification code for a phone number
+  // ("Become an Author" onboarding step).
+  sendPhoneVerificationCode: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError('You must be signed in to access this resource.', 401)
+    }
+    const { phone } = req.body as SendPhoneCodeInput
+    await userService.sendPhoneVerificationCode(req.user.id, phone)
+    res.status(200).json({ message: 'Verification code sent.' })
+  }),
+
+  // Any signed-in user: confirm the code sent to their phone number.
+  verifyPhoneCode: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError('You must be signed in to access this resource.', 401)
+    }
+    const { code } = req.body as VerifyPhoneCodeInput
+    const user = await userService.verifyPhoneCode(req.user.id, code)
+    res.status(200).json({ message: 'Phone number verified successfully.', user })
+  }),
+
+  // Reader-only: complete "Become an Author" onboarding, flipping the account
+  // to the author role once email/phone are verified and the Truth Protocol
+  // has been accepted.
+  becomeAuthor: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError('You must be signed in to access this resource.', 401)
+    }
+    const input = req.body as BecomeAuthorInput
+    const user = await userService.becomeAuthor(req.user.id, input)
+    res.status(200).json({ message: 'Congratulations — your account is now an author account!', user })
   }),
 }

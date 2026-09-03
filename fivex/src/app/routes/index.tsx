@@ -7,6 +7,7 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 import { ErrorPage } from '../pages/ErrorPage'
 import { ProtectedRoute } from './ProtectedRoute'
 import { AdminRoute } from './AdminRoute'
+import { AuthorRoute } from './AuthorRoute'
 import { HomePage } from '@/features/home/pages/HomePage'
 import { ForYouPage } from '@/features/for-you/pages/ForYouPage'
 import { LocalPage } from '@/features/local/pages/LocalPage'
@@ -15,6 +16,7 @@ import { ArticlePage } from '@/features/articles/pages/ArticlePage'
 import { CategoryPage } from '@/features/categories/pages/CategoryPage'
 import { TagPage } from '@/features/tags/pages/TagPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { ProfilePage } from '@/features/auth/pages/ProfilePage'
 import { AdminDashboardPage } from '@/features/admin/pages/AdminDashboardPage'
 import { UsersPage } from '@/features/admin/users/pages/UsersPage'
@@ -48,7 +50,10 @@ import { MyCommentsPage } from '@/features/comments/pages/MyCommentsPage'
 import { MyVideosPage } from '@/features/videos/pages/MyVideosPage'
 import VideoStudioPage from '@/features/videos/pages/VideoStudioPage'
 import { AuthorSettingsPage } from '@/features/authors/pages/AuthorSettingsPage'
+import { ReaderSettingsPage } from '@/features/readers/pages/ReaderSettingsPage'
+import { TopicSubmissionPage } from '@/features/readers/pages/TopicSubmissionPage'
 import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage'
+import { NotificationsPage as AdminNotificationsPage } from '@/features/admin/notifications/pages/NotificationsPage'
 import { ProfileIdentityPage } from '@/features/profile/pages/ProfileIdentityPage'
 import { DraftsPage } from '@/features/authors/pages/DraftsPage'
 import { SubmissionQueuePage } from '@/features/authors/pages/SubmissionQueuePage'
@@ -56,6 +61,18 @@ import { PitchCenterPage } from '@/features/authors/pages/PitchCenterPage'
 import { VideoPage } from '@/features/videos/pages/VideoPage'
 import { NewslettersPage } from '@/features/newsletter/pages/NewslettersPage'
 import VideosPage from '@/features/videos/pages/VideosPage'
+import { AuthorProfilePage } from '@/features/authors/pages/AuthorProfilePage'
+import { CollaborationPage } from '@/features/authors/pages/CollaborationPage'
+import { EvidenceVaultPage } from '@/features/evidence/pages/EvidenceVaultPage'
+import { InvestigationsPage } from '@/features/authors/pages/InvestigationsPage'
+import { NewInvestigationPage } from '@/features/authors/pages/NewInvestigationPage'
+import { InvestigationPage } from '@/features/investigations/pages/InvestigationPage'
+import { InvestigationReviewPage } from '@/features/admin/investigations/pages/InvestigationReviewPage'
+import { InvestigationsPage as PublicInvestigationsPage } from '@/features/investigations/pages/InvestigationsPage'
+import { InvestigationDetailPage } from '@/features/investigations/pages/InvestigationDetailPage'
+import { SubscribePage } from '@/features/billing/pages/SubscribePage'
+import { BecomeAuthorPage } from '@/features/onboarding/pages/BecomeAuthorPage'
+import { AuthorOnboardingPage } from '@/features/onboarding/pages/AuthorOnboardingPage'
 
 export const router = createBrowserRouter([
   {
@@ -72,7 +89,11 @@ export const router = createBrowserRouter([
       { path: 'tag/:slug', element: <TagPage /> },
       { path: 'videos', element: <VideosPage /> },
       { path: 'videos/:id', element: <VideoPage /> },
+      { path: 'investigations', element: <PublicInvestigationsPage /> },
+      { path: 'investigations/:id', element: <InvestigationDetailPage /> },
+      { path: 'authors/:id', element: <AuthorProfilePage /> },
       { path: 'newsletter', element: <NewslettersPage /> },
+      { path: 'subscribe', element: <SubscribePage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'careers', element: <CareersPage /> },
       { path: 'contact', element: <ContactPage /> },
@@ -107,6 +128,7 @@ export const router = createBrowserRouter([
           { path: 'categories', element: <CategoriesPage /> },
           { path: 'tickets', element: <TicketsPage /> },
           { path: 'fact-check-verification', element: <FactCheckVerificationPage /> },
+          { path: 'notifications', element: <AdminNotificationsPage /> },
           { path: 'settings', element: <SettingsPage /> },
         ],
       },
@@ -134,9 +156,32 @@ export const router = createBrowserRouter([
           { path: 'notifications', element: <NotificationsPage /> },
           { path: 'profile', element: <ProfileIdentityPage /> },
           { path: 'author-settings', element: <AuthorSettingsPage /> },
+          { path: 'reader-settings', element: <ReaderSettingsPage /> },
+          { path: 'topic-submission', element: <TopicSubmissionPage /> },
+          { path: 'become-author', element: <BecomeAuthorPage /> },
+          { path: 'become-author/onboarding', element: <AuthorOnboardingPage /> },
           { path: 'drafts', element: <DraftsPage /> },
           { path: 'submissions', element: <SubmissionQueuePage /> },
           { path: 'pitches', element: <PitchCenterPage /> },
+          { path: 'collaboration', element: <CollaborationPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: 'author',
+    element: <AuthorRoute />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        element: <DashboardLayout />,
+        children: [
+          { index: true, element: <InvestigationsPage /> },
+          { path: 'investigations', element: <InvestigationsPage /> },
+          { path: 'investigations/new', element: <NewInvestigationPage /> },
+          { path: 'investigations/review-queue', element: <InvestigationReviewPage /> },
+          { path: 'investigations/:id', element: <InvestigationPage /> },
+          { path: 'evidence', element: <EvidenceVaultPage /> },
         ],
       },
     ],
@@ -144,6 +189,9 @@ export const router = createBrowserRouter([
   {
     element: <AuthLayout />,
     errorElement: <ErrorPage />,
-    children: [{ path: '/login', element: <LoginPage /> }],
+    children: [
+      { path: '/login', element: <LoginPage /> },
+      { path: '/register', element: <RegisterPage /> },
+    ],
   },
 ])

@@ -2,11 +2,13 @@ import type { Article, VerificationStatus } from '@/shared/types/article.types'
 
 export interface ArticleComment {
   id: string
+  authorId?: string
   authorName: string
   authorAvatarUrl?: string
   content: string
   createdAt: string
   likes: number
+  liked?: boolean
 }
 
 export interface FactCheckDetails {
@@ -14,6 +16,7 @@ export interface FactCheckDetails {
   summary: string
   source: string
   checkedBy: string
+  checkedById?: string
   checkedAt: string
 }
 
@@ -26,11 +29,17 @@ export interface ArticleDetail extends Article {
    * mock stories don't have one and fall back to `content` paragraphs.
    */
   bodyHtml?: string
+  /**
+   * True when the backend withheld the full body because a free-plan
+   * reader hit their monthly article cap. Mock stories are never locked.
+   */
+  locked?: boolean
   /** Citation links the author attached when creating the article. */
   sourceLinks?: string[]
   likes: number
   dislikes: number
   reposts: number
+  bookmarks: number
   factCheck: FactCheckDetails
   comments: ArticleComment[]
 }

@@ -1,4 +1,5 @@
-import { Camera, UserRound } from 'lucide-react'
+import { UserRound } from 'lucide-react'
+import { MediaUploadField } from '../MediaUploadField'
 import type { AuthorProfileSettings } from '../../types/authorSettings.types'
 
 interface AuthorProfileSectionProps {
@@ -24,26 +25,37 @@ export function AuthorProfileSection({
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
-            {profile.profileImage ? (
-              <img
-                src={profile.profileImage}
-                alt={profile.displayName}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <UserRound className="h-8 w-8" />
-            )}
+        <div className="flex flex-col gap-5 sm:flex-row">
+          <div className="flex items-center gap-4">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
+              {profile.profileImage ? (
+                <img
+                  src={profile.profileImage}
+                  alt={profile.displayName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <UserRound className="h-8 w-8" />
+              )}
+            </div>
+
+            <MediaUploadField
+              label="Profile photo"
+              accept="image/*"
+              kind="image"
+              value={profile.profileImage ?? null}
+              onChange={(url) => onChange({ profileImage: url ?? '' })}
+            />
           </div>
 
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-card-border)] px-4 py-2 text-sm font-medium text-[var(--color-card-heading)] transition hover:bg-[var(--color-accent-bg)]"
-          >
-            <Camera className="h-4 w-4" />
-            Change photo
-          </button>
+          <MediaUploadField
+            label="Banner image"
+            helperText="Shown across the top of your public profile."
+            accept="image/*"
+            kind="image"
+            value={profile.bannerImage ?? null}
+            onChange={(url) => onChange({ bannerImage: url ?? '' })}
+          />
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">

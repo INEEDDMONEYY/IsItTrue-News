@@ -16,6 +16,13 @@ import { bannerRoutes } from './modules/banners/routes/banner.routes.js'
 import { ticketRoutes } from './modules/tickets/routes/ticket.routes.js'
 import { factCheckRoutes } from './modules/factChecks/routes/factCheck.routes.js'
 import { mediaRoutes } from './modules/media/routes/media.routes.js'
+import { commentRoutes } from './modules/comments/routes/comment.routes.js'
+import { bookmarkRoutes } from './modules/bookmarks/routes/bookmark.routes.js'
+import { notificationRoutes } from './modules/notifications/routes/notification.routes.js'
+import { videoRoutes } from './modules/videos/routes/video.routes.js'
+import { topicSubmissionRoutes } from './modules/topicSubmissions/routes/topicSubmission.routes.js'
+import { searchRoutes } from './modules/search/routes/search.routes.js'
+import { investigationRoutes } from './modules/investigations/routes/investigation.routes.js'
 
 export function createApp(): Express {
   const app = express()
@@ -45,7 +52,14 @@ export function createApp(): Express {
   app.use('/api/banners', bannerRoutes)
   app.use('/api/tickets', ticketRoutes)
   app.use('/api/fact-checks', factCheckRoutes)
+  app.use('/api/comments', commentRoutes)
   app.use('/api/media', mediaRoutes)
+  app.use('/api/bookmarks', bookmarkRoutes)
+  app.use('/api/notifications', notificationRoutes)
+  app.use('/api/videos', videoRoutes)
+  app.use('/api/topic-submissions', topicSubmissionRoutes)
+  app.use('/api/search', searchRoutes)
+  app.use('/api/investigations', investigationRoutes)
 
   app.use(notFound)
   app.use(errorHandler)

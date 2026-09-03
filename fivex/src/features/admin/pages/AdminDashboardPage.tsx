@@ -1,6 +1,7 @@
 import { Users, UserCheck, ShieldCheck, TrendingUp } from 'lucide-react'
 import { useUsersList } from '../hooks/useUsersList'
 import { StatCard } from '@/components/cards'
+import { PageLoader } from '@/components/loaders/PageLoader'
 
 export function AdminDashboardPage() {
   const { data: users, isLoading, error } = useUsersList()
@@ -25,7 +26,7 @@ export function AdminDashboardPage() {
 
       <h2 className="text-lg font-semibold text-heading mb-3">All Users</h2>
 
-      {isLoading && <p className="text-sm text-text-muted">Loading users...</p>}
+      {isLoading && <PageLoader label="Loading users..." />}
 
       {error && (
         <p className="text-sm text-disputed">

@@ -42,7 +42,7 @@ export function adaptPublicArticle(article: PublicArticle): Article {
     },
     author: { id: article.author?.id ?? 'unknown', name: article.author?.name ?? 'Staff Writer' },
     publishedAt: article.publishedAt ?? article.createdAt,
-    readTimeMinutes: estimateReadTimeMinutes(article.body),
+    readTimeMinutes: estimateReadTimeMinutes(article.body ?? article.excerpt),
     stats: { views: article.views, comments: 0, shares: 0 },
     verificationStatus: VERIFICATION_STATUS_MAP[article.factCheckStatus ?? 'none'],
   }
@@ -82,7 +82,7 @@ export function adaptPublicArticleDetail(article: PublicArticle): ArticleDetail 
   const status = base.verificationStatus ?? 'unverified'
   const { summary, source } = FACT_CHECK_COPY[status]
 
-  const content = article.body
+  const content = (article.body ?? '')
     .split(/\n{2,}/)
     .map((p) => p.trim())
     .filter(Boolean)
@@ -91,15 +91,18 @@ export function adaptPublicArticleDetail(article: PublicArticle): ArticleDetail 
     ...base,
     content: content.length ? content : [article.excerpt || article.title],
     bodyHtml: article.body,
+    locked: article.locked,
     sourceLinks: article.sourceLinks ?? [],
     likes: article.likes,
-    dislikes: 0,
-    reposts: 0,
+    dislikes: article.dislikes,
+    reposts: article.shares,
+    bookmarks: article.bookmarks,
     factCheck: {
       status,
       summary,
       source,
-      checkedBy: 'IsItTrue Fact-Check Team',
+      checkedBy: article.factCheckReviewedBy?.name ?? 'IsItTrue Fact-Check Team',
+      checkedById: article.factCheckReviewedBy?.id,
       checkedAt: base.publishedAt,
     },
     comments: [],

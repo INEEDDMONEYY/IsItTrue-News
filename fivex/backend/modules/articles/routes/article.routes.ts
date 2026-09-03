@@ -39,6 +39,12 @@ router.get('/featured', articleController.getFeatured)
 router.get('/category/:slug', articleController.listByCategory)
 router.get('/tag/:slug', articleController.listByTag)
 
+// Public: a given author's published articles, for their public profile page.
+router.get('/author/:id', articleController.listByAuthor)
+
+// Public: a given reader's liked articles, for their public profile page.
+router.get('/liked/:id', articleController.listLiked)
+
 // Public-ish: same visibility rules as "/:id" but looked up by slug, since
 // reader-facing URLs use the article's slug rather than its Mongo id.
 router.get('/slug/:slug', optionalAuthenticate, articleController.getBySlug)
@@ -71,10 +77,20 @@ router.patch(
   articleController.updateStatus,
 )
 
-router.post('/:id/view', articleController.recordView)
+router.post('/:id/view', optionalAuthenticate, articleController.recordView)
 
 // Any authenticated reader can like/unlike a published article.
 router.post('/:id/like', authenticate, articleController.toggleLike)
+
+// Any authenticated reader can dislike/un-dislike a published article.
+router.post('/:id/dislike', authenticate, articleController.toggleDislike)
+
+// Anyone can share an article; this just increments a counter, no auth needed.
+router.post('/:id/share', articleController.share)
+
+// Any authenticated reader (reader, author, or editor) can bookmark/unbookmark
+// a published article.
+router.post('/:id/bookmark', authenticate, articleController.toggleBookmark)
 
 router.delete(
   '/:id',

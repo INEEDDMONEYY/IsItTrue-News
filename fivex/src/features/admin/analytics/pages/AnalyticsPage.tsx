@@ -1,4 +1,5 @@
 import { BarChart3, TrendingUp, UserPlus, Users as UsersIcon } from 'lucide-react'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { useUsersList } from '../../hooks/useUsersList'
 import { useAuthorArticles } from '@/features/authors/hooks/useAuthorArticles'
 import { getErrorMessage } from '@/lib/getErrorMessage'
@@ -28,7 +29,7 @@ export function AnalyticsPage() {
         Platform-wide account, content, and engagement ratios.
       </p>
 
-      {isLoading && <p className="text-sm text-text-muted">Loading analytics...</p>}
+      {isLoading && <PageLoader label="Loading analytics..." />}
       {error && <p className="text-sm text-disputed">{getErrorMessage(error, 'Failed to load analytics.')}</p>}
 
       {users && (

@@ -5,6 +5,7 @@ export interface AuthorProfileSettings {
   location: string
   website: string
   profileImage?: string
+  bannerImage?: string
   socialLinks: {
     twitter: string
     linkedin: string

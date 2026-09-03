@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Tags, Plus, Trash2 } from 'lucide-react'
 import { useCategories } from '@/features/categories/hooks/useCategories'
 import { EmptyStateCard } from '@/components/cards'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 
 export function CategoriesPage() {
@@ -58,7 +59,7 @@ export function CategoriesPage() {
         {formError && <p className="text-xs text-disputed mt-2">{formError}</p>}
       </div>
 
-      {isLoading && <p className="text-sm text-text-muted">Loading categories...</p>}
+      {isLoading && <PageLoader label="Loading categories..." />}
       {error && <p className="text-sm text-disputed">{getErrorMessage(error, 'Failed to load categories.')}</p>}
 
       {!isLoading && categories.length > 0 && (

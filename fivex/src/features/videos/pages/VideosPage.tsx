@@ -8,7 +8,15 @@ type Video = {
   category: string;
   slug: string;
   featured?: boolean;
+  /** Duration in seconds. Videos of 180s (3 min) or less show up in the Short Videos section. */
+  durationSeconds: number;
 };
+
+function formatDuration(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+}
 
 const mockVideos: Video[] = [
   {
@@ -18,6 +26,7 @@ const mockVideos: Video[] = [
     category: "Investigations",
     slug: "the-story-behind-the-numbers",
     featured: true,
+    durationSeconds: 480,
   },
   {
     id: "2",
@@ -26,6 +35,7 @@ const mockVideos: Video[] = [
     category: "Fact Checks",
     slug: "what-the-evidence-actually-shows",
     featured: true,
+    durationSeconds: 150,
   },
   {
     id: "3",
@@ -33,6 +43,7 @@ const mockVideos: Video[] = [
     thumbnail: "/src/assets/images/same-blood.png",
     category: "Local",
     slug: "inside-a-changing-community",
+    durationSeconds: 90,
   },
   {
     id: "4",
@@ -40,6 +51,7 @@ const mockVideos: Video[] = [
     thumbnail: "/src/assets/images/power.png",
     category: "Fact Checks",
     slug: "the-facts-behind-the-claim",
+    durationSeconds: 165,
   },
   {
     id: "5",
@@ -47,6 +59,7 @@ const mockVideos: Video[] = [
     thumbnail: "/src/assets/images/lost.png",
     category: "Investigations",
     slug: "what-happens-when-systems-fail",
+    durationSeconds: 540,
   },
   {
     id: "6",
@@ -54,6 +67,7 @@ const mockVideos: Video[] = [
     thumbnail: "/src/assets/images/sophie.png",
     category: "Culture",
     slug: "the-people-behind-the-story",
+    durationSeconds: 120,
   },
   {
     id: "7",
@@ -61,6 +75,7 @@ const mockVideos: Video[] = [
     thumbnail: "/src/assets/images/caitlin-clark.png",
     category: "Explainers",
     slug: "understanding-the-bigger-picture",
+    durationSeconds: 360,
   },
   {
     id: "8",
@@ -68,6 +83,7 @@ const mockVideos: Video[] = [
     thumbnail: "/src/assets/images/time-to-move.jpg",
     category: "Local",
     slug: "a-closer-look-at-what-changed",
+    durationSeconds: 420,
   },
   {
     id: "9",
@@ -75,6 +91,7 @@ const mockVideos: Video[] = [
     thumbnail: "/src/assets/images/speak-up.jpg",
     category: "Explainers",
     slug: "separating-fact-from-fiction",
+    durationSeconds: 175,
   },
   {
     id: "10",
@@ -82,8 +99,15 @@ const mockVideos: Video[] = [
     thumbnail: "/src/assets/images/power.png",
     category: "Investigations",
     slug: "following-the-evidence",
+    durationSeconds: 300,
   },
 ];
+
+const SHORT_VIDEO_MAX_SECONDS = 180;
+
+const shortVideos = mockVideos.filter(
+  (video) => video.durationSeconds <= SHORT_VIDEO_MAX_SECONDS,
+);
 
 const categories = Array.from(
   new Set(mockVideos.map((video) => video.category)),
@@ -113,6 +137,10 @@ function VideoCard({ video }: { video: Video }) {
             />
           </span>
         </div>
+
+        <span className="absolute bottom-2 right-2 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-semibold text-white">
+          {formatDuration(video.durationSeconds)}
+        </span>
       </div>
 
       <div className="p-4">
@@ -167,6 +195,33 @@ export default function VideosPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
               {featuredVideos.map((video) => (
+                <VideoCard key={video.id} video={video} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Short Videos (<= 3 min) */}
+        {shortVideos.length > 0 && (
+          <section className="mt-16">
+            <div className="mb-6 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                  Quick Watch
+                </p>
+
+                <h2 className="mt-1 text-2xl font-bold text-slate-950">
+                  Short Videos
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Quick stories, 3 minutes or less.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {shortVideos.map((video) => (
                 <VideoCard key={video.id} video={video} />
               ))}
             </div>

@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { ThumbsUp, ThumbsDown, MessageCircle, Repeat2, ShieldCheck } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MessageCircle, Repeat2, Bookmark, ShieldCheck } from 'lucide-react'
 
 function formatCount(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}m`
@@ -12,6 +11,17 @@ interface EngagementBarProps {
   dislikes: number
   commentsCount: number
   reposts: number
+  bookmarks: number
+  liked?: boolean
+  disliked?: boolean
+  reposted?: boolean
+  bookmarked?: boolean
+  /** Anonymous visitors see a dimmed bookmark icon that opens a sign-up prompt instead of toggling. */
+  bookmarkInactive?: boolean
+  onLike: () => void
+  onDislike: () => void
+  onShare: () => void
+  onBookmark: () => void
   onCommentClick: () => void
   onFactCheckClick: () => void
 }
@@ -21,42 +31,45 @@ export function EngagementBar({
   dislikes,
   commentsCount,
   reposts,
+  bookmarks,
+  liked = false,
+  disliked = false,
+  reposted = false,
+  bookmarked = false,
+  bookmarkInactive = false,
+  onLike,
+  onDislike,
+  onShare,
+  onBookmark,
   onCommentClick,
   onFactCheckClick,
 }: EngagementBarProps) {
-  const [reaction, setReaction] = useState<'like' | 'dislike' | null>(null)
-  const [reposted, setReposted] = useState(false)
-
-  const likeCount = likes + (reaction === 'like' ? 1 : 0)
-  const dislikeCount = dislikes + (reaction === 'dislike' ? 1 : 0)
-  const repostCount = reposts + (reposted ? 1 : 0)
-
   return (
     <div className="flex items-center flex-wrap gap-2 py-3 border-y border-border">
       <button
-        onClick={() => setReaction((prev) => (prev === 'like' ? null : 'like'))}
-        aria-pressed={reaction === 'like'}
+        onClick={onLike}
+        aria-pressed={liked}
         className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
-          reaction === 'like'
+          liked
             ? 'bg-accent text-white border-accent'
             : 'border-border text-heading hover:border-accent-border hover:text-accent'
         }`}
       >
         <ThumbsUp className="w-4 h-4" />
-        {formatCount(likeCount)}
+        {formatCount(likes)}
       </button>
 
       <button
-        onClick={() => setReaction((prev) => (prev === 'dislike' ? null : 'dislike'))}
-        aria-pressed={reaction === 'dislike'}
+        onClick={onDislike}
+        aria-pressed={disliked}
         className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
-          reaction === 'dislike'
+          disliked
             ? 'bg-card-2 text-heading border-border'
             : 'border-border text-heading hover:border-accent-border hover:text-accent'
         }`}
       >
         <ThumbsDown className="w-4 h-4" />
-        {formatCount(dislikeCount)}
+        {formatCount(dislikes)}
       </button>
 
       <button
@@ -68,7 +81,7 @@ export function EngagementBar({
       </button>
 
       <button
-        onClick={() => setReposted((prev) => !prev)}
+        onClick={onShare}
         aria-pressed={reposted}
         className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
           reposted
@@ -77,7 +90,23 @@ export function EngagementBar({
         }`}
       >
         <Repeat2 className="w-4 h-4" />
-        {formatCount(repostCount)}
+        {formatCount(reposts)}
+      </button>
+
+      <button
+        onClick={onBookmark}
+        aria-pressed={bookmarked}
+        title={bookmarkInactive ? 'Sign up to bookmark stories' : undefined}
+        className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
+          bookmarkInactive
+            ? 'border-border text-text-dim opacity-60 hover:opacity-100'
+            : bookmarked
+              ? 'bg-accent text-white border-accent'
+              : 'border-border text-heading hover:border-accent-border hover:text-accent'
+        }`}
+      >
+        <Bookmark className={`w-4 h-4 ${bookmarked && !bookmarkInactive ? 'fill-current' : ''}`} />
+        {formatCount(bookmarks)}
       </button>
 
       <button

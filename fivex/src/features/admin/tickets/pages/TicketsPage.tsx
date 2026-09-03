@@ -1,5 +1,6 @@
 import { Ticket, CheckCircle2, RotateCcw } from 'lucide-react'
 import { StatCard } from '@/components/cards'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { useTickets } from '@/features/tickets/hooks/useTickets'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 
@@ -27,7 +28,7 @@ export function TicketsPage() {
         <StatCard label="Resolved Tickets" value={resolvedTickets.length} icon={CheckCircle2} />
       </div>
 
-      {isLoading && <p className="text-sm text-text-muted mb-4">Loading tickets...</p>}
+      {isLoading && <PageLoader label="Loading tickets..." />}
       {error && (
         <p className="text-sm text-disputed mb-4">
           {getErrorMessage(error, 'Failed to load tickets.')}

@@ -4,6 +4,7 @@ import { Search, Menu, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Plus }
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { useCategories } from '@/features/categories/hooks/useCategories'
+import { SearchBar } from '@/features/search/components/SearchBar'
 import logo from '@/assets/icons/question-icon-removebg.png'
 
 const NAV_LINKS = [
@@ -11,6 +12,7 @@ const NAV_LINKS = [
   { label: 'For You', to: '/for-you' },
   { label: 'Local', to: '/local' },
   { label: 'Fact Checks', to: '/fact-checks' },
+  { label: 'Investigations', to: '/investigations' },
   { label: 'Videos', to: '/videos' },
   { label: 'Newsletters', to: '/newsletter' },
 ]
@@ -20,6 +22,7 @@ export function Header() {
   const { theme, setTheme } = useTheme()
   const { categories } = useCategories()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const topicsScrollRef = useRef<HTMLDivElement>(null)
 
   const scrollTopics = (direction: 'left' | 'right') => {
@@ -119,25 +122,23 @@ export function Header() {
 
           <div className="flex-1" />
 
-          <div className="hidden lg:flex items-center relative w-64">
-            <Search className="absolute left-3 w-4 h-4 text-text-dim" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-surface text-sm text-heading placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-accent-border"
-            />
-          </div>
+          <SearchBar className="hidden lg:block w-64" />
 
           <button
+            type="button"
             aria-label="Search"
+            onClick={() => setMobileSearchOpen((v) => !v)}
             className="p-2 rounded-full text-text-muted hover:text-text hover:bg-surface transition-colors lg:hidden"
           >
-            <Search className="w-[18px] h-[18px]" />
+            {mobileSearchOpen ? <X className="w-[18px] h-[18px]" /> : <Search className="w-[18px] h-[18px]" />}
           </button>
 
-          <button className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-lg bg-heading text-bg hover:opacity-90 transition-opacity">
+          <Link
+            to="/subscribe"
+            className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-lg bg-heading text-bg hover:opacity-90 transition-opacity"
+          >
             Subscribe
-          </button>
+          </Link>
 
           {isAuthenticated ? (
             <Link
@@ -158,6 +159,12 @@ export function Header() {
             </Link>
           )}
         </div>
+
+        {mobileSearchOpen && (
+          <div className="lg:hidden border-t border-border px-4 py-3 bg-bg">
+            <SearchBar autoFocus onNavigate={() => setMobileSearchOpen(false)} />
+          </div>
+        )}
 
         {mobileOpen && (
           <nav className="md:hidden border-t border-border px-4 py-3 flex flex-col gap-3 bg-bg">

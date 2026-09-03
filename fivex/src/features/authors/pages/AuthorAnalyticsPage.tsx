@@ -1,6 +1,7 @@
 import { BarChart3, Eye, FileText, MessageSquare } from 'lucide-react'
 import { useAuthorArticles } from '../hooks/useAuthorArticles'
 import { StatCard } from '@/components/cards'
+import { PaywallGate } from '@/features/billing/components/PaywallGate'
 import { ViewsTrendChart } from '../components/charts/ViewsTrendChart'
 import { DonutChart } from '../components/charts/DonutChart'
 import { buildViewsTrend, buildStatusBreakdown, buildCategoryBreakdown } from '../components/charts/chartData'
@@ -41,6 +42,7 @@ export function AuthorAnalyticsPage() {
   }))
 
   return (
+    <PaywallGate feature="analytics">
     <div>
       <h1 className="text-2xl font-semibold text-heading mb-1">Analytics</h1>
       <p className="text-sm text-text-muted mb-6">
@@ -110,5 +112,6 @@ export function AuthorAnalyticsPage() {
         Interaction figures are illustrative until the analytics backend is connected.
       </p>
     </div>
+    </PaywallGate>
   )
 }

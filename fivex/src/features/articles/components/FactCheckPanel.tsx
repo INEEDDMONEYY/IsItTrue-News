@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import { Link } from 'react-router-dom'
 import dayjs from '@/lib/dayjs'
 import { VerdictBadge } from '@/features/fact-checks/components/VerdictBadge'
 import type { FactCheckDetails } from '../types/articleDetail.types'
@@ -30,7 +31,15 @@ export const FactCheckPanel = forwardRef<HTMLDivElement, FactCheckPanelProps>(
           </div>
           <div>
             <dt className="text-card-text-dim">Checked by</dt>
-            <dd className="text-card-text font-medium">{factCheck.checkedBy}</dd>
+            <dd className="text-card-text font-medium">
+              {factCheck.checkedById ? (
+                <Link to={`/authors/${factCheck.checkedById}`} className="hover:text-accent transition-colors">
+                  {factCheck.checkedBy}
+                </Link>
+              ) : (
+                factCheck.checkedBy
+              )}
+            </dd>
           </div>
           <div>
             <dt className="text-card-text-dim">Checked on</dt>

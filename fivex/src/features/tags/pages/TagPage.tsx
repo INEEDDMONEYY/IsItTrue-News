@@ -8,6 +8,7 @@ import { ArticleCard } from '@/features/home/components/ArticleCard'
 import { TRENDING_ARTICLES } from '@/features/home/data/mockHome'
 import { usePagination } from '@/hooks/usePagination'
 import { Pagination } from '@/components/ui/Pagination'
+import { PageLoader } from '@/components/loaders/PageLoader'
 
 const PAGE_SIZE = 6
 
@@ -50,7 +51,7 @@ export function TagPage() {
         <p className="text-sm text-text-muted">Stories tagged {tag?.name ?? 'with this tag'}.</p>
       </div>
 
-      {isLoading && <p className="text-sm text-text-muted">Loading articles...</p>}
+      {isLoading && <PageLoader label="Loading articles..." />}
 
       {!isLoading && adaptedReal.length === 0 && (
         <p className="text-sm text-text-muted">No stories tagged with this yet.</p>

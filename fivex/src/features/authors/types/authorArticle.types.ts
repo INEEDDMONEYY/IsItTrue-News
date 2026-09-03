@@ -7,6 +7,24 @@ export type AuthorArticleStatus =
   | 'published'
   | 'rejected'
 
+// The real backend Article status values (backend/modules/articles/constants/
+// articleStatus.ts) — used by articles.api.ts, which talks to the actual
+// /api/articles/* endpoints rather than the richer mock workflow above.
+export type ArticleStatus = 'draft' | 'pending_review' | 'published'
+
+export interface CreateArticleInput {
+  title: string
+  excerpt: string
+  body: string
+  category: string
+  tags?: string[]
+  articleImageUrl?: string
+  articleVideoUrl?: string
+  videoThumbnailUrl?: string
+  socialLinks?: string[]
+  sourceLinks?: string[]
+}
+
 export type AuthorWorkflowStage =
   | 'draft'
   | 'assignment'

@@ -1,13 +1,14 @@
 
 import { useMemo, useState } from 'react'
-import { Bookmark, BookOpen, ShieldCheck } from 'lucide-react'
+import { Bookmark, BookOpen, Video as VideoIcon } from 'lucide-react'
 import BookmarkCard from '@/features/bookmarks/components/BookmarkCard'
 import BookmarkFilters from '@/features/bookmarks/components/BookmarkFilters'
-import { mockBookmarks } from '@/features/bookmarks/data/mockBookmarks'
+import { PageLoader } from '@/components/loaders/PageLoader'
+import { useBookmarks } from '@/features/bookmarks/hooks/useBookmarks'
 import type { BookmarkContentType } from '@/features/bookmarks/types/bookmark.types'
 
 export function BookmarksPage() {
-  const [bookmarks, setBookmarks] = useState(mockBookmarks)
+  const { bookmarks, isLoading, removeBookmark } = useBookmarks()
   const [search, setSearch] = useState('')
   const [type, setType] = useState<BookmarkContentType | 'all'>('all')
   const [sort, setSort] = useState<'newest' | 'oldest'>('newest')
@@ -16,8 +17,8 @@ export function BookmarksPage() {
   const articleCount = bookmarks.filter(
     (bookmark) => bookmark.type === 'article',
   ).length
-  const factCheckCount = bookmarks.filter(
-    (bookmark) => bookmark.type === 'fact-check',
+  const videoCount = bookmarks.filter(
+    (bookmark) => bookmark.type === 'video',
   ).length
 
   const visibleBookmarks = useMemo(() => {
@@ -36,7 +37,13 @@ export function BookmarksPage() {
   }, [bookmarks, search, type, sort])
 
   const handleRemove = (id: string) => {
-    setBookmarks((prev) => prev.filter((bookmark) => bookmark.id !== id))
+    const bookmark = bookmarks.find((item) => item.id === id)
+    if (!bookmark || (bookmark.type !== 'article' && bookmark.type !== 'video')) return
+    removeBookmark(bookmark.type, id)
+  }
+
+  if (isLoading) {
+    return <PageLoader label="Loading your bookmarks..." />
   }
 
   return (
@@ -53,8 +60,8 @@ export function BookmarksPage() {
               Bookmarks
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-muted)] md:text-base">
-              Organize articles and fact checks you've saved to read, review,
-              or reference later.
+              Articles and videos you've saved to read, watch, or reference
+              later.
             </p>
           </div>
         </div>
@@ -99,20 +106,21 @@ export function BookmarksPage() {
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
-              <ShieldCheck className="h-5 w-5" />
+              <VideoIcon className="h-5 w-5" />
             </div>
 
             <div>
               <p className="text-sm text-[var(--color-card-text-muted)]">
-                Fact Checks
+                Videos
               </p>
               <p className="text-2xl font-bold text-[var(--color-card-heading)]">
-                {factCheckCount}
+                {videoCount}
               </p>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Filters */}
       <section>

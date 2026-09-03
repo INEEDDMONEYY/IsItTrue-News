@@ -15,6 +15,7 @@ import type {
   AuthorArticle,
   AuthorWorkflowStage,
 } from '@/features/authors/types/authorArticle.types'
+import { PaywallGate } from '@/features/billing/components/PaywallGate'
 
 const workflowLabels: Record<AuthorWorkflowStage, string> = {
   draft: 'Draft',
@@ -341,6 +342,7 @@ export function DraftsPage() {
   ).length
 
   return (
+    <PaywallGate feature="drafts">
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -430,6 +432,7 @@ export function DraftsPage() {
         </section>
       )}
     </main>
+    </PaywallGate>
   )
 }
 

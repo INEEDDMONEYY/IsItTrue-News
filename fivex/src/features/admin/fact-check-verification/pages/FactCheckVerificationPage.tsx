@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BadgeCheck, Check, X } from 'lucide-react'
 import { StatCard } from '@/components/cards'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { useFactCheckVerification } from '../hooks/useFactCheckVerification'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 
@@ -50,7 +51,7 @@ export function FactCheckVerificationPage() {
         <StatCard label="Pending Verification" value={requests.length} icon={BadgeCheck} />
       </div>
 
-      {isLoading && <p className="text-sm text-text-muted">Loading fact-check requests...</p>}
+      {isLoading && <PageLoader label="Loading fact-check requests..." />}
       {error && (
         <p className="text-sm text-disputed mb-4">
           {getErrorMessage(error, 'Failed to load fact-check requests.')}

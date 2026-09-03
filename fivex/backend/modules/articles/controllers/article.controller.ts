@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import { asyncHandler } from '../../../utils/asyncHandler.js'
 import { AppError } from '../../../shared/errors/AppError.js'
+import { truncateToParagraphs } from '../../../utils/htmlPreview.js'
 import { articleService } from '../services/article.service.js'
 import type {
   CreateArticleInput,
@@ -13,6 +14,18 @@ function requireUser(req: Request) {
     throw new AppError('You must be signed in to access this resource.', 401)
   }
   return req.user
+}
+
+// Locked readers (anonymous viewers, or free-plan readers past their monthly
+// unlock cap) get a short preview of the body instead of the full article —
+// headline/excerpt/author/comments stay unlimited (see articleService's
+// resolveArticleLock for the actual gating decision).
+function serializeArticle(article: Awaited<ReturnType<typeof articleService.getArticleById>>['article'], locked: boolean) {
+  const json = article.toJSON() as Record<string, unknown>
+  if (locked) {
+    json.body = truncateToParagraphs(json.body as string, 2)
+  }
+  return { ...json, locked }
 }
 
 export const articleController = {
@@ -31,6 +44,18 @@ export const articleController = {
   // Public: published articles carrying a given tag, for the tag page.
   listByTag: asyncHandler(async (req: Request, res: Response) => {
     const articles = await articleService.listPublishedByTag(req.params.slug)
+    res.status(200).json({ articles })
+  }),
+
+  // Public: a given author's published articles, for their public profile page.
+  listByAuthor: asyncHandler(async (req: Request, res: Response) => {
+    const articles = await articleService.listPublishedByAuthor(req.params.id)
+    res.status(200).json({ articles })
+  }),
+
+  // Public: a given reader's liked articles, for their public profile page.
+  listLiked: asyncHandler(async (req: Request, res: Response) => {
+    const articles = await articleService.listLikedByUser(req.params.id)
     res.status(200).json({ articles })
   }),
 
@@ -61,14 +86,20 @@ export const articleController = {
   }),
 
   getBySlug: asyncHandler(async (req: Request, res: Response) => {
-    const article = await articleService.getArticleBySlug(req.params.slug, req.user)
+    const { article, locked } = await articleService.getArticleBySlug(req.params.slug, req.user)
     const liked = req.user ? article.likedBy.some((id) => id.toString() === req.user!.id) : false
-    res.status(200).json({ article, liked })
+    const disliked = req.user
+      ? article.dislikedBy.some((id) => id.toString() === req.user!.id)
+      : false
+    const bookmarked = req.user
+      ? article.bookmarkedBy.some((entry) => entry.user.toString() === req.user!.id)
+      : false
+    res.status(200).json({ article: serializeArticle(article, locked), liked, disliked, bookmarked })
   }),
 
   getById: asyncHandler(async (req: Request, res: Response) => {
-    const article = await articleService.getArticleById(req.params.id, req.user)
-    res.status(200).json({ article })
+    const { article, locked } = await articleService.getArticleById(req.params.id, req.user)
+    res.status(200).json({ article: serializeArticle(article, locked) })
   }),
 
   create: asyncHandler(async (req: Request, res: Response) => {
@@ -99,13 +130,30 @@ export const articleController = {
   }),
 
   recordView: asyncHandler(async (req: Request, res: Response) => {
-    await articleService.recordView(req.params.id)
+    await articleService.recordView(req.params.id, req.user?.id)
     res.status(204).send()
   }),
 
   toggleLike: asyncHandler(async (req: Request, res: Response) => {
     const user = requireUser(req)
     const result = await articleService.toggleLike(req.params.id, user.id)
+    res.status(200).json(result)
+  }),
+
+  toggleDislike: asyncHandler(async (req: Request, res: Response) => {
+    const user = requireUser(req)
+    const result = await articleService.toggleDislike(req.params.id, user.id)
+    res.status(200).json(result)
+  }),
+
+  share: asyncHandler(async (req: Request, res: Response) => {
+    const sharesCount = await articleService.incrementShare(req.params.id)
+    res.status(200).json({ sharesCount })
+  }),
+
+  toggleBookmark: asyncHandler(async (req: Request, res: Response) => {
+    const user = requireUser(req)
+    const result = await articleService.toggleBookmark(req.params.id, user.id)
     res.status(200).json(result)
   }),
 }

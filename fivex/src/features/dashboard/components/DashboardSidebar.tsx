@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Lock, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
+import { isPremiumUser } from '@/features/billing/utils/plan'
+import { FreePlanUsageWidget } from '@/features/readers/components/FreePlanUsageWidget'
 import { getDashboardNav } from '../constants/dashboardNav'
 import logo from '@/assets/icons/question-icon-removebg.png'
 
@@ -10,6 +12,7 @@ const COLLAPSE_STORAGE_KEY = 'itt-dashboard-sidebar-collapsed'
 export function DashboardSidebar() {
   const { user } = useAuth()
   const nav = getDashboardNav(user?.role)
+  const premium = isPremiumUser(user)
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.localStorage.getItem(COLLAPSE_STORAGE_KEY) === '1'
@@ -36,7 +39,7 @@ export function DashboardSidebar() {
       </Link>
 
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-        {nav.map(({ label, to, icon: Icon, end }) => (
+        {nav.map(({ label, to, icon: Icon, end, premium: isPremiumItem }) => (
           <NavLink
             key={to}
             to={to}
@@ -53,12 +56,21 @@ export function DashboardSidebar() {
             }
           >
             <Icon className="w-4 h-4 shrink-0" />
-            {!collapsed && label}
+            {!collapsed && (
+              <span className="flex flex-1 items-center justify-between gap-2 truncate">
+                {label}
+                {isPremiumItem && !premium && (
+                  <Lock className="w-3.5 h-3.5 shrink-0 text-text-dim" />
+                )}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
 
       <div className="px-3 py-4 border-t border-border">
+        {!collapsed && user?.role === 'reader' && !premium && <FreePlanUsageWidget />}
+
         <div className={`flex items-center gap-2 py-2 ${collapsed ? 'justify-center px-0' : 'px-3'}`}>
           <div className="w-7 h-7 rounded-full bg-accent-bg flex items-center justify-center text-xs font-medium text-accent shrink-0">
             {user?.name?.[0]?.toUpperCase() ?? '?'}

@@ -108,6 +108,7 @@ function toArticleDetail(article: Article): ArticleDetail {
     likes: Math.max(12, Math.round(article.stats.views * 0.018)),
     dislikes: Math.max(1, Math.round(article.stats.views * 0.004)),
     reposts: article.stats.shares,
+    bookmarks: Math.max(3, Math.round(article.stats.views * 0.006)),
     factCheck: buildFactCheck(article, seed),
     comments: buildComments(article, seed),
   }

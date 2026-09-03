@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Megaphone, Plus, Trash2 } from 'lucide-react'
 import { EmptyStateCard } from '@/components/cards'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { useBanners } from '@/features/banners/hooks/useBanners'
 import type { BannerTone } from '@/features/banners/api/banners.api'
 import { getErrorMessage } from '@/lib/getErrorMessage'
@@ -82,7 +83,7 @@ export function BannersPage() {
         {formError && <p className="text-xs text-disputed mt-2">{formError}</p>}
       </div>
 
-      {isLoading && <p className="text-sm text-text-muted">Loading banners...</p>}
+      {isLoading && <PageLoader label="Loading banners..." />}
       {error && <p className="text-sm text-disputed">{getErrorMessage(error, 'Failed to load banners.')}</p>}
 
       <div className="flex flex-col gap-3">
