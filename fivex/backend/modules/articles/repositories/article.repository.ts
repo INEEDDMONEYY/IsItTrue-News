@@ -2,6 +2,7 @@ import { Types } from 'mongoose'
 import { Article, type ArticleDocument } from '../models/Article.js'
 import type { ArticleStatus } from '../constants/articleStatus.js'
 import { ARTICLE_STATUSES } from '../constants/articleStatus.js'
+import type { ArticleEditorialStage } from '../constants/editorialWorkflow.js'
 
 export interface ToggleLikeResult {
   likesCount: number
@@ -33,6 +34,8 @@ export interface CreateArticleInput {
   socialLinks?: string[]
   sourceLinks?: string[]
   publishedAt?: Date
+  submittedAt?: Date
+  editorialStage?: ArticleEditorialStage
 }
 
 export interface UpdateArticleInput {
@@ -55,11 +58,31 @@ export const articleRepository = {
   },
 
   async findByAuthor(authorId: string): Promise<ArticleDocument[]> {
-    return Article.find({ author: authorId }).sort({ createdAt: -1 })
+    return Article.find({ author: authorId }).sort({ createdAt: -1 }).populate('reviewedBy', 'name')
   },
 
   async findByStatus(status: ArticleStatus): Promise<ArticleDocument[]> {
-    return Article.find({ status }).sort({ createdAt: -1 })
+    return Article.find({ status })
+      .sort({ submittedAt: 1, createdAt: 1 })
+      .populate('author', 'name')
+      .populate('reviewedBy', 'name')
+  },
+
+  async findEditorialWorkflow(): Promise<ArticleDocument[]> {
+    return Article.find()
+      .select(
+        '_id title slug category status factCheckStatus editorialStage editorialDeadline submittedAt publishedAt createdAt updatedAt author',
+      )
+      .sort({ editorialDeadline: 1, updatedAt: -1 })
+      .populate('author', 'name')
+  },
+
+  // Drafts an editor has sent back and the author hasn't resubmitted yet.
+  async findChangesRequested(): Promise<ArticleDocument[]> {
+    return Article.find({ status: ARTICLE_STATUSES.DRAFT, reviewedAt: { $exists: true } })
+      .sort({ reviewedAt: -1 })
+      .populate('author', 'name')
+      .populate('reviewedBy', 'name')
   },
 
   async findPublished(): Promise<ArticleDocument[]> {
@@ -140,11 +163,102 @@ export const articleRepository = {
   },
 
   async updateStatus(id: string, status: ArticleStatus): Promise<void> {
-    const set: Record<string, unknown> = { status }
+    const set: Record<string, unknown> = {
+      status,
+      editorialStage:
+        status === ARTICLE_STATUSES.PUBLISHED
+          ? 'published'
+          : status === ARTICLE_STATUSES.PENDING_REVIEW
+            ? 'submitted'
+            : 'draft',
+    }
     if (status === ARTICLE_STATUSES.PUBLISHED) {
       set.publishedAt = new Date()
     }
+    if (status === ARTICLE_STATUSES.PENDING_REVIEW) {
+      set.submittedAt = new Date()
+    }
     await Article.updateOne({ _id: id }, { $set: set })
+  },
+
+  async updateEditorialWorkflow(
+    id: string,
+    workflow: { editorialStage: ArticleEditorialStage; editorialDeadline: string | null },
+  ): Promise<void> {
+    await Article.updateOne(
+      { _id: id },
+      {
+        $set: {
+          editorialStage: workflow.editorialStage,
+          ...(workflow.editorialDeadline
+            ? { editorialDeadline: new Date(`${workflow.editorialDeadline}T00:00:00.000Z`) }
+            : {}),
+        },
+        ...(workflow.editorialDeadline === null ? { $unset: { editorialDeadline: 1 } } : {}),
+      },
+    )
+  },
+
+  // Editor decision: approving publishes it (and clears any earlier feedback);
+  // requesting changes sends it back to the author as a draft carrying the
+  // editor's checklist and note.
+  async recordReview(
+    id: string,
+    decision: {
+      status: ArticleStatus
+      reviewerId: string
+      note?: string
+      requirements?: string[]
+    },
+  ): Promise<void> {
+    const set: Record<string, unknown> = {
+      status: decision.status,
+      editorialStage: decision.status === ARTICLE_STATUSES.PUBLISHED ? 'published' : 'draft',
+      reviewedBy: decision.reviewerId,
+      reviewedAt: new Date(),
+    }
+    const unset: Record<string, 1> = {}
+
+    if (decision.status === ARTICLE_STATUSES.PUBLISHED) {
+      set.publishedAt = new Date()
+      set.reviewRequirements = []
+      unset.reviewNote = 1
+    } else {
+      set.reviewRequirements = (decision.requirements ?? []).map((text) => ({ text, done: false }))
+      if (decision.note) {
+        set.reviewNote = decision.note
+      } else {
+        unset.reviewNote = 1
+      }
+    }
+
+    await Article.updateOne(
+      { _id: id },
+      Object.keys(unset).length > 0 ? { $set: set, $unset: unset } : { $set: set },
+    )
+  },
+
+  // Returns false when the article has no requirement with that id.
+  async setRequirementDone(articleId: string, requirementId: string, done: boolean): Promise<boolean> {
+    const result = await Article.updateOne(
+      { _id: articleId, 'reviewRequirements._id': requirementId },
+      { $set: { 'reviewRequirements.$.done': done } },
+    )
+    return result.matchedCount > 0
+  },
+
+  // Appends a numbered correction notice (1, 2, 3...) to the article and returns its number.
+  async addPublishedCorrection(id: string, text: string, publishedAt: Date): Promise<number | null> {
+    const counted = await Article.findByIdAndUpdate(id, { $inc: { correctionsCount: 1 } }, { new: true }).select(
+      'correctionsCount',
+    )
+    if (!counted) return null
+
+    await Article.updateOne(
+      { _id: id },
+      { $push: { corrections: { number: counted.correctionsCount, text, publishedAt } } },
+    )
+    return counted.correctionsCount
   },
 
   async incrementViews(id: string): Promise<void> {
@@ -241,6 +355,37 @@ export const articleRepository = {
       const entry = article.bookmarkedBy.find((item) => item.user.toString() === userId)
       return { article, savedAt: entry?.savedAt ?? article.updatedAt }
     })
+  },
+
+  // Articles an editor can fact-check: anything that has left the author's drafts.
+  async findForFactCheckOversight(): Promise<ArticleDocument[]> {
+    return Article.find({ status: { $in: [ARTICLE_STATUSES.PENDING_REVIEW, ARTICLE_STATUSES.PUBLISHED] } })
+      .select(
+        '_id title slug status factCheckStatus factCheckRejectionReason factCheckReviewedAt factCheckReviewedBy author updatedAt',
+      )
+      .sort({ updatedAt: -1 })
+      .limit(300)
+      .populate('author', 'name')
+      .populate('factCheckReviewedBy', 'name')
+  },
+
+  // Editor verification. Never overrides an admin's rejection (see the service).
+  async setFactCheckVerified(id: string, reviewedBy: string): Promise<void> {
+    await Article.updateOne(
+      { _id: id, factCheckStatus: { $in: ['none', 'pending', 'approved'] } },
+      {
+        $set: { factCheckStatus: 'approved', factCheckReviewedAt: new Date(), factCheckReviewedBy: reviewedBy },
+        $unset: { factCheckRejectionReason: 1 },
+      },
+    )
+  },
+
+  // Only an approved check is withdrawn; pending/rejected states belong to the admin review.
+  async clearFactCheckApproval(id: string): Promise<void> {
+    await Article.updateOne(
+      { _id: id, factCheckStatus: 'approved' },
+      { $set: { factCheckStatus: 'none' }, $unset: { factCheckReviewedAt: 1, factCheckReviewedBy: 1 } },
+    )
   },
 
   async setFactCheckPending(id: string): Promise<void> {

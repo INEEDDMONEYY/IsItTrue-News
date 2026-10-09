@@ -5,10 +5,18 @@ const FOOTER_COLUMNS = [
   {
     title: 'Sections',
     links: [
-      { label: 'Politics', to: '/category/politics' },
-      { label: 'World', to: '/category/world' },
-      { label: 'Technology', to: '/category/technology' },
+      { label: 'Artificial Intelligence', to: '/category/artificial-intelligence' },
+      { label: 'Breaking News', to: '/category/breaking-news'},
       { label: 'Business', to: '/category/business' },
+      { label: 'Entertainment', to: '/category/entertainment' },
+      { label: 'Education', to: '/category/education' },
+      { label: 'Health', to: '/category/health' },
+      { label: 'Politics', to: '/category/politics' },
+      { label: 'Science', to: '/category/science' },
+      { label: 'Sports', to: '/category/sports' },
+      { label: 'Travel', to: '/category/travel' },
+      { label: 'Technology', to: '/category/technology' },
+      { label: 'World', to: '/category/world' },
     ],
   },
   {
@@ -24,10 +32,16 @@ const FOOTER_COLUMNS = [
   {
     title: 'Company',
     links: [
+      { label: 'Ads', to: '/ads' },
       { label: 'About Us', to: '/about' },
+      { label: 'Become an Contributor', to: '/become-a-contributor' },
+      { label: 'Become an Author', to: '/become-author' },
+      { label: 'Become an Editor', to: '/become-editor' },
       { label: 'Careers', to: '/careers' },
       { label: 'Contact', to: '/contact' },
+      { label: 'Editorial Guidelines', to: '/editorial-guidelines' },
       { label: 'FAQ', to: '/faq' },
+      { label: 'Organizations', to: '/organizations' },
       { label: 'Submit Ticket', to: '/submit-ticket' },
     ],
   },

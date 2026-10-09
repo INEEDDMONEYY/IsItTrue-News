@@ -1,5 +1,6 @@
 import { AppError } from '../../../shared/errors/AppError.js'
 import { FREE_PLAN_LIMITS } from '../../../shared/constants/plan.js'
+import { hasPremiumAccess } from '../../../shared/constants/features.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
 import { searchRepository, type SearchResultItem } from '../repositories/search.repository.js'
 
@@ -59,7 +60,7 @@ export const searchService = {
       throw new AppError('Account not found.', 404)
     }
 
-    const isPremium = user.plan === 'premium'
+    const isPremium = hasPremiumAccess('unlimitedSearch', user.plan)
 
     if (isPremium) {
       const results = await runSearch(q, type)

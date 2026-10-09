@@ -9,6 +9,7 @@ import type {
   CreateInvestigationInput,
   RejectInvestigationInput,
   UpdateInvestigationInput,
+  UpdateEditorialWorkflowInput,
 } from '../validations/investigation.validation.js'
 
 function requireUser(req: Request) {
@@ -39,6 +40,11 @@ export const investigationController = {
     res.status(200).json({ investigations })
   }),
 
+  listEditorialWorkflow: asyncHandler(async (_req: Request, res: Response) => {
+    const investigations = await investigationService.listEditorialWorkflow()
+    res.status(200).json({ investigations })
+  }),
+
   // Author/collaborator/editor/admin always get the full workspace view;
   // everyone else only ever sees a sanitized, access-tier-gated published view.
   getById: asyncHandler(async (req: Request, res: Response) => {
@@ -58,6 +64,13 @@ export const investigationController = {
     const input = req.body as UpdateInvestigationInput
     await investigationService.updateInvestigation(req.params.id, user, input)
     res.status(200).json({ message: 'Investigation updated successfully.' })
+  }),
+
+  updateEditorialWorkflow: asyncHandler(async (req: Request, res: Response) => {
+    const user = requireUser(req)
+    const input = req.body as UpdateEditorialWorkflowInput
+    await investigationService.updateEditorialWorkflow(req.params.id, user, input)
+    res.status(200).json({ message: 'Editorial workflow updated.' })
   }),
 
   remove: asyncHandler(async (req: Request, res: Response) => {

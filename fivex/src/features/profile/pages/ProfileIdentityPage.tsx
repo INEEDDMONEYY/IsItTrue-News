@@ -230,7 +230,7 @@ export function ProfileIdentityPage() {
           {!isVerified && (
             <button
               type="button"
-              className="mt-5 w-full rounded-xl bg-[var(--color-accent)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+              className="mt-5 w-full rounded-xl bg-brand-gradient px-4 py-3 text-sm font-semibold text-on-brand transition"
             >
               Start Verification
             </button>

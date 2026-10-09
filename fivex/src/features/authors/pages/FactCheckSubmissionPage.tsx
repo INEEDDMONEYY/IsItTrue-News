@@ -149,7 +149,7 @@ export function FactCheckSubmissionPage() {
           <button
             type="submit"
             disabled={!notes.trim() || !claim.trim() || !sources.trim() || isSubmitting}
-            className="self-start inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-accent text-white text-sm font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+            className="self-start inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand-gradient text-on-brand text-sm font-medium transition-colors disabled:opacity-50"
           >
             <ShieldCheck className="w-4 h-4" />
             {isSubmitting ? 'Submitting...' : 'Submit fact check'}

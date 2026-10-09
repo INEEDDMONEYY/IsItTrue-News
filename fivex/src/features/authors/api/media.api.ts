@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client'
+import { compressImage, type ImagePreset } from '@/lib/compressImage'
 import type { Media } from '../types/media.types'
 
 /**
@@ -16,6 +17,15 @@ export const mediaApi = {
     const formData = new FormData()
     formData.append('file', file)
     const { data } = await apiClient.post<{ media: Media }>('/api/media', formData, {
+      headers: { 'Content-Type': undefined },
+    })
+    return data.media
+  },
+
+  uploadProfilePhoto: async (file: File, preset: ImagePreset = 'avatar'): Promise<Media> => {
+    const formData = new FormData()
+    formData.append('file', await compressImage(file, preset))
+    const { data } = await apiClient.post<{ media: Media }>('/api/media/profile-photo', formData, {
       headers: { 'Content-Type': undefined },
     })
     return data.media

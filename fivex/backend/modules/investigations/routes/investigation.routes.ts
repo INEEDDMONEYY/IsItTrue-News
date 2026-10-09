@@ -12,6 +12,7 @@ import {
   createInvestigationSchema,
   rejectInvestigationSchema,
   updateInvestigationSchema,
+  updateEditorialWorkflowSchema,
 } from '../validations/investigation.validation.js'
 import { createEvidenceSchema, updateEvidenceSchema } from '../validations/evidence.validation.js'
 
@@ -36,6 +37,13 @@ router.get(
   authenticate,
   authorize(ROLES.EDITOR, ROLES.ADMIN),
   investigationController.listReviewQueue,
+)
+
+router.get(
+  '/editorial-workflow',
+  authenticate,
+  authorize(ROLES.EDITOR, ROLES.ADMIN),
+  investigationController.listEditorialWorkflow,
 )
 
 // Author/collaborator/editor/admin only — the global Evidence Vault across
@@ -67,6 +75,14 @@ router.patch(
   authorize(ROLES.AUTHOR, ROLES.EDITOR, ROLES.ADMIN),
   validate(updateInvestigationSchema),
   investigationController.update,
+)
+
+router.patch(
+  '/:id/editorial-workflow',
+  authenticate,
+  authorize(ROLES.EDITOR, ROLES.ADMIN),
+  validate(updateEditorialWorkflowSchema),
+  investigationController.updateEditorialWorkflow,
 )
 
 router.delete('/:id', authenticate, authorize(ROLES.AUTHOR, ROLES.ADMIN), investigationController.remove)

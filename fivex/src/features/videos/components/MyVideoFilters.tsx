@@ -32,7 +32,7 @@ export function MyVideoFilters({
             onClick={() => onChange(filter.value)}
             className={`rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${
               active
-                ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-white'
+                ? 'border-transparent bg-brand-gradient text-on-brand'
                 : 'border-[var(--color-card-border)] bg-[var(--color-card)] text-[var(--color-card-text)] hover:bg-[var(--color-card-2)]'
             }`}
           >

@@ -32,7 +32,7 @@ function InvestigationsPageContent() {
         <h1 className="text-2xl font-semibold text-heading">My Investigations</h1>
         <Link
           to="/author/investigations/new"
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-accent text-white text-sm font-medium hover:bg-accent-hover transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand-gradient text-on-brand text-sm font-medium transition-colors"
         >
           <FilePlus2 className="w-4 h-4" />
           New Investigation

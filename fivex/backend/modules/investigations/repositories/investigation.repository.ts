@@ -1,6 +1,7 @@
 import { Types } from 'mongoose'
 import { Investigation, type InvestigationDocument } from '../models/Investigation.js'
 import { INVESTIGATION_STATUSES, type InvestigationStatus } from '../constants/investigationStatus.js'
+import type { InvestigationWorkflowStage } from '../constants/editorialWorkflow.js'
 import type {
   CreateInvestigationInput,
   UpdateInvestigationInput,
@@ -37,6 +38,13 @@ export const investigationRepository = {
       .populate('author', 'name')
   },
 
+  async findEditorialWorkflow(): Promise<InvestigationDocument[]> {
+    return Investigation.find()
+      .select('_id title slug status workflowStage editorialDeadline createdAt updatedAt author')
+      .sort({ editorialDeadline: 1, updatedAt: -1 })
+      .populate('author', 'name')
+  },
+
   async findPublished(category?: string): Promise<InvestigationDocument[]> {
     const query: Record<string, unknown> = { status: INVESTIGATION_STATUSES.PUBLISHED }
     if (category) query.category = category
@@ -60,11 +68,29 @@ export const investigationRepository = {
   async setStatus(
     id: string,
     status: InvestigationStatus,
-    extra: { publishedAt?: Date; rejectionReason?: string } = {},
+    extra: { publishedAt?: Date; rejectionReason?: string; workflowStage?: InvestigationWorkflowStage } = {},
   ): Promise<void> {
     const set: Record<string, unknown> = { status, ...extra }
     if (status !== INVESTIGATION_STATUSES.REJECTED) set.rejectionReason = undefined
     await Investigation.updateOne({ _id: id }, { $set: set })
+  },
+
+  async updateEditorialWorkflow(
+    id: string,
+    workflow: { workflowStage: InvestigationWorkflowStage; editorialDeadline: Date | null },
+  ): Promise<void> {
+    await Investigation.updateOne(
+      { _id: id },
+      {
+        $set: {
+          workflowStage: workflow.workflowStage,
+          ...(workflow.editorialDeadline
+            ? { editorialDeadline: new Date(`${workflow.editorialDeadline}T00:00:00.000Z`) }
+            : {}),
+        },
+        ...(workflow.editorialDeadline === null ? { $unset: { editorialDeadline: 1 } } : {}),
+      },
+    )
   },
 
   async incrementViews(id: string): Promise<void> {

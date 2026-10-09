@@ -1,6 +1,7 @@
 import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
 import { FREE_PLAN_LIMITS } from '../../../shared/constants/plan.js'
+import { FREE_PLAN_LIMITS_ENFORCED, hasPremiumAccess } from '../../../shared/constants/features.js'
 import { assertDeliverableEmail } from '../../../security/emailValidator.js'
 import { comparePassword, hashPassword } from '../../../utils/password.js'
 import { generateVerificationCode, hashToken } from '../../../utils/tokens.js'
@@ -10,8 +11,22 @@ import { articleRepository } from '../../articles/repositories/article.repositor
 import { videoRepository } from '../../videos/repositories/video.repository.js'
 import { commentRepository } from '../../comments/repositories/comment.repository.js'
 import { userRepository } from '../repositories/user.repository.js'
-import type { IAuthorProfile, IReaderProfile } from '../models/User.js'
-import type { BecomeAuthorInput } from '../validations/user.validation.js'
+import type { IAuthorProfile, IReaderProfile, UserDocument } from '../models/User.js'
+import type { BecomeAuthorInput, BecomeEditorInput } from '../validations/user.validation.js'
+
+// The photo/bio can come from the onboarding form or from what the user already
+// saved in their settings — one of the two must exist.
+function assertProfileComplete(
+  user: UserDocument,
+  input: Pick<BecomeAuthorInput, 'profilePhotoUrl' | 'shortBio'>,
+): void {
+  if (!input.profilePhotoUrl && !user.authorProfile?.profileImage) {
+    throw new AppError('A profile photo is required.', 400)
+  }
+  if (!input.shortBio && !user.authorProfile?.bio) {
+    throw new AppError('A short bio is required.', 400)
+  }
+}
 
 export interface LibraryItem {
   id: string
@@ -123,7 +138,9 @@ export const userService = {
       throw new AppError('Account not found.', 404)
     }
 
-    const isPremium = user.plan === 'premium'
+    const unlimitedArticles = hasPremiumAccess('unlimitedArticles', user.plan)
+    const unlimitedSearch = hasPremiumAccess('unlimitedSearch', user.plan)
+    const unlimitedComments = hasPremiumAccess('unlimitedComments', user.plan)
     const periodStart = user.usage?.periodStart ?? new Date()
     const resetDate = new Date(
       Date.UTC(periodStart.getUTCFullYear(), periodStart.getUTCMonth() + 1, 1),
@@ -134,9 +151,11 @@ export const userService = {
 
     return {
       plan: user.plan,
+      // False once every paywalled feature is unlocked, so the sidebar hides the free-plan widget.
+      limitsEnforced: FREE_PLAN_LIMITS_ENFORCED && user.plan !== 'premium',
       articlesRead,
-      articlesLimit: isPremium ? null : FREE_PLAN_LIMITS.articlesPerMonth,
-      articlesRemaining: isPremium
+      articlesLimit: unlimitedArticles ? null : FREE_PLAN_LIMITS.articlesPerMonth,
+      articlesRemaining: unlimitedArticles
         ? null
         : Math.max(0, FREE_PLAN_LIMITS.articlesPerMonth - articlesRead),
       // Videos aren't capped by count — free-plan viewers get unlimited
@@ -144,13 +163,13 @@ export const userService = {
       // premium (see article/video service content-gating).
       maxFreeVideoDurationSeconds: FREE_PLAN_LIMITS.maxFreeVideoDurationSeconds,
       searchesUsed,
-      searchesLimit: isPremium ? null : FREE_PLAN_LIMITS.searchesPerMonth,
-      searchesRemaining: isPremium
+      searchesLimit: unlimitedSearch ? null : FREE_PLAN_LIMITS.searchesPerMonth,
+      searchesRemaining: unlimitedSearch
         ? null
         : Math.max(0, FREE_PLAN_LIMITS.searchesPerMonth - searchesUsed),
       commentsUsed,
-      commentsLimit: isPremium ? null : FREE_PLAN_LIMITS.commentsPerMonth,
-      commentsRemaining: isPremium
+      commentsLimit: unlimitedComments ? null : FREE_PLAN_LIMITS.commentsPerMonth,
+      commentsRemaining: unlimitedComments
         ? null
         : Math.max(0, FREE_PLAN_LIMITS.commentsPerMonth - commentsUsed),
       resetDate: resetDate.toISOString(),
@@ -442,7 +461,46 @@ export const userService = {
       throw new AppError('Please verify your phone number before becoming an author.', 400)
     }
 
+    assertProfileComplete(user, input)
+
     await userRepository.completeAuthorOnboarding(userId, {
+      fullName: input.fullName,
+      profilePhotoUrl: input.profilePhotoUrl,
+      shortBio: input.shortBio,
+      socialLinks: input.socialLinks,
+    })
+
+    const updatedUser = await userRepository.findById(userId)
+    if (!updatedUser) {
+      throw new AppError('Account not found.', 404)
+    }
+    return updatedUser
+  },
+
+  // Self-service reader -> editor upgrade. Mirrors becomeAuthor exactly:
+  // instant approval once email/phone are verified and the editorial
+  // standards agreement is accepted, no manual review queue.
+  async becomeEditor(userId: string, input: BecomeEditorInput) {
+    const user = await userRepository.findById(userId)
+    if (!user) {
+      throw new AppError('Account not found.', 404)
+    }
+
+    if (user.role !== ROLES.READER) {
+      throw new AppError('Only reader accounts can apply to become an editor.', 400)
+    }
+
+    if (!user.isEmailVerified) {
+      throw new AppError('Please verify your email address before becoming an editor.', 400)
+    }
+
+    if (!user.isPhoneVerified) {
+      throw new AppError('Please verify your phone number before becoming an editor.', 400)
+    }
+
+    assertProfileComplete(user, input)
+
+    await userRepository.completeEditorOnboarding(userId, {
       fullName: input.fullName,
       profilePhotoUrl: input.profilePhotoUrl,
       shortBio: input.shortBio,

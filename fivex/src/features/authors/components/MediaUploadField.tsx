@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { ImagePlus, Loader2, Video, X } from 'lucide-react'
 import { useMediaUpload } from '../hooks/useMediaUpload'
 import { getErrorMessage } from '@/lib/getErrorMessage'
+import type { ImagePreset } from '@/lib/compressImage'
 
 interface MediaUploadFieldProps {
   label: string
@@ -10,6 +11,8 @@ interface MediaUploadFieldProps {
   kind: 'image' | 'video'
   value: string | null
   onChange: (url: string | null) => void
+  // Resizes the image before upload and lets non-author roles use the field.
+  imagePreset?: ImagePreset
 }
 
 /**
@@ -24,9 +27,10 @@ export function MediaUploadField({
   kind,
   value,
   onChange,
+  imagePreset,
 }: MediaUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const { upload, isUploading } = useMediaUpload()
+  const { upload, isUploading } = useMediaUpload({ imagePreset })
   const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

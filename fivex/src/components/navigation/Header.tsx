@@ -145,7 +145,7 @@ export function Header() {
               to={user?.role === 'admin' ? '/admin' : '/dashboard'}
               className="hidden sm:flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-border hover:border-accent-border transition-colors"
             >
-              <div className="w-7 h-7 rounded-full bg-accent-bg flex items-center justify-center text-xs font-medium text-accent">
+              <div className="w-7 h-7 rounded-full bg-gray-300 flex items-center justify-center text-xs font-medium text-white">
                 {user?.name?.[0]?.toUpperCase() ?? '?'}
               </div>
               <span className="text-sm text-text">{user?.name}</span>

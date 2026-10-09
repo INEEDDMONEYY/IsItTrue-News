@@ -112,7 +112,7 @@ export function SubmittedArticlesPage() {
 
           <Link
             to="/dashboard/authors/articles/new"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-on-brand transition"
           >
             <FileText className="h-4 w-4" />
             New Article
@@ -448,7 +448,7 @@ export function SubmittedArticlesPage() {
           ) : (
             <Link
               to="/dashboard/authors/articles/new"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-on-brand transition"
             >
               Start an article
               <ArrowRight className="h-4 w-4" />

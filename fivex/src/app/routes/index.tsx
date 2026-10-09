@@ -17,6 +17,7 @@ import { CategoryPage } from '@/features/categories/pages/CategoryPage'
 import { TagPage } from '@/features/tags/pages/TagPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
+import { OrganizationSignUpPage } from '@/features/auth/pages/OrganizationSignUpPage'
 import { ProfilePage } from '@/features/auth/pages/ProfilePage'
 import { AdminDashboardPage } from '@/features/admin/pages/AdminDashboardPage'
 import { UsersPage } from '@/features/admin/users/pages/UsersPage'
@@ -34,13 +35,24 @@ import { DashboardHomePage } from '@/features/dashboard/pages/DashboardHomePage'
 import { AccountSettingsPage } from '@/features/settings/pages/AccountSettingsPage'
 import { ArticlesListPage } from '@/features/authors/pages/ArticlesListPage'
 import { NewArticlePage } from '@/features/authors/pages/NewArticlePage'
+import { EditArticlePage } from '@/features/authors/pages/EditArticlePage'
 import { FactCheckSubmissionPage } from '@/features/authors/pages/FactCheckSubmissionPage'
+import { PendingApprovalsPage } from '@/features/editor/pages/PendingApprovalsPage'
+import { CorrectionsManagementPage } from '@/features/corrections/pages/CorrectionsManagementPage'
 import { ReviewQueuePage } from '@/features/editor/pages/ReviewQueuePage'
+import { EditorialCalendarPage } from '@/features/editor/pages/EditorialCalendarPage'
+import { FactCheckOversightPage } from '@/features/editor/pages/FactCheckOversightPage'
 import { DashboardAnalyticsPage } from '@/features/dashboard/pages/DashboardAnalyticsPage'
 import { BookmarksPage } from '@/features/bookmarks/pages/BookmarksPage'
+import { AdsPage } from '@/features/company/pages/AdsPage'
 import { AboutPage } from '@/features/company/pages/AboutPage'
+import { BecomeAContributorPage } from '@/features/company/pages/BecomeAContributorPage'
+import { BecomeAnAuthorPage } from '@/features/company/pages/BecomeAnAuthorPage'
+import { BecomeAnEditorPage } from '@/features/company/pages/BecomeAnEditorPage'
+import { OrganizationsPage } from '@/features/company/pages/OrganizationsPage'
 import { CareersPage } from '@/features/company/pages/CareersPage'
 import { ContactPage } from '@/features/company/pages/ContactPage'
+import { EditorialGuidelinesPage } from '@/features/company/pages/EditorialGuidelinesPage'
 import { FaqPage } from '@/features/faq/pages/FaqPage'
 import { SubmitTicketPage } from '@/features/tickets/pages/SubmitTicketPage'
 import { PrivacyPolicyPage } from '@/features/legal/pages/PrivacyPolicyPage'
@@ -73,6 +85,10 @@ import { InvestigationDetailPage } from '@/features/investigations/pages/Investi
 import { SubscribePage } from '@/features/billing/pages/SubscribePage'
 import { BecomeAuthorPage } from '@/features/onboarding/pages/BecomeAuthorPage'
 import { AuthorOnboardingPage } from '@/features/onboarding/pages/AuthorOnboardingPage'
+import { BecomeEditorPage } from '@/features/onboarding/pages/BecomeEditorPage'
+import { EditorOnboardingPage } from '@/features/onboarding/pages/EditorOnboardingPage'
+import { OrganizationSeatsPage } from '@/features/organizations/pages/OrganizationSeatsPage'
+import { OrganizationBillingPage } from '@/features/organizations/pages/OrganizationBillingPage'
 
 export const router = createBrowserRouter([
   {
@@ -94,9 +110,15 @@ export const router = createBrowserRouter([
       { path: 'authors/:id', element: <AuthorProfilePage /> },
       { path: 'newsletter', element: <NewslettersPage /> },
       { path: 'subscribe', element: <SubscribePage /> },
+      { path: 'ads', element: <AdsPage /> },
       { path: 'about', element: <AboutPage /> },
+      { path: 'become-a-contributor', element: <BecomeAContributorPage /> },
+      { path: 'become-author', element: <BecomeAnAuthorPage /> },
+      { path: 'become-editor', element: <BecomeAnEditorPage /> },
+      { path: 'organizations', element: <OrganizationsPage /> },
       { path: 'careers', element: <CareersPage /> },
       { path: 'contact', element: <ContactPage /> },
+      { path: 'editorial-guidelines', element: <EditorialGuidelinesPage /> },
       { path: 'faq', element: <FaqPage /> },
       { path: 'submit-ticket', element: <SubmitTicketPage /> },
       { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
@@ -146,8 +168,13 @@ export const router = createBrowserRouter([
           { path: 'settings', element: <AccountSettingsPage /> },
           { path: 'articles', element: <ArticlesListPage /> },
           { path: 'articles/new', element: <NewArticlePage /> },
+          { path: 'articles/:id/edit', element: <EditArticlePage /> },
           { path: 'fact-checks', element: <FactCheckSubmissionPage /> },
           { path: 'review', element: <ReviewQueuePage /> },
+          { path: 'calendar', element: <EditorialCalendarPage /> },
+          { path: 'fact-check-oversight', element: <FactCheckOversightPage /> },
+          { path: 'approvals', element: <PendingApprovalsPage /> },
+          { path: 'corrections', element: <CorrectionsManagementPage /> },
           { path: 'analytics', element: <DashboardAnalyticsPage /> },
           { path: 'bookmarks', element: <BookmarksPage /> },
           { path: 'comments', element: <MyCommentsPage /> },
@@ -160,6 +187,10 @@ export const router = createBrowserRouter([
           { path: 'topic-submission', element: <TopicSubmissionPage /> },
           { path: 'become-author', element: <BecomeAuthorPage /> },
           { path: 'become-author/onboarding', element: <AuthorOnboardingPage /> },
+          { path: 'become-editor', element: <BecomeEditorPage /> },
+          { path: 'become-editor/onboarding', element: <EditorOnboardingPage /> },
+          { path: 'organization/seats', element: <OrganizationSeatsPage /> },
+          { path: 'organization/billing', element: <OrganizationBillingPage /> },
           { path: 'drafts', element: <DraftsPage /> },
           { path: 'submissions', element: <SubmissionQueuePage /> },
           { path: 'pitches', element: <PitchCenterPage /> },
@@ -192,6 +223,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      { path: '/organizations/signup', element: <OrganizationSignUpPage /> },
     ],
   },
 ])

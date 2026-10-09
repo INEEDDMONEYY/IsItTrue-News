@@ -4,13 +4,13 @@ import dayjs from '@/lib/dayjs'
 
 export function LatestPostsList({ articles }: { articles: Article[] }) {
   return (
-    <div className="rounded-2xl border border-card-border bg-card p-4">
+    <div className="rounded-2xl border border-border bg-card p-4">
       <h3 className="text-sm font-semibold text-card-heading mb-4">Latest Posts</h3>
       <ul className="flex flex-col gap-4">
         {articles.map((article) => (
           <li key={article.id}>
             <Link to={`/article/${article.slug}`} className="flex gap-3 group">
-              <div className="w-14 h-14 rounded-lg bg-card-2 shrink-0 border border-card-border overflow-hidden">
+              <div className="w-14 h-14 rounded-lg bg-card-2 shrink-0 border border-border overflow-hidden">
                 <img
                   src={article.thumbnailUrl}
                   alt={article.title}

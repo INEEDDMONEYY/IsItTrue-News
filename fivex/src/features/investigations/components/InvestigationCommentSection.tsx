@@ -45,7 +45,7 @@ export function InvestigationCommentSection({
           <button
             type="submit"
             disabled={!draft.trim() || isPosting}
-            className="self-end flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="self-end flex items-center gap-2 rounded-lg bg-brand-gradient px-4 py-2 text-sm font-medium text-on-brand transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPosting && <Spinner size="sm" className="border-white/40 border-t-white" />}
             {isPosting ? 'Posting...' : 'Post Comment'}

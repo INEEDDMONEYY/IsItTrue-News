@@ -1,49 +1,109 @@
 @keyframes gradient-border-spin {
   to {
-    background-position: 300% 50%;
+    background-position: 0 0, 300% 50%;
   }
 }
 
-/* Animated blue -> red -> purple -> pink border, used for the header's
-   category chips. Uses the double-background trick so it works on rounded
-   pills without an extra wrapper element. */
-.gradient-border-chip {
-  border: 1px solid transparent;
-  background-image:
-    linear-gradient(var(--color-bg), var(--color-bg)),
-    linear-gradient(90deg, #3b82f6, #dc2626, #a855f7, #ec4899, #3b82f6);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  background-size:
-    100% 100%,
-    300% 100%;
-  animation: gradient-border-spin 6s linear infinite;
-}
+/* Animated gradient border (sky-300 -> red -> purple -> pink) via the double-background trick, so it
+   works on rounded shapes without a wrapper. --gb-fill is the inner fill, taken from the bg-* class. */
+.bg-bg,
+[class~="bg-[var(--color-bg)]"],
+[class~="bg-[var(--color-background)]"] { --gb-fill: var(--color-bg); }
+.bg-surface,
+[class~="bg-[var(--color-surface)]"] { --gb-fill: var(--color-surface); }
+.bg-surface-2,
+[class~="bg-[var(--color-surface-2)]"] { --gb-fill: var(--color-surface-2); }
+.bg-card,
+[class~="bg-[var(--color-card)]"] { --gb-fill: var(--color-card); }
+.bg-card-2,
+[class~="bg-[var(--color-card-2)]"] { --gb-fill: var(--color-card-2); }
 
-/* Same animated border, tinted to sit on a --color-card / --color-surface
-   background instead of --color-bg. */
-.gradient-border-card {
-  border: 1px solid transparent;
-  background-image:
-    linear-gradient(var(--color-card), var(--color-card)),
-    linear-gradient(90deg, #3b82f6, #dc2626, #a855f7, #ec4899, #3b82f6);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  background-size:
-    100% 100%,
-    300% 100%;
-  animation: gradient-border-spin 6s linear infinite;
-}
-
+.gradient-border-chip,
+.gradient-border-card,
 .gradient-border-surface {
   border: 1px solid transparent;
   background-image:
-    linear-gradient(var(--color-surface), var(--color-surface)),
-    linear-gradient(90deg, #3b82f6, #dc2626, #a855f7, #ec4899, #3b82f6);
+    linear-gradient(var(--gb-fill), var(--gb-fill)),
+    var(--gradient-border);
   background-origin: border-box;
   background-clip: padding-box, border-box;
   background-size:
     100% 100%,
     300% 100%;
   animation: gradient-border-spin 6s linear infinite;
+}
+
+.gradient-border-chip { --gb-fill: var(--color-bg); }
+.gradient-border-card { --gb-fill: var(--color-card); }
+.gradient-border-surface { --gb-fill: var(--color-surface); }
+
+/* Every bordered card/panel across the platform picks up the gradient border; it drifts on hover.
+   Matches both the token classes and the arbitrary-value form (border-[var(--color-card-border)]).
+   Opt out with .no-gradient-border. Form controls and buttons are intentionally not matched. */
+:is(div, section, article, aside, li, a, details, nav, header, footer, figure):is(
+    .border-border,
+    .border-card-border,
+    [class~="border-[var(--color-border)]"],
+    [class~="border-[var(--color-card-border)]"]
+  ):is(
+    .bg-bg,
+    .bg-surface,
+    .bg-surface-2,
+    .bg-card,
+    .bg-card-2,
+    [class~="bg-[var(--color-bg)]"],
+    [class~="bg-[var(--color-background)]"],
+    [class~="bg-[var(--color-surface)]"],
+    [class~="bg-[var(--color-surface-2)]"],
+    [class~="bg-[var(--color-card)]"],
+    [class~="bg-[var(--color-card-2)]"]
+  ):not(.no-gradient-border, .border-dashed):not(.gradient-border-chip, .gradient-border-card, .gradient-border-surface) {
+  border-color: transparent;
+  background-image:
+    linear-gradient(var(--gb-fill), var(--gb-fill)),
+    var(--gradient-border);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size:
+    100% 100%,
+    300% 100%;
+  background-position:
+    0 0,
+    0% 50%;
+  transition: background-position 0.8s ease;
+}
+
+:is(div, section, article, aside, li, a, details, nav, header, footer, figure):is(
+    .border-border,
+    .border-card-border,
+    [class~="border-[var(--color-border)]"],
+    [class~="border-[var(--color-card-border)]"]
+  ):is(
+    .bg-bg,
+    .bg-surface,
+    .bg-surface-2,
+    .bg-card,
+    .bg-card-2,
+    [class~="bg-[var(--color-bg)]"],
+    [class~="bg-[var(--color-background)]"],
+    [class~="bg-[var(--color-surface)]"],
+    [class~="bg-[var(--color-surface-2)]"],
+    [class~="bg-[var(--color-card)]"],
+    [class~="bg-[var(--color-card-2)]"]
+  ):not(.no-gradient-border, .border-dashed):not(.gradient-border-chip, .gradient-border-card, .gradient-border-surface):hover {
+  background-position:
+    0 0,
+    100% 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradient-border-chip,
+  .gradient-border-card,
+  .gradient-border-surface {
+    animation: none;
+  }
+
+  :is(div, section, article, aside, li, a, details, nav, header, footer, figure) {
+    transition-duration: 0s !important;
+  }
 }

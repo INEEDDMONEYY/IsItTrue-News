@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useAuth } from '@/app/providers/AuthProvider'
 
 import type { PremiumFeatureKey } from '../constants/premiumFeatures'
-import { isPremiumUser } from '../utils/plan'
+import { hasPremiumAccess } from '../utils/plan'
 import { PaywallNotice } from './PaywallNotice'
 
 interface PaywallGateProps {
@@ -18,7 +18,7 @@ interface PaywallGateProps {
 export function PaywallGate({ feature, children }: PaywallGateProps) {
   const { user } = useAuth()
 
-  if (isPremiumUser(user)) return <>{children}</>
+  if (hasPremiumAccess(user, feature)) return <>{children}</>
 
   return <PaywallNotice feature={feature} />
 }

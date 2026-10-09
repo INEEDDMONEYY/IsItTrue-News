@@ -4,6 +4,8 @@ export interface RegisterPayload {
   name: string
   email: string
   password: string
+  accountType?: 'individual' | 'organization'
+  organizationName?: string
 }
 
 export interface RegisterResponse {

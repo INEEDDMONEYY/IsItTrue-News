@@ -7,6 +7,7 @@ import { ROLES } from '../../../shared/constants/roles.js'
 import { userController } from '../controllers/user.controller.js'
 import {
   becomeAuthorSchema,
+  becomeEditorSchema,
   changeEmailSchema,
   changePasswordSchema,
   createUserSchema,
@@ -64,6 +65,7 @@ router.post(
   userController.verifyPhoneCode,
 )
 router.post('/me/become-author', authenticate, validate(becomeAuthorSchema), userController.becomeAuthor)
+router.post('/me/become-editor', authenticate, validate(becomeEditorSchema), userController.becomeEditor)
 
 // Admin-only: manage another account's role or existence.
 router.patch(

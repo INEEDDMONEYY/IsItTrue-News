@@ -55,7 +55,7 @@ export function PaywallNotice({ feature }: PaywallNoticeProps) {
 
         <Link
           to="/subscribe"
-          className="mt-8 inline-flex items-center justify-center rounded-xl bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+          className="mt-8 inline-flex items-center justify-center rounded-xl bg-brand-gradient px-6 py-3 text-sm font-semibold text-on-brand transition"
         >
           View plans & subscribe
         </Link>

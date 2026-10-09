@@ -22,7 +22,7 @@ function ToggleRow({ label, description, defaultChecked = false }: ToggleRowProp
         aria-checked={checked}
         onClick={() => setChecked((v) => !v)}
         className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${
-          checked ? 'bg-accent' : 'bg-card-2'
+          checked ? 'bg-brand-gradient' : 'bg-card-2'
         }`}
       >
         <span

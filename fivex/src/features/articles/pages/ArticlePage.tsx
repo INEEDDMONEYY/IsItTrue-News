@@ -172,6 +172,21 @@ export function ArticlePage() {
         onFactCheckClick={() => factCheckRef.current?.scrollIntoView({ behavior: 'smooth' })}
       />
 
+      {article.corrections && article.corrections.length > 0 && (
+        <section className="flex flex-col gap-3 rounded-xl border border-pending/30 bg-pending/10 p-4">
+          <h2 className="text-sm font-semibold text-heading">Corrections</h2>
+          <ol className="flex flex-col gap-2">
+            {article.corrections.map((correction) => (
+              <li key={correction.number} className="text-sm text-text">
+                <span className="font-medium text-heading">Correction {correction.number}</span>
+                <span className="text-text-muted"> · {dayjs(correction.publishedAt).format('MMM D, YYYY')}</span>
+                <p className="mt-0.5 whitespace-pre-line break-words">{correction.text}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
       {isPlanLocked ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-surface-2 px-6 py-10 text-center">
           <p className="text-sm font-semibold text-heading">
@@ -183,7 +198,7 @@ export function ArticlePage() {
           </p>
           <Link
             to="/subscribe"
-            className="mt-1 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-hover"
+            className="mt-1 rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-on-brand transition"
           >
             View plans & subscribe
           </Link>
@@ -209,7 +224,7 @@ export function ArticlePage() {
                 </p>
                 <Link
                   to="/register"
-                  className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-hover"
+                  className="rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-on-brand transition"
                 >
                   Sign up to keep reading
                 </Link>

@@ -98,7 +98,7 @@ export function DraftCard({
 
           <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-[var(--color-accent)] transition-all"
+              className="h-full rounded-full bg-brand-gradient transition-all"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -188,7 +188,7 @@ export function DraftCard({
           <button
             type="button"
             onClick={() => onEdit(draft)}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-on-brand transition"
           >
             <Pencil className="h-4 w-4" />
             Continue Editing

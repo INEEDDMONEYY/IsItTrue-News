@@ -67,17 +67,17 @@ export default function VideoStudioPage() {
         <div>
           <Link
             to="/dashboard/videos"
-            className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-900"
+            className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-text-muted transition hover:text-heading"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to My Videos
           </Link>
 
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-heading">
             Video Studio
           </h1>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-text-muted">
             Upload, edit, caption, and prepare your video for
             editorial review.
           </p>
@@ -86,7 +86,7 @@ export default function VideoStudioPage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-text shadow-sm transition hover:bg-surface-2"
           >
             <Save className="h-4 w-4" />
             Save Draft
@@ -94,7 +94,7 @@ export default function VideoStudioPage() {
 
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition"
           >
             <Send className="h-4 w-4" />
             Submit for Review
@@ -151,24 +151,24 @@ export default function VideoStudioPage() {
           )}
 
           {activeSection === 'captions' && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-heading">
                 Captions
               </h2>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-text-muted">
                 Caption editing will be available here.
               </p>
             </div>
           )}
 
           {activeSection === 'publishing' && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-heading">
                 Publishing
               </h2>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-text-muted">
                 Review your video details before submitting it to
                 the editorial workflow.
               </p>

@@ -1,4 +1,4 @@
-import { FilePlus2, ShieldCheck, BookMarked, BarChart3, FileText } from 'lucide-react'
+import { FilePlus2, ShieldCheck, BookMarked, BarChart3, FileText, Users, CreditCard } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useAuthorArticles } from '@/features/authors/hooks/useAuthorArticles'
 import { QuickLinkCard } from '@/components/cards'
@@ -53,8 +53,18 @@ function ReaderOverview() {
   )
 }
 
+function OrganizationOverview() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <QuickLinkCard to="/dashboard/organization/seats" label="Team Seats" icon={Users} />
+      <QuickLinkCard to="/dashboard/organization/billing" label="Billing & Plans" icon={CreditCard} />
+    </div>
+  )
+}
+
 export function DashboardHomePage() {
   const { user } = useAuth()
+  const isRoleWithDedicatedOverview = user?.role === 'author' || user?.role === 'editor' || user?.role === 'organization'
 
   return (
     <div>
@@ -63,7 +73,8 @@ export function DashboardHomePage() {
 
       {user?.role === 'author' && <AuthorOverview />}
       {user?.role === 'editor' && <EditorOverview />}
-      {(user?.role === 'reader' || !user?.role) && <ReaderOverview />}
+      {user?.role === 'organization' && <OrganizationOverview />}
+      {!isRoleWithDedicatedOverview && <ReaderOverview />}
     </div>
   )
 }

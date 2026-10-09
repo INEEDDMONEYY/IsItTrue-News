@@ -1,5 +1,6 @@
 import { apiClient } from '@/api/client'
 import type { ArticleStatus, AuthorArticle, CreateArticleInput } from '../types/authorArticle.types'
+import type { MyArticle, UpdateArticleInput } from '../types/myArticle.types'
 
 /**
  * Shared articles API client used by both the author dashboard and the
@@ -22,6 +23,25 @@ export const articlesApi = {
   listPending: async (): Promise<AuthorArticle[]> => {
     const { data } = await apiClient.get<{ articles: AuthorArticle[] }>('/api/articles/pending')
     return data.articles
+  },
+
+  // The author's own articles in their real backend shape, including any editor feedback.
+  listMyArticles: async (): Promise<MyArticle[]> => {
+    const { data } = await apiClient.get<{ articles: MyArticle[] }>('/api/articles/mine')
+    return data.articles
+  },
+
+  getById: async (id: string): Promise<MyArticle> => {
+    const { data } = await apiClient.get<{ article: MyArticle }>(`/api/articles/${id}`)
+    return data.article
+  },
+
+  update: async (id: string, input: UpdateArticleInput): Promise<void> => {
+    await apiClient.patch(`/api/articles/${id}`, input)
+  },
+
+  setRequirementDone: async (id: string, requirementId: string, done: boolean): Promise<void> => {
+    await apiClient.patch(`/api/articles/${id}/requirements/${requirementId}`, { done })
   },
 
   create: async (input: CreateArticleInput): Promise<AuthorArticle> => {

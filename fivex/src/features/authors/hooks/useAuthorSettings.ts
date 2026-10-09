@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { authorSettingsApi, type AuthorProfileApi } from '../api/authorSettings.api'
+import { useAuth } from '@/app/providers/AuthProvider'
 import type {
   AuthorSettings,
   AuthorProfileSettings,
@@ -140,6 +141,7 @@ function toApi(settings: AuthorSettings): Partial<AuthorProfileApi> {
 
 export function useAuthorSettings() {
   const queryClient = useQueryClient()
+  const { user, updateUser } = useAuth()
 
   const { data, isLoading } = useQuery({
     queryKey: ['authors', 'settings', 'mine'],
@@ -212,7 +214,13 @@ export function useAuthorSettings() {
         nameChanged ? authorSettingsApi.updateName(next.profile.displayName) : Promise.resolve(),
       ])
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['authors', 'settings', 'mine'] }),
+    onSuccess: (_result, next) => {
+      updateUser({
+        name: next.profile.displayName,
+        authorProfile: { ...user?.authorProfile, profileImage: next.profile.profileImage },
+      })
+      return queryClient.invalidateQueries({ queryKey: ['authors', 'settings', 'mine'] })
+    },
   })
 
   const saveSettings = async () => {

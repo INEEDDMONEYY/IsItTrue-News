@@ -74,7 +74,7 @@ export function BannersPage() {
           <button
             type="button"
             onClick={handleAdd}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-accent text-white hover:bg-accent/90 transition-colors shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-brand-gradient text-on-brand transition-colors shrink-0"
           >
             <Plus className="w-4 h-4" />
             Add
@@ -108,7 +108,7 @@ export function BannersPage() {
                 onClick={() => handleToggle(banner.id)}
                 title={banner.active ? 'Active' : 'Inactive'}
                 className={`relative w-10 h-6 rounded-full transition-colors ${
-                  banner.active ? 'bg-accent' : 'bg-card-2'
+                  banner.active ? 'bg-brand-gradient' : 'bg-card-2'
                 }`}
               >
                 <span

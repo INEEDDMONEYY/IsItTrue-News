@@ -6,8 +6,16 @@ export interface OnboardingSocialLinks {
 
 export interface BecomeAuthorPayload {
   fullName: string
-  profilePhotoUrl: string
-  shortBio: string
+  profilePhotoUrl?: string
+  shortBio?: string
   socialLinks?: OnboardingSocialLinks
   acceptTruthProtocol: boolean
+}
+
+export interface BecomeEditorPayload {
+  fullName: string
+  profilePhotoUrl?: string
+  shortBio?: string
+  socialLinks?: OnboardingSocialLinks
+  acceptEditorialStandards: boolean
 }

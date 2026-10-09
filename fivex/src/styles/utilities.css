@@ -1,0 +1,32 @@
+/* Brand gradient (sky-300 -> purple-400) utilities. Gradient fills are always light, so text on them
+   uses --color-on-brand (near-black) in both themes to stay readable. */
+
+@utility bg-brand-gradient {
+  background-image: var(--gradient-brand);
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  transition: background-position 0.5s ease;
+
+  &:hover {
+    background-position: 100% 50%;
+  }
+}
+
+@utility text-on-brand {
+  color: var(--color-on-brand);
+}
+
+/* Large headings only: the stops are darker in light mode so the text still meets contrast on white. */
+@utility text-brand-gradient {
+  background-image: var(--gradient-brand-text);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-brand-gradient,
+  .bg-brand-gradient:hover {
+    transition: none;
+  }
+}

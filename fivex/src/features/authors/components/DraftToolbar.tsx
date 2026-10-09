@@ -31,7 +31,7 @@ export function DraftToolbar({
       <button
         type="button"
         onClick={onNewArticle}
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-gradient px-5 text-sm font-semibold text-on-brand transition"
       >
         <Plus className="h-4 w-4" />
         New Article

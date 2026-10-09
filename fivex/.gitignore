@@ -13,6 +13,9 @@ dist-ssr
 dist-server
 *.local
 
+# Backup storage for uploads when Cloudinary is unavailable
+/uploads
+
 # Environment variables (never commit real secrets)
 .env
 .env.*

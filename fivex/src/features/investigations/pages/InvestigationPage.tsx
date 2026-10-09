@@ -203,7 +203,7 @@ export function InvestigationPage() {
             type="button"
             onClick={() => submitForReview()}
             disabled={isSubmitting}
-            className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl bg-brand-gradient px-4 py-2 text-sm font-semibold text-on-brand transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {isSubmitting && <Spinner size="sm" className="border-white/40 border-t-white" />}
             Submit for Review
@@ -309,7 +309,7 @@ export function InvestigationPage() {
         <button
           type="submit"
           disabled={isUpdating}
-          className="self-start flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="self-start flex items-center gap-2 rounded-xl bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-on-brand transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isUpdating && <Spinner size="sm" className="border-white/40 border-t-white" />}
           Save Changes
@@ -381,7 +381,7 @@ export function InvestigationPage() {
           <button
             type="submit"
             disabled={isAddingTimelineEntry}
-            className="self-start flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+            className="self-start flex items-center gap-1.5 rounded-lg bg-brand-gradient px-4 py-2 text-sm font-medium text-on-brand hover:opacity-90 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" />
             Add Entry
@@ -472,7 +472,7 @@ export function InvestigationPage() {
           <button
             type="submit"
             disabled={isUploading}
-            className="self-start flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+            className="self-start flex items-center gap-1.5 rounded-lg bg-brand-gradient px-4 py-2 text-sm font-medium text-on-brand hover:opacity-90 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" />
             Add to Vault
@@ -510,7 +510,7 @@ export function InvestigationPage() {
             <button
               type="submit"
               disabled={isAddingEditorComment || !commentDraft.trim()}
-              className="self-end rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+              className="self-end rounded-lg bg-brand-gradient px-4 py-2 text-sm font-medium text-on-brand hover:opacity-90 disabled:opacity-50"
             >
               Post Internal Comment
             </button>

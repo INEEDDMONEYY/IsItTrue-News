@@ -65,7 +65,7 @@ export default function BookmarkCard({
           type="button"
           onClick={() => onRemove(item.id)}
           aria-label={`Remove ${item.title} from bookmarks`}
-          className="absolute right-4 top-4 rounded-full border border-[var(--color-card-border)] bg-[var(--color-card)] p-2 text-[var(--color-card-text-muted)] transition-colors hover:text-red-600"
+          className="absolute right-4 top-4 rounded-full border border-[var(--color-card-border)] bg-[var(--color-sky-200)] p-2 text-[var(--color-card-text-muted)] transition-colors hover:text-red-600"
         >
           <X className="h-4 w-4" />
         </button>

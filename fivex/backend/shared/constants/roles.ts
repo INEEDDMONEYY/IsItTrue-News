@@ -2,6 +2,8 @@ export const ROLES = {
   READER: 'reader',
   AUTHOR: 'author',
   EDITOR: 'editor',
+  ORGANIZATION: 'organization',
+  CONTRIBUTOR: 'contributor',
   ADMIN: 'admin',
 } as const
 

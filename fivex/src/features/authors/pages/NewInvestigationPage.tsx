@@ -107,7 +107,7 @@ function NewInvestigationForm() {
         <button
           type="submit"
           disabled={isCreating}
-          className="self-start flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="self-start flex items-center gap-2 rounded-xl bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-on-brand transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isCreating && <Spinner size="sm" className="border-white/40 border-t-white" />}
           {isCreating ? 'Creating...' : 'Create Draft'}

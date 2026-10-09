@@ -93,6 +93,7 @@ export function adaptPublicArticleDetail(article: PublicArticle): ArticleDetail 
     bodyHtml: article.body,
     locked: article.locked,
     sourceLinks: article.sourceLinks ?? [],
+    corrections: article.corrections ?? [],
     likes: article.likes,
     dislikes: article.dislikes,
     reposts: article.shares,

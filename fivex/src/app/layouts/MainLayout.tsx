@@ -8,7 +8,7 @@ export function MainLayout() {
     <div className="min-h-screen bg-bg text-text flex flex-col">
       <BannerBar />
       <Header />
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 md:px-8">
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 md:px-8 [&_h1]:text-brand-gradient">
         <Outlet />
       </main>
       <Footer />

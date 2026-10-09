@@ -36,7 +36,7 @@ export function MyVideoToolbar({
           <button
             type="button"
             onClick={onUpload}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-on-brand transition"
           >
             <Upload className="h-4 w-4" />
             Upload Video

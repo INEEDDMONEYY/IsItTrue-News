@@ -36,7 +36,7 @@ export function SignUpPromptModal({ title, description, onClose }: SignUpPromptM
         <div className="mt-5 flex items-center gap-3">
           <Link
             to="/register"
-            className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-accent-hover"
+            className="flex-1 rounded-lg bg-brand-gradient px-4 py-2.5 text-center text-sm font-semibold text-on-brand transition"
           >
             Sign up
           </Link>

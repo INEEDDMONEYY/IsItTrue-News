@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { INVESTIGATION_WORKFLOW_STAGES } from '../constants/editorialWorkflow.js'
 
 export const createInvestigationSchema = z.object({
   title: z.string().trim().min(1, 'A title is required').max(200),
@@ -50,3 +51,10 @@ export const addInvestigationCommentSchema = z.object({
 })
 
 export type AddInvestigationCommentInput = z.infer<typeof addInvestigationCommentSchema>
+
+export const updateEditorialWorkflowSchema = z.object({
+  workflowStage: z.enum(INVESTIGATION_WORKFLOW_STAGES),
+  editorialDeadline: z.string().date().nullable(),
+})
+
+export type UpdateEditorialWorkflowInput = z.infer<typeof updateEditorialWorkflowSchema>

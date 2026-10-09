@@ -26,7 +26,7 @@ export function InvestigationTimeline({ entries }: InvestigationTimelineProps) {
       <ol className="flex flex-col gap-4 border-l-2 border-card-border pl-5">
         {entries.map((entry) => (
           <li key={entry.id} className="relative">
-            <span className="absolute -left-[27px] top-1 h-2.5 w-2.5 rounded-full bg-accent" />
+            <span className="absolute -left-[27px] top-1 h-2.5 w-2.5 rounded-full bg-brand-gradient" />
             <p className="text-xs font-medium text-text-dim">{dayjs(entry.date).format('MMM D, YYYY')}</p>
             <p className="text-sm font-semibold text-heading">{entry.title}</p>
             {entry.locked ? (
@@ -53,7 +53,7 @@ export function InvestigationTimeline({ entries }: InvestigationTimelineProps) {
           </p>
           <Link
             to="/subscribe"
-            className="mt-1 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-hover"
+            className="mt-1 rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-on-brand transition"
           >
             View plans & subscribe
           </Link>

@@ -1,5 +1,5 @@
 import { onboardingApi } from '../api/onboarding.api'
-import type { BecomeAuthorPayload } from '../types/onboarding.types'
+import type { BecomeAuthorPayload, BecomeEditorPayload } from '../types/onboarding.types'
 
 export const onboardingService = {
   async sendPhoneCode(phone: string) {
@@ -14,6 +14,11 @@ export const onboardingService = {
 
   async becomeAuthor(payload: BecomeAuthorPayload) {
     const response = await onboardingApi.becomeAuthor(payload)
+    return response.data
+  },
+
+  async becomeEditor(payload: BecomeEditorPayload) {
+    const response = await onboardingApi.becomeEditor(payload)
     return response.data
   },
 }

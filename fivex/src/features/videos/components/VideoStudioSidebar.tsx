@@ -46,9 +46,9 @@ export default function VideoStudioSidebar({
   onSectionChange,
 }: VideoStudioSidebarProps) {
   return (
-    <aside className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+    <aside className="rounded-2xl border border-border bg-card p-3 shadow-sm">
       <div className="mb-3 px-3 py-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
           Video Studio
         </p>
       </div>
@@ -66,8 +66,8 @@ export default function VideoStudioSidebar({
               className={[
                 'flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium transition',
                 active
-                  ? 'bg-sky-50 text-sky-700'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                  ? 'bg-brand-gradient text-on-brand'
+                  : 'text-text-muted hover:bg-surface-2 hover:text-heading',
               ].join(' ')}
             >
               <Icon className="h-4 w-4" />

@@ -36,20 +36,20 @@ export default function VideoUploader({
       className={[
         'rounded-2xl border-2 border-dashed p-10 text-center transition',
         isDragging
-          ? 'border-sky-400 bg-sky-50'
-          : 'border-slate-200 bg-white hover:border-slate-300',
+          ? 'border-accent bg-accent-bg'
+          : 'border-border bg-card hover:border-border',
       ].join(' ')}
     >
       <div className="mx-auto flex max-w-md flex-col items-center">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gradient text-on-brand">
           <Video className="h-6 w-6" />
         </div>
 
-        <h3 className="text-lg font-semibold text-slate-900">
+        <h3 className="text-lg font-semibold text-heading">
           Upload a video
         </h3>
 
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-text-muted">
           Drag and drop your video here, or choose a file from your
           computer.
         </p>
@@ -57,7 +57,7 @@ export default function VideoUploader({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-gradient px-5 py-3 text-sm font-semibold text-on-brand transition"
         >
           <Upload className="h-4 w-4" />
           Choose Video

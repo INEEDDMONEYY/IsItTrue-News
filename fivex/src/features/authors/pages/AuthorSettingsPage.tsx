@@ -60,7 +60,7 @@ export function AuthorSettingsPage() {
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)] disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-on-brand transition disabled:opacity-60"
         >
           {isSaving ? (
             <Spinner size="sm" className="border-white/40 border-t-white" />

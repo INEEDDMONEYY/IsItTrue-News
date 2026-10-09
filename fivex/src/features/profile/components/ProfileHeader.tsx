@@ -114,7 +114,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             aria-label="Profile completion"
           >
             <div
-              className="h-full rounded-full bg-[var(--color-accent)] transition-all"
+              className="h-full rounded-full bg-brand-gradient transition-all"
               style={{ width: `${profile.profileCompletion}%` }}
             />
           </div>

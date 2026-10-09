@@ -82,7 +82,7 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(
             <button
               type="submit"
               disabled={!draft.trim() || isPosting}
-              className="self-end flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-accent text-white disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+              className="self-end flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand-gradient text-on-brand disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
             >
               {isPosting && <Spinner size="sm" className="border-white/40 border-t-white" />}
               {isPosting ? 'Posting...' : 'Post Comment'}
@@ -120,7 +120,7 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(
               </p>
               <Link
                 to="/register"
-                className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                className="rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-on-brand transition hover:opacity-90"
               >
                 Sign up
               </Link>

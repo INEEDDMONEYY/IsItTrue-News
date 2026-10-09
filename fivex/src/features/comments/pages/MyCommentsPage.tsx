@@ -34,7 +34,7 @@ export function MyCommentsPage() {
       <div className="space-y-6">
         <section>
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sky-400">
               <MessageSquareText className="h-5 w-5" />
             </div>
 

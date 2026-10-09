@@ -61,6 +61,11 @@ export interface IAuthorOnboarding {
   completedAt?: Date
 }
 
+export interface IEditorOnboarding {
+  editorialStandardsAcceptedAt?: Date
+  completedAt?: Date
+}
+
 // Persistent (never reset monthly) read/watch history, unlike usage.* which
 // only tracks the current free-plan cap period. Drives the reader's public
 // profile "Library" tab. Most-recent-first, capped at 200 entries each.
@@ -79,6 +84,8 @@ export interface IUser {
   email: string
   passwordHash: string
   role: Role
+  // Contact name is stored in `name`; only set when role === 'organization'.
+  organizationName?: string
   isEmailVerified: boolean
   emailVerificationTokenHash?: string
   emailVerificationExpires?: Date
@@ -93,6 +100,8 @@ export interface IUser {
   readerProfile?: IReaderProfile
   // Set once a reader completes the "Become an Author" onboarding flow.
   authorOnboarding?: IAuthorOnboarding
+  // Set once a reader completes the "Become an Editor" onboarding flow.
+  editorOnboarding?: IEditorOnboarding
   // Stripe billing isn't wired up yet — this just drives which dashboard
   // features are gated behind the paywall in the meantime.
   plan: 'free' | 'premium'
@@ -131,6 +140,11 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: Object.values(ROLES),
       default: ROLES.READER,
+    },
+    organizationName: {
+      type: String,
+      trim: true,
+      maxlength: 120,
     },
     isEmailVerified: {
       type: Boolean,
@@ -173,6 +187,16 @@ const userSchema = new Schema<IUser>(
       type: new Schema<IAuthorOnboarding>(
         {
           truthProtocolAcceptedAt: { type: Date },
+          completedAt: { type: Date },
+        },
+        { _id: false },
+      ),
+      default: undefined,
+    },
+    editorOnboarding: {
+      type: new Schema<IEditorOnboarding>(
+        {
+          editorialStandardsAcceptedAt: { type: Date },
           completedAt: { type: Date },
         },
         { _id: false },

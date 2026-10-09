@@ -1,92 +1,93 @@
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { PageLoader } from '@/components/loaders/PageLoader'
+import { ReviewFeedbackPanel } from '@/features/authors/components/ReviewFeedbackPanel'
+import { useChangesRequested, useReviewQueue } from '../hooks/useReviewQueue'
+import type { PendingArticle } from '../types/reviewQueue.types'
 
-interface ReviewItem {
-  id: string
-  title: string
-  author: string
-  category: string
-  submittedAt: string
+type Tab = 'awaiting_review' | 'waiting_on_authors'
+
+function QueueRow({ article, children }: { article: PendingArticle; children?: React.ReactNode }) {
+  return (
+    <article className="rounded-xl border border-card-border bg-card p-4 flex flex-col gap-3">
+      <div className="min-w-0">
+        <h2 className="text-sm font-semibold text-card-heading break-words">{article.title}</h2>
+        <p className="mt-1 text-xs text-card-text-muted">
+          {article.author?.name ?? 'Unknown author'} · {article.category}
+        </p>
+      </div>
+      {children}
+    </article>
+  )
 }
 
-const INITIAL_QUEUE: ReviewItem[] = [
-  {
-    id: 'r1',
-    title: 'Inside the State\u2019s Push for Renewable Energy Credits',
-    author: 'Jordan Blake',
-    category: 'Politics',
-    submittedAt: '2026-07-10T11:15:00.000Z',
-  },
-  {
-    id: 'r2',
-    title: 'School District Proposes Four-Day Week for Fall Term',
-    author: 'Priya Natarajan',
-    category: 'Local',
-    submittedAt: '2026-07-18T08:00:00.000Z',
-  },
-  {
-    id: 'r3',
-    title: 'How Rising Rates Are Reshaping the Rental Market',
-    author: 'Sam O\u2019Connor',
-    category: 'Business',
-    submittedAt: '2026-07-22T13:40:00.000Z',
-  },
-]
-
 export function ReviewQueuePage() {
-  const [queue, setQueue] = useState(INITIAL_QUEUE)
+  const [tab, setTab] = useState<Tab>('awaiting_review')
+  const pending = useReviewQueue()
+  const waiting = useChangesRequested()
 
-  const handleDecision = (id: string) => {
-    setQueue((prev) => prev.filter((item) => item.id !== id))
-  }
+  const tabs: { value: Tab; label: string; count: number }[] = [
+    { value: 'awaiting_review', label: 'Awaiting review', count: pending.articles.length },
+    { value: 'waiting_on_authors', label: 'Waiting on authors', count: waiting.articles.length },
+  ]
+  const active = tab === 'awaiting_review' ? pending : waiting
 
   return (
     <div>
       <h1 className="text-2xl font-semibold text-heading mb-1">Review Queue</h1>
-      <p className="text-sm text-text-muted mb-6">
-        Articles submitted by authors, waiting for editorial approval.
+      <p className="text-sm text-text-muted mb-5">
+        Track every article in the editorial workflow — what needs your decision and what authors are still fixing.
       </p>
 
-      <div className="flex flex-col gap-3">
-        {queue.map((item) => (
-          <div
-            key={item.id}
-            className="rounded-xl border border-card-border bg-card p-4 flex items-center justify-between gap-4"
+      <div className="mb-5 flex flex-wrap gap-2">
+        {tabs.map(({ value, label, count }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setTab(value)}
+            aria-pressed={tab === value}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+              tab === value
+                ? 'border-transparent bg-brand-gradient text-on-brand'
+                : 'border-border text-text-muted hover:border-accent-border hover:text-accent'
+            }`}
           >
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-card-heading truncate">{item.title}</p>
-              <p className="text-xs text-card-text-muted">
-                {item.author} · {item.category} · Submitted{' '}
-                {new Date(item.submittedAt).toLocaleDateString()}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => handleDecision(item.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-verified/10 text-verified border border-verified/30 hover:bg-verified/20 transition-colors"
-              >
-                <Check className="w-3.5 h-3.5" />
-                Approve
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDecision(item.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-disputed/10 text-disputed border border-disputed/30 hover:bg-disputed/20 transition-colors"
-              >
-                <X className="w-3.5 h-3.5" />
-                Reject
-              </button>
-            </div>
-          </div>
+            {label} ({count})
+          </button>
         ))}
-
-        {queue.length === 0 && (
-          <div className="rounded-xl border border-dashed border-card-border bg-card p-8 text-center text-sm text-card-text-muted">
-            The review queue is empty.
-          </div>
-        )}
       </div>
+
+      {active.isLoading ? (
+        <PageLoader label="Loading the queue..." />
+      ) : active.isError ? (
+        <p className="text-sm text-disputed">Couldn&apos;t load the queue. Please refresh and try again.</p>
+      ) : active.articles.length === 0 ? (
+        <div className="rounded-xl border border-card-border bg-card p-8 text-center text-sm text-card-text-muted">
+          {tab === 'awaiting_review' ? 'Nothing is waiting for review.' : 'No authors are working on changes right now.'}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3 max-w-3xl">
+          {tab === 'awaiting_review'
+            ? pending.articles.map((article) => (
+                <QueueRow key={article.id} article={article}>
+                  <p className="text-xs text-card-text-muted">
+                    Submitted {new Date(article.submittedAt ?? article.createdAt).toLocaleDateString()}
+                  </p>
+                  <Link
+                    to="/dashboard/approvals"
+                    className="w-fit rounded-lg bg-brand-gradient px-3 py-1.5 text-xs font-medium text-on-brand transition-colors"
+                  >
+                    Review in Pending Approvals
+                  </Link>
+                </QueueRow>
+              ))
+            : waiting.articles.map((article) => (
+                <QueueRow key={article.id} article={article}>
+                  <ReviewFeedbackPanel review={article} />
+                </QueueRow>
+              ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import {
   BadgeCheck,
   Camera,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useMediaUpload } from '@/features/authors/hooks/useMediaUpload'
+import { authorSettingsApi } from '@/features/authors/api/authorSettings.api'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import { useAuthorOnboarding } from '../hooks/useAuthorOnboarding'
 
@@ -29,7 +31,7 @@ const TRUTH_PROTOCOL_ITEMS = [
 export function AuthorOnboardingPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { upload, isUploading } = useMediaUpload()
+  const { upload, isUploading } = useMediaUpload({ profilePhoto: true })
   const {
     resendEmailVerification,
     isResendingEmail,
@@ -41,7 +43,6 @@ export function AuthorOnboardingPage() {
     isBecomingAuthor,
   } = useAuthorOnboarding()
 
-  const [fullName, setFullName] = useState(user?.name ?? '')
   const [phone, setPhone] = useState(user?.phone ?? '')
   const [phoneCode, setPhoneCode] = useState('')
   const [codeSent, setCodeSent] = useState(false)
@@ -58,15 +59,33 @@ export function AuthorOnboardingPage() {
     }
   }, [user, navigate])
 
+  // Photo, bio and social links the user already saved in settings are reused as-is.
+  const { data: savedProfile, isLoading: isProfileLoading } = useQuery({
+    queryKey: ['onboarding', 'existing-profile'],
+    queryFn: authorSettingsApi.getMine,
+    gcTime: 0,
+  })
+  const savedPhoto = savedProfile?.authorProfile.profileImage ?? ''
+  const savedBio = savedProfile?.authorProfile.bio ?? ''
+  const fullName = savedProfile?.name ?? user?.name ?? ''
+
+  useEffect(() => {
+    const links = savedProfile?.authorProfile.socialLinks
+    if (links) {
+      setSocialLinks({ twitter: links.twitter ?? '', linkedin: links.linkedin ?? '', instagram: links.instagram ?? '' })
+    }
+  }, [savedProfile])
+
   const isEmailVerified = Boolean(user?.isEmailVerified)
   const isPhoneVerified = Boolean(user?.isPhoneVerified)
 
   const canSubmit =
+    !isProfileLoading &&
     fullName.trim().length >= 2 &&
     isEmailVerified &&
     isPhoneVerified &&
-    Boolean(profilePhotoUrl) &&
-    shortBio.trim().length > 0 &&
+    Boolean(savedPhoto || profilePhotoUrl) &&
+    Boolean(savedBio || shortBio.trim()) &&
     acceptTruthProtocol
 
   const handlePhotoChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -125,8 +144,8 @@ export function AuthorOnboardingPage() {
     try {
       await becomeAuthor({
         fullName: fullName.trim(),
-        profilePhotoUrl,
-        shortBio: shortBio.trim(),
+        profilePhotoUrl: savedPhoto ? undefined : profilePhotoUrl,
+        shortBio: savedBio ? undefined : shortBio.trim(),
         socialLinks: {
           twitter: socialLinks.twitter.trim() || undefined,
           linkedin: socialLinks.linkedin.trim() || undefined,
@@ -176,12 +195,15 @@ export function AuthorOnboardingPage() {
           <div className="space-y-5">
             <div>
               <label className="mb-2 block text-sm font-medium text-[var(--color-card-heading)]">Full name</label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(event) => setFullName(event.target.value)}
-                className="w-full rounded-xl border border-[var(--color-card-border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent-bg)]"
-              />
+              <div className="rounded-xl border border-[var(--color-card-border)] p-4">
+                <p className="text-sm text-[var(--color-card-text)]">{fullName}</p>
+                <p className="mt-2 text-xs text-[var(--color-card-text-muted)]">
+                  Using the name from your profile.{' '}
+                  <Link to="/dashboard/reader-settings" className="font-medium text-[var(--color-accent)]">
+                    Change in settings
+                  </Link>
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--color-card-border)] p-4">
@@ -252,7 +274,7 @@ export function AuthorOnboardingPage() {
                     type="button"
                     onClick={handleVerifyCode}
                     disabled={isVerifyingPhoneCode || phoneCode.trim().length !== 6}
-                    className="rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-60"
+                    className="rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-on-brand disabled:opacity-60"
                   >
                     {isVerifyingPhoneCode ? 'Verifying...' : 'Verify'}
                   </button>
@@ -264,30 +286,51 @@ export function AuthorOnboardingPage() {
               <label className="mb-2 block text-sm font-medium text-[var(--color-card-heading)]">Profile photo</label>
               <div className="flex items-center gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--color-card-border)] bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
-                  {profilePhotoUrl ? (
-                    <img src={profilePhotoUrl} alt="" className="h-full w-full object-cover" />
+                  {savedPhoto || profilePhotoUrl ? (
+                    <img src={savedPhoto || profilePhotoUrl} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <UserRound className="h-6 w-6" />
                   )}
                 </div>
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--color-card-border)] px-4 py-2.5 text-sm font-semibold text-[var(--color-card-heading)] hover:border-[var(--color-accent)]">
-                  {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-                  {isUploading ? 'Uploading...' : profilePhotoUrl ? 'Change photo' : 'Upload photo'}
-                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
-                </label>
+                {savedPhoto ? (
+                  <p className="text-sm text-[var(--color-card-text-muted)]">
+                    Using the photo from your profile.{' '}
+                    <Link to="/dashboard/reader-settings" className="font-medium text-[var(--color-accent)]">
+                      Change in settings
+                    </Link>
+                  </p>
+                ) : (
+                  <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--color-card-border)] px-4 py-2.5 text-sm font-semibold text-[var(--color-card-heading)] hover:border-[var(--color-accent)]">
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                    {isUploading ? 'Uploading...' : profilePhotoUrl ? 'Change photo' : 'Upload photo'}
+                    <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+                  </label>
+                )}
               </div>
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-[var(--color-card-heading)]">Short bio</label>
-              <textarea
-                value={shortBio}
-                onChange={(event) => setShortBio(event.target.value)}
-                rows={4}
-                maxLength={1000}
-                placeholder="Tell readers about your beat and experience..."
-                className="w-full rounded-xl border border-[var(--color-card-border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent-bg)]"
-              />
+              {savedBio ? (
+                <div className="rounded-xl border border-[var(--color-card-border)] p-4">
+                  <p className="whitespace-pre-line text-sm text-[var(--color-card-text)]">{savedBio}</p>
+                  <p className="mt-2 text-xs text-[var(--color-card-text-muted)]">
+                    Using the bio from your profile.{' '}
+                    <Link to="/dashboard/reader-settings" className="font-medium text-[var(--color-accent)]">
+                      Change in settings
+                    </Link>
+                  </p>
+                </div>
+              ) : (
+                <textarea
+                  value={shortBio}
+                  onChange={(event) => setShortBio(event.target.value)}
+                  rows={4}
+                  maxLength={1000}
+                  placeholder="Tell readers about your beat and experience..."
+                  className="w-full rounded-xl border border-[var(--color-card-border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent-bg)]"
+                />
+              )}
             </div>
 
             <div>
@@ -355,7 +398,7 @@ export function AuthorOnboardingPage() {
         <button
           type="submit"
           disabled={!canSubmit || isBecomingAuthor}
-          className="w-full rounded-xl bg-[var(--color-accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
+          className="w-full rounded-xl bg-brand-gradient px-5 py-3 text-sm font-semibold text-on-brand transition disabled:opacity-50"
         >
           {isBecomingAuthor ? 'Submitting...' : 'Become an Author'}
         </button>

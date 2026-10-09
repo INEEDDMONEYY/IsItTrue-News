@@ -46,7 +46,7 @@ export function PricingTierCard({
       } ${className}`}
     >
       {tier.highlighted && (
-        <span className="mb-3 inline-flex w-fit items-center rounded-full bg-[var(--color-accent)] px-3 py-1 text-xs font-semibold text-white">
+        <span className="mb-3 inline-flex w-fit items-center rounded-full bg-brand-gradient px-3 py-1 text-xs font-semibold text-on-brand">
           Most popular
         </span>
       )}
@@ -86,7 +86,7 @@ export function PricingTierCard({
         className={`mt-8 w-full rounded-xl px-4 py-3 text-sm font-semibold transition ${
           disabled
             ? 'cursor-not-allowed bg-[var(--color-card-2)] text-[var(--color-card-text-dim)]'
-            : 'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)]'
+            : 'bg-brand-gradient text-on-brand'
         }`}
       >
         {ctaLabel}

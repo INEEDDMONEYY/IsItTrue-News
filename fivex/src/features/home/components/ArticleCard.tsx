@@ -6,7 +6,7 @@ export function ArticleCard({ article }: { article: Article }) {
   return (
     <Link
       to={`/article/${article.slug}`}
-      className="group flex flex-col rounded-2xl border border-card-border bg-card overflow-hidden hover:border-accent-border transition-colors"
+      className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-colors"
     >
       <div className="aspect-[4/3] bg-card-2 overflow-hidden">
         <img

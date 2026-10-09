@@ -1,6 +1,7 @@
 
 import { useMemo, useState } from 'react'
-import { mockNotifications } from '@/features/notifications/data/mockNotifications'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { notificationsApi } from '@/features/notifications/api/notifications.api'
 import type {
   Notification,
   NotificationFilter,
@@ -8,9 +9,27 @@ import type {
   NotificationType,
 } from '@/features/notifications/types/notification.types'
 
+export const NOTIFICATIONS_QUERY_KEY = ['notifications', 'mine'] as const
+
 export function useNotifications() {
-  const [notifications, setNotifications] =
-    useState<Notification[]>(mockNotifications)
+  const queryClient = useQueryClient()
+
+  const { data, isLoading } = useQuery({
+    queryKey: NOTIFICATIONS_QUERY_KEY,
+    queryFn: notificationsApi.listMine,
+    // Picks up new editorial submissions without a manual refresh.
+    refetchInterval: 30_000,
+  })
+  const notifications = useMemo(() => data ?? [], [data])
+
+  // Updates the UI immediately; resyncs from the server if the request fails.
+  const applyChange = (
+    update: (current: Notification[]) => Notification[],
+    request: Promise<unknown>,
+  ) => {
+    queryClient.setQueryData<Notification[]>(NOTIFICATIONS_QUERY_KEY, (current) => update(current ?? []))
+    request.catch(() => queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY }))
+  }
 
   const [filter, setFilter] = useState<NotificationFilter>({
     type: 'all',
@@ -50,62 +69,59 @@ export function useNotifications() {
   )
 
   const markAsRead = (id: string) => {
-    setNotifications((current) =>
-      current.map((notification) =>
-        notification.id === id
-          ? { ...notification, read: true }
-          : notification,
-      ),
+    applyChange(
+      (current) =>
+        current.map((notification) =>
+          notification.id === id ? { ...notification, read: true } : notification,
+        ),
+      notificationsApi.markRead(id),
     )
   }
 
   const markAsUnread = (id: string) => {
-    setNotifications((current) =>
-      current.map((notification) =>
-        notification.id === id
-          ? { ...notification, read: false }
-          : notification,
-      ),
+    applyChange(
+      (current) =>
+        current.map((notification) =>
+          notification.id === id ? { ...notification, read: false } : notification,
+        ),
+      notificationsApi.markUnread(id),
     )
   }
 
   const toggleReadStatus = (id: string) => {
-    setNotifications((current) =>
-      current.map((notification) =>
-        notification.id === id
-          ? { ...notification, read: !notification.read }
-          : notification,
-      ),
-    )
+    const target = notifications.find((notification) => notification.id === id)
+    if (!target) return
+    if (target.read) markAsUnread(id)
+    else markAsRead(id)
   }
 
   const markAllAsRead = () => {
-    setNotifications((current) =>
-      current.map((notification) => ({
-        ...notification,
-        read: true,
-      })),
+    applyChange(
+      (current) => current.map((notification) => ({ ...notification, read: true })),
+      notificationsApi.markAllRead(),
     )
   }
 
   const markAllAsUnread = () => {
-    setNotifications((current) =>
-      current.map((notification) => ({
-        ...notification,
-        read: false,
-      })),
+    const readIds = notifications.filter((notification) => notification.read).map((n) => n.id)
+    applyChange(
+      (current) => current.map((notification) => ({ ...notification, read: false })),
+      Promise.all(readIds.map((id) => notificationsApi.markUnread(id))),
     )
   }
 
   const removeNotification = (id: string) => {
-    setNotifications((current) =>
-      current.filter((notification) => notification.id !== id),
+    applyChange(
+      (current) => current.filter((notification) => notification.id !== id),
+      notificationsApi.remove(id),
     )
   }
 
   const removeReadNotifications = () => {
-    setNotifications((current) =>
-      current.filter((notification) => !notification.read),
+    const readIds = notifications.filter((notification) => notification.read).map((n) => n.id)
+    applyChange(
+      (current) => current.filter((notification) => !notification.read),
+      Promise.all(readIds.map((id) => notificationsApi.remove(id))),
     )
   }
 
@@ -132,6 +148,7 @@ export function useNotifications() {
 
   return {
     notifications,
+    isLoading,
     filteredNotifications,
     unreadNotifications,
     stats,

@@ -22,7 +22,7 @@ export function FeaturedArticle({ article }: { article: Article }) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/10" />
 
       <div className="absolute top-4 left-4 flex items-center gap-2">
-        <span className="text-[11px] uppercase tracking-wide font-medium px-2.5 py-1 rounded-full bg-tag-1/90 text-black">
+        <span className="text-[11px] uppercase tracking-wide font-medium px-2.5 py-1 rounded-full bg-brand-gradient text-on-brand">
           {article.category.name}
         </span>
       </div>

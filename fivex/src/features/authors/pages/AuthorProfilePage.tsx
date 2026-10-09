@@ -45,7 +45,7 @@ export function AuthorProfilePage() {
   const { user: currentUser, isAuthenticated } = useAuth()
   const [tab, setTab] = useState<ProfileTab>('articles')
   const queryClient = useQueryClient()
-  const { upload, isUploading } = useMediaUpload()
+  const { upload, isUploading } = useMediaUpload({ imagePreset: 'banner' })
   const [bannerError, setBannerError] = useState<string | null>(null)
   const [signUpPrompt, setSignUpPrompt] = useState(false)
 
@@ -103,8 +103,8 @@ export function AuthorProfilePage() {
 
   return (
     <div className="flex flex-col gap-6 pb-10">
-      <div className="relative rounded-2xl overflow-hidden">
-        <div className="h-40 md:h-56 w-full bg-gradient-to-r from-accent/30 via-card-2 to-accent/10">
+      <div className="relative">
+        <div className="h-40 md:h-56 w-full rounded-2xl overflow-hidden bg-gradient-to-r from-accent/30 via-card-2 to-accent/10">
           {info?.bannerImage && (
             <img src={info.bannerImage} alt="" className="w-full h-full object-cover" />
           )}
@@ -182,7 +182,7 @@ export function AuthorProfilePage() {
               className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${
                 isFollowing
                   ? 'border border-border text-text hover:border-disputed hover:text-disputed'
-                  : 'bg-accent text-white hover:opacity-90'
+                  : 'bg-brand-gradient text-on-brand hover:opacity-90'
               }`}
             >
               {isFollowing ? 'Following' : 'Follow'}

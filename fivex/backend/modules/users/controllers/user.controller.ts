@@ -5,6 +5,7 @@ import { AppError } from '../../../shared/errors/AppError.js'
 import { userService } from '../services/user.service.js'
 import type {
   BecomeAuthorInput,
+  BecomeEditorInput,
   ChangeEmailInput,
   ChangePasswordInput,
   CreateUserInput,
@@ -181,5 +182,15 @@ export const userController = {
     const input = req.body as BecomeAuthorInput
     const user = await userService.becomeAuthor(req.user.id, input)
     res.status(200).json({ message: 'Congratulations — your account is now an author account!', user })
+  }),
+
+  // Reader-only: complete "Become an Editor" onboarding, mirroring becomeAuthor.
+  becomeEditor: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError('You must be signed in to access this resource.', 401)
+    }
+    const input = req.body as BecomeEditorInput
+    const user = await userService.becomeEditor(req.user.id, input)
+    res.status(200).json({ message: 'Congratulations — your account is now an editor account!', user })
   }),
 }

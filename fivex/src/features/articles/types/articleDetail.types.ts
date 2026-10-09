@@ -36,6 +36,8 @@ export interface ArticleDetail extends Article {
   locked?: boolean
   /** Citation links the author attached when creating the article. */
   sourceLinks?: string[]
+  /** Published correction notices, numbered per article. */
+  corrections?: { number: number; text: string; publishedAt: string }[]
   likes: number
   dislikes: number
   reposts: number

@@ -15,7 +15,7 @@ import { getErrorMessage } from '@/lib/getErrorMessage'
  */
 export function ReaderProfileSection() {
   const { user, updateUser } = useAuth()
-  const { upload, isUploading } = useMediaUpload()
+  const { upload, isUploading } = useMediaUpload({ profilePhoto: true })
 
   const { data, isLoading } = useQuery({
     queryKey: ['reader-profile-settings'],
@@ -43,7 +43,10 @@ export function ReaderProfileSection() {
       ])
     },
     onSuccess: () => {
-      updateUser({ name: name.trim() })
+      updateUser({
+        name: name.trim(),
+        authorProfile: { ...user?.authorProfile, profileImage },
+      })
       setSaved(true)
       window.setTimeout(() => setSaved(false), 2500)
     },
@@ -131,7 +134,7 @@ export function ReaderProfileSection() {
           type="button"
           onClick={() => saveMutation.mutate()}
           disabled={saveMutation.isPending}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)] disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-on-brand transition disabled:opacity-60"
         >
           {saveMutation.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />

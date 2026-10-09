@@ -91,7 +91,7 @@ export function BecomeAuthorPage() {
         {isReader ? (
           <Link
             to="/dashboard/become-author/onboarding"
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-on-brand transition"
           >
             Start Onboarding
           </Link>

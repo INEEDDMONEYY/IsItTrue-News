@@ -1,6 +1,7 @@
 import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
 import { INVESTIGATION_FREE_LIMITS } from '../../../shared/constants/plan.js'
+import { hasPremiumAccess } from '../../../shared/constants/features.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
 import { investigationRepository } from '../repositories/investigation.repository.js'
 import { evidenceRepository } from '../repositories/evidence.repository.js'
@@ -38,7 +39,7 @@ async function resolveAccessTier(actingUserId?: string): Promise<'anonymous' | '
   if (!actingUserId) return 'anonymous'
   const user = await userRepository.findById(actingUserId)
   if (!user) return 'anonymous'
-  return user.plan === 'premium' ? 'premium' : 'free'
+  return hasPremiumAccess('fullInvestigations', user.plan) ? 'premium' : 'free'
 }
 
 export const evidenceService = {

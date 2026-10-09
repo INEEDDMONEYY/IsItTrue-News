@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { Lock, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
-import { isPremiumUser } from '@/features/billing/utils/plan'
+import { hasPremiumAccess, isPremiumUser } from '@/features/billing/utils/plan'
 import { FreePlanUsageWidget } from '@/features/readers/components/FreePlanUsageWidget'
 import { getDashboardNav } from '../constants/dashboardNav'
+import { UserAvatar } from './UserAvatar'
 import logo from '@/assets/icons/question-icon-removebg.png'
 
 const COLLAPSE_STORAGE_KEY = 'itt-dashboard-sidebar-collapsed'
@@ -24,7 +25,7 @@ export function DashboardSidebar() {
 
   return (
     <aside
-      className={`hidden md:flex shrink-0 flex-col bg-surface border-r border-border transition-[width] duration-200 ${
+      className={`hidden md:flex sticky top-0 h-screen shrink-0 flex-col bg-surface border-r border-border transition-[width] duration-200 ${
         collapsed ? 'w-[72px]' : 'w-60'
       }`}
     >
@@ -38,8 +39,8 @@ export function DashboardSidebar() {
         {!collapsed && <span className="font-semibold text-heading truncate">IsItTrue News</span>}
       </Link>
 
-      <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-        {nav.map(({ label, to, icon: Icon, end, premium: isPremiumItem }) => (
+      <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
+        {nav.map(({ label, to, icon: Icon, end, premiumFeature }) => (
           <NavLink
             key={to}
             to={to}
@@ -50,7 +51,7 @@ export function DashboardSidebar() {
                 collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2'
               } ${
                 isActive
-                  ? 'bg-accent-bg text-accent font-medium'
+                  ? 'bg-brand-gradient text-on-brand font-medium'
                   : 'text-text-muted hover:text-text hover:bg-surface-2'
               }`
             }
@@ -59,7 +60,7 @@ export function DashboardSidebar() {
             {!collapsed && (
               <span className="flex flex-1 items-center justify-between gap-2 truncate">
                 {label}
-                {isPremiumItem && !premium && (
+                {premiumFeature && !hasPremiumAccess(user, premiumFeature) && (
                   <Lock className="w-3.5 h-3.5 shrink-0 text-text-dim" />
                 )}
               </span>
@@ -72,9 +73,7 @@ export function DashboardSidebar() {
         {!collapsed && user?.role === 'reader' && !premium && <FreePlanUsageWidget />}
 
         <div className={`flex items-center gap-2 py-2 ${collapsed ? 'justify-center px-0' : 'px-3'}`}>
-          <div className="w-7 h-7 rounded-full bg-accent-bg flex items-center justify-center text-xs font-medium text-accent shrink-0">
-            {user?.name?.[0]?.toUpperCase() ?? '?'}
-          </div>
+          <UserAvatar user={user} className="w-7 h-7 text-xs shrink-0" />
           {!collapsed && (
             <div className="min-w-0">
               <p className="text-sm text-heading truncate">{user?.name}</p>

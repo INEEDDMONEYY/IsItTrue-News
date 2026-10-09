@@ -1,474 +1,236 @@
-
-import {
-  AlertCircle,
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  FileText,
-  FlaskConical,
-  Users,
-} from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-
-import { mockAuthorArticles } from '@/features/authors/data/mockAuthorArticles'
-import type {
-  AuthorArticle,
-  AuthorWorkflowStage,
-} from '@/features/authors/types/authorArticle.types'
+import { Eye, FilePlus2, Loader2, Pencil, Send, Trash2 } from 'lucide-react'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { PaywallGate } from '@/features/billing/components/PaywallGate'
+import { getErrorMessage } from '@/lib/getErrorMessage'
+import { ReviewFeedbackPanel } from '../components/ReviewFeedbackPanel'
+import { hasReviewFeedback } from '../utils/reviewFeedback'
+import { useMyDrafts } from '../hooks/useMyDrafts'
+import type { MyArticle } from '../types/myArticle.types'
 
-const workflowLabels: Record<AuthorWorkflowStage, string> = {
-  draft: 'Draft',
-  assignment: 'Assignment',
-  collaboration: 'Collaboration',
-  revision: 'Revision',
-  'fact-check': 'Fact Check',
-  'editor-review': 'Editor Review',
-  approved: 'Approved',
-  published: 'Published',
+type DraftStage = 'draft' | 'changes_requested' | 'in_review' | 'published'
+type StageFilter = DraftStage | 'all'
+
+const STAGE_META: Record<DraftStage, { label: string; className: string }> = {
+  draft: { label: 'Draft', className: 'bg-card-2 text-card-text-muted border-card-border' },
+  changes_requested: { label: 'Changes requested', className: 'bg-disputed/10 text-disputed border-disputed/30' },
+  in_review: { label: 'In editor review', className: 'bg-pending/10 text-pending border-pending/30' },
+  published: { label: 'Published', className: 'bg-verified/10 text-verified border-verified/30' },
 }
 
-function getWorkflowBadgeClass(stage: AuthorWorkflowStage) {
-  switch (stage) {
-    case 'fact-check':
-      return 'bg-amber-50 text-amber-700 ring-amber-200'
-    case 'revision':
-      return 'bg-orange-50 text-orange-700 ring-orange-200'
-    case 'editor-review':
-      return 'bg-blue-50 text-blue-700 ring-blue-200'
-    case 'collaboration':
-      return 'bg-violet-50 text-violet-700 ring-violet-200'
-    case 'approved':
-    case 'published':
-      return 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-    default:
-      return 'bg-slate-50 text-slate-700 ring-slate-200'
-  }
+const FILTERS: { value: StageFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'changes_requested', label: 'Changes requested' },
+  { value: 'draft', label: 'Drafts' },
+  { value: 'in_review', label: 'In review' },
+  { value: 'published', label: 'Published' },
+]
+
+function getStage(article: MyArticle): DraftStage {
+  if (article.status === 'published') return 'published'
+  if (article.status === 'pending_review') return 'in_review'
+  return hasReviewFeedback(article) ? 'changes_requested' : 'draft'
 }
 
-function getFactCheckLabel(article: AuthorArticle) {
-  switch (article.factCheck.status) {
-    case 'verified':
-      return 'Verified'
-    case 'in-review':
-      return 'In review'
-    case 'issues-found':
-      return `${article.factCheck.issuesFound} issues`
-    case 'pending':
-      return 'Pending'
-    default:
-      return 'Not submitted'
-  }
+interface DraftCardProps {
+  article: MyArticle
+  onToggleRequirement: (articleId: string, requirementId: string, done: boolean) => void
+  onSubmit: (articleId: string) => void
+  onDelete: (article: MyArticle) => void
+  isBusy: boolean
 }
 
-function getFactCheckClass(article: AuthorArticle) {
-  switch (article.factCheck.status) {
-    case 'verified':
-      return 'text-emerald-600'
-    case 'issues-found':
-      return 'text-red-600'
-    case 'in-review':
-    case 'pending':
-      return 'text-amber-600'
-    default:
-      return 'text-slate-500'
-  }
-}
-
-function getAssignmentSummary(article: AuthorArticle) {
-  const assignments = article.collaboration.assignments
-
-  if (!assignments.length) {
-    return 'No active assignments'
-  }
-
-  const active = assignments.filter(
-    (assignment) =>
-      assignment.status === 'pending' ||
-      assignment.status === 'in-progress',
-  ).length
-
-  if (!active) {
-    return 'All assignments complete'
-  }
-
-  return `${active} active assignment${active === 1 ? '' : 's'}`
-}
-
-function DraftCard({ article }: { article: AuthorArticle }) {
-  const hasOpenRevision =
-    article.revisions.requested &&
-    article.revisions.latestRequest?.status !== 'completed'
-
-  const hasFactCheckIssues = article.factCheck.issuesFound > 0
+function DraftCard({ article, onToggleRequirement, onSubmit, onDelete, isBusy }: DraftCardProps) {
+  const stage = getStage(article)
+  const meta = STAGE_META[stage]
+  const requirements = article.reviewRequirements ?? []
+  const openRequirements = requirements.filter((requirement) => !requirement.done).length
+  const isDraft = article.status === 'draft'
+  const canResubmit = isDraft && openRequirements === 0 && article.body.trim().length > 0
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-[var(--color-card-border)] bg-[var(--color-card)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
-              <FileText className="h-5 w-5" />
-            </div>
-
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
-                {article.category}
-              </p>
-
-              <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">
-                Updated {new Date(article.updatedAt).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-
-          <span
-            className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${getWorkflowBadgeClass(
-              article.workflow.stage,
-            )}`}
-          >
-            {workflowLabels[article.workflow.stage]}
-          </span>
+    <article className="rounded-2xl border border-card-border bg-card p-4 sm:p-5 flex flex-col gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wide text-card-text-muted">{article.category}</p>
+          <h2 className="mt-0.5 text-base font-semibold text-card-heading break-words">{article.title}</h2>
+          {article.excerpt && <p className="mt-1 text-sm text-card-text-muted line-clamp-2">{article.excerpt}</p>}
         </div>
+        <span className={`self-start shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${meta.className}`}>
+          {meta.label}
+        </span>
+      </div>
 
-        <div className="mt-5">
-          <h2 className="text-lg font-bold leading-7 text-[var(--color-card-heading)]">
-            {article.title}
-          </h2>
+      <p className="text-xs text-card-text-muted">
+        Updated {new Date(article.updatedAt).toLocaleDateString()}
+        {article.submittedAt && stage !== 'draft' ? ` · Submitted ${new Date(article.submittedAt).toLocaleDateString()}` : ''}
+      </p>
 
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--color-card-text-muted)]">
-            {article.excerpt}
-          </p>
-        </div>
+      {stage === 'changes_requested' && (
+        <ReviewFeedbackPanel
+          review={article}
+          disabled={isBusy}
+          onToggleRequirement={(requirementId, done) => onToggleRequirement(article.id, requirementId, done)}
+        />
+      )}
 
-        <div className="mt-5">
-          <div className="mb-2 flex items-center justify-between text-xs">
-            <span className="font-medium text-[var(--color-text-muted)]">
-              Workflow progress
-            </span>
+      {stage === 'in_review' && (
+        <p className="rounded-lg bg-pending/10 px-3 py-2 text-sm text-card-text">
+          An editor is reviewing this article. You&apos;ll be notified when they decide.
+        </p>
+      )}
 
-            <span className="font-semibold text-[var(--color-card-heading)]">
-              {article.workflow.completionPercent}%
-            </span>
-          </div>
-
-          <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-[var(--color-accent)] transition-all"
-              style={{
-                width: `${Math.min(
-                  Math.max(article.workflow.completionPercent, 0),
-                  100,
-                )}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Metric
-            label="Words"
-            value={article.metrics.wordCount.toLocaleString()}
-          />
-
-          <Metric
-            label="Sources"
-            value={article.metrics.sources.toString()}
-          />
-
-          <Metric
-            label="Evidence"
-            value={article.metrics.evidenceItems.toString()}
-          />
-
-          <Metric
-            label="Media"
-            value={article.metrics.mediaItems.toString()}
-          />
-        </div>
-
-        <div className="mt-5 grid gap-3 border-t border-[var(--color-card-border)] pt-5 sm:grid-cols-2">
-          <WorkflowItem
-            icon={Users}
-            label="Collaboration"
-            value={
-              article.collaboration.enabled
-                ? `${article.collaboration.coAuthors.length} co-author${
-                    article.collaboration.coAuthors.length === 1 ? '' : 's'
-                  }`
-                : 'Solo article'
-            }
-          />
-
-          <WorkflowItem
-            icon={Clock3}
-            label="Assignments"
-            value={getAssignmentSummary(article)}
-          />
-
-          <WorkflowItem
-            icon={FlaskConical}
-            label="Fact check"
-            value={getFactCheckLabel(article)}
-            valueClassName={getFactCheckClass(article)}
-          />
-
-          <WorkflowItem
-            icon={article.submission.ready ? CheckCircle2 : AlertCircle}
-            label="Submission"
-            value={article.submission.ready ? 'Ready to submit' : 'Not ready'}
-            valueClassName={
-              article.submission.ready
-                ? 'text-emerald-600'
-                : 'text-slate-500'
-            }
-          />
-        </div>
-
-        {(hasOpenRevision || hasFactCheckIssues) && (
-          <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-
-              <div>
-                <p className="text-sm font-semibold text-amber-800">
-                  Action required
-                </p>
-
-                <p className="mt-1 text-xs leading-5 text-amber-700">
-                  {hasOpenRevision
-                    ? article.revisions.latestRequest?.summary
-                    : `${article.factCheck.issuesFound} fact-check issue${
-                        article.factCheck.issuesFound === 1 ? '' : 's'
-                      } need to be resolved.`}
-                </p>
-              </div>
-            </div>
-          </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {isDraft && (
+          <>
+            <Link
+              to={`/dashboard/articles/${article.id}/edit`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-heading hover:border-accent-border hover:text-accent transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              {stage === 'changes_requested' ? 'Make changes' : 'Edit'}
+            </Link>
+            <button
+              type="button"
+              disabled={!canResubmit || isBusy}
+              onClick={() => onSubmit(article.id)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-gradient px-3 py-2 text-xs font-medium text-on-brand transition-colors disabled:opacity-50"
+            >
+              {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+              {stage === 'changes_requested' ? 'Resubmit for review' : 'Submit for review'}
+            </button>
+            {stage === 'changes_requested' && openRequirements > 0 && (
+              <span className="text-xs text-card-text-muted">
+                Tick off all {requirements.length} requirements to resubmit.
+              </span>
+            )}
+          </>
         )}
 
-        <div className="mt-6 rounded-xl bg-slate-50 px-4 py-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-            Next action
-          </p>
-
-          <p className="mt-1 text-sm font-semibold text-slate-700">
-            {article.workflow.nextAction}
-          </p>
-        </div>
-
-        <div className="mt-6 flex items-center justify-between gap-3">
-          <div className="text-xs text-[var(--color-text-muted)]">
-            Last action: {article.workflow.lastAction}
-          </div>
-
+        {stage === 'published' && (
           <Link
-            to={`/dashboard/authors/articles/${article.id}`}
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+            to={`/article/${article.slug}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-heading hover:border-accent-border hover:text-accent transition-colors"
           >
-            Continue
-            <ArrowRight className="h-4 w-4" />
+            <Eye className="w-3.5 h-3.5" />
+            View
           </Link>
-        </div>
+        )}
+
+        {stage !== 'in_review' && stage !== 'published' && (
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => onDelete(article)}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs text-disputed hover:bg-surface-2 transition-colors disabled:opacity-50"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Delete
+          </button>
+        )}
       </div>
     </article>
   )
 }
 
-function Metric({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div className="rounded-xl border border-[var(--color-card-border)] bg-slate-50 px-3 py-3">
-      <p className="text-xs text-[var(--color-text-muted)]">{label}</p>
-      <p className="mt-1 text-sm font-bold text-[var(--color-card-heading)]">
-        {value}
-      </p>
-    </div>
-  )
-}
-
-function WorkflowItem({
-  icon: Icon,
-  label,
-  value,
-  valueClassName = 'text-[var(--color-card-heading)]',
-}: {
-  icon: typeof Users
-  label: string
-  value: string
-  valueClassName?: string
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-        <Icon className="h-4 w-4" />
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-xs text-[var(--color-text-muted)]">{label}</p>
-
-        <p className={`truncate text-sm font-semibold ${valueClassName}`}>
-          {value}
-        </p>
-      </div>
-    </div>
-  )
-}
-
 export function DraftsPage() {
-  const drafts = mockAuthorArticles.filter(
-    (article) =>
-      article.status === 'draft' ||
-      article.status === 'in-review',
+  const { articles, isLoading, isError, toggleRequirement, submitForReview, remove } = useMyDrafts()
+  const [filter, setFilter] = useState<StageFilter>('all')
+
+  const counts = articles.reduce<Record<DraftStage, number>>(
+    (acc, article) => {
+      acc[getStage(article)] += 1
+      return acc
+    },
+    { draft: 0, changes_requested: 0, in_review: 0, published: 0 },
   )
+  const visible = filter === 'all' ? articles : articles.filter((article) => getStage(article) === filter)
 
-  const actionRequiredCount = drafts.filter(
-    (article) =>
-      article.revisions.requested ||
-      article.factCheck.issuesFound > 0,
-  ).length
+  const actionError = toggleRequirement.error ?? submitForReview.error ?? remove.error
 
-  const collaborationCount = drafts.filter(
-    (article) => article.collaboration.enabled,
-  ).length
-
-  const readyToSubmitCount = drafts.filter(
-    (article) => article.submission.ready,
-  ).length
+  const handleDelete = (article: MyArticle) => {
+    if (!window.confirm(`Delete "${article.title}"? This cannot be undone.`)) return
+    remove.mutate(article.id)
+  }
 
   return (
     <PaywallGate feature="drafts">
-    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-[var(--color-accent)]">
-              Author Workspace
-            </p>
-
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--color-heading)] sm:text-4xl">
-              My Drafts
-            </h1>
-
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-              Manage your stories from early research through collaboration,
-              fact-checking, revisions, and editorial submission.
-            </p>
-          </div>
-
+      <div>
+        <div className="flex items-center justify-between gap-4 mb-1">
+          <h1 className="text-2xl font-semibold text-heading">My Drafts</h1>
           <Link
-            to="/dashboard/authors/articles/new"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
+            to="/dashboard/articles/new"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand-gradient text-on-brand text-sm font-medium transition-colors"
           >
-            <FileText className="h-4 w-4" />
+            <FilePlus2 className="w-4 h-4" />
             New Article
           </Link>
         </div>
-      </header>
+        <p className="text-sm text-text-muted mb-5">
+          Your articles, including any changes an editor needs before they can be published.
+        </p>
 
-      <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard
-          icon={FileText}
-          label="Active drafts"
-          value={drafts.length}
-          description="Stories in progress"
-        />
-
-        <SummaryCard
-          icon={Users}
-          label="Collaborating"
-          value={collaborationCount}
-          description="Drafts with collaborators"
-        />
-
-        <SummaryCard
-          icon={AlertCircle}
-          label="Action required"
-          value={actionRequiredCount}
-          description="Revisions or issues"
-        />
-
-        <SummaryCard
-          icon={CheckCircle2}
-          label="Ready to submit"
-          value={readyToSubmitCount}
-          description="Editorially prepared"
-        />
-      </section>
-
-      {drafts.length > 0 ? (
-        <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          {drafts.map((article) => (
-            <DraftCard key={article.id} article={article} />
-          ))}
-        </section>
-      ) : (
-        <section className="rounded-2xl border border-dashed border-[var(--color-card-border)] bg-[var(--color-card)] px-6 py-16 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
-            <FileText className="h-7 w-7" />
+        {counts.changes_requested > 0 && (
+          <div className="mb-5 rounded-xl border border-disputed/30 bg-disputed/10 px-4 py-3 text-sm text-card-text">
+            {counts.changes_requested} article{counts.changes_requested === 1 ? ' needs' : 's need'} changes before
+            it can be published.
           </div>
+        )}
 
-          <h2 className="mt-5 text-lg font-bold text-[var(--color-card-heading)]">
-            No drafts yet
-          </h2>
+        <div className="mb-5 flex flex-wrap gap-2">
+          {FILTERS.map(({ value, label }) => {
+            const count = value === 'all' ? articles.length : counts[value]
+            const active = filter === value
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setFilter(value)}
+                aria-pressed={active}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  active
+                    ? 'border-transparent bg-brand-gradient text-on-brand'
+                    : 'border-border text-text-muted hover:border-accent-border hover:text-accent'
+                }`}
+              >
+                {label} ({count})
+              </button>
+            )
+          })}
+        </div>
 
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--color-card-text-muted)]">
-            Start a new article and build your story through research,
-            collaboration, verification, and editorial review.
-          </p>
+        {actionError != null && <p className="mb-4 text-sm text-disputed">{getErrorMessage(actionError)}</p>}
 
-          <Link
-            to="/dashboard/authors/articles/new"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-accent-hover)]"
-          >
-            Create your first article
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </section>
-      )}
-    </main>
+        {isLoading ? (
+          <PageLoader label="Loading your drafts..." />
+        ) : isError ? (
+          <p className="text-sm text-disputed">Couldn&apos;t load your articles. Please refresh and try again.</p>
+        ) : visible.length === 0 ? (
+          <div className="rounded-xl border border-card-border bg-card p-8 text-center text-sm text-card-text-muted">
+            {articles.length === 0 ? 'You have no articles yet.' : 'Nothing here yet.'}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 max-w-3xl">
+            {visible.map((article) => (
+              <DraftCard
+                key={article.id}
+                article={article}
+                isBusy={
+                  (submitForReview.isPending && submitForReview.variables === article.id) ||
+                  (remove.isPending && remove.variables === article.id) ||
+                  toggleRequirement.isPending
+                }
+                onToggleRequirement={(id, requirementId, done) =>
+                  toggleRequirement.mutate({ id, requirementId, done })
+                }
+                onSubmit={(id) => submitForReview.mutate(id)}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </PaywallGate>
   )
 }
-
-function SummaryCard({
-  icon: Icon,
-  label,
-  value,
-  description,
-}: {
-  icon: typeof FileText
-  label: string
-  value: number
-  description: string
-}) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-card-border)] bg-[var(--color-card)] p-5 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
-          <Icon className="h-5 w-5" />
-        </div>
-
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
-            {label}
-          </p>
-
-          <p className="mt-1 text-2xl font-bold text-[var(--color-heading)]">
-            {value}
-          </p>
-        </div>
-      </div>
-
-      <p className="mt-4 text-xs text-[var(--color-text-muted)]">
-        {description}
-      </p>
-    </div>
-  )
-}
-

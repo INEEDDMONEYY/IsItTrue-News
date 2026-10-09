@@ -7,6 +7,7 @@ export interface CreateUserInput {
   email: string
   passwordHash: string
   role?: Role
+  organizationName?: string
   isEmailVerified?: boolean
 }
 
@@ -29,6 +30,11 @@ export const userRepository = {
     return User.findById(id)
   },
 
+  async findIdsByRole(role: Role): Promise<string[]> {
+    const users = await User.find({ role }).select('_id')
+    return users.map((user) => String(user._id))
+  },
+
   async findByIdWithSecrets(id: string): Promise<UserDocument | null> {
     return User.findById(id).select('+passwordHash')
   },
@@ -45,6 +51,7 @@ export const userRepository = {
       email: normalizeEmail(input.email),
       passwordHash: input.passwordHash,
       ...(input.role ? { role: input.role } : {}),
+      ...(input.organizationName ? { organizationName: input.organizationName.trim() } : {}),
       ...(input.isEmailVerified ? { isEmailVerified: input.isEmailVerified } : {}),
     })
   },
@@ -141,8 +148,8 @@ export const userRepository = {
     userId: string,
     input: {
       fullName: string
-      profilePhotoUrl: string
-      shortBio: string
+      profilePhotoUrl?: string
+      shortBio?: string
       socialLinks?: IAuthorProfile['socialLinks']
     },
   ): Promise<void> {
@@ -154,11 +161,38 @@ export const userRepository = {
           name: input.fullName.trim(),
           role: ROLES.AUTHOR,
           'authorProfile.professionalName': input.fullName.trim(),
-          'authorProfile.profileImage': input.profilePhotoUrl,
-          'authorProfile.bio': input.shortBio,
+          ...(input.profilePhotoUrl ? { 'authorProfile.profileImage': input.profilePhotoUrl } : {}),
+          ...(input.shortBio ? { 'authorProfile.bio': input.shortBio } : {}),
           ...(input.socialLinks ? { 'authorProfile.socialLinks': input.socialLinks } : {}),
           'authorOnboarding.truthProtocolAcceptedAt': now,
           'authorOnboarding.completedAt': now,
+        },
+      },
+    )
+  },
+
+  async completeEditorOnboarding(
+    userId: string,
+    input: {
+      fullName: string
+      profilePhotoUrl?: string
+      shortBio?: string
+      socialLinks?: IAuthorProfile['socialLinks']
+    },
+  ): Promise<void> {
+    const now = new Date()
+    await User.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          name: input.fullName.trim(),
+          role: ROLES.EDITOR,
+          'authorProfile.professionalName': input.fullName.trim(),
+          ...(input.profilePhotoUrl ? { 'authorProfile.profileImage': input.profilePhotoUrl } : {}),
+          ...(input.shortBio ? { 'authorProfile.bio': input.shortBio } : {}),
+          ...(input.socialLinks ? { 'authorProfile.socialLinks': input.socialLinks } : {}),
+          'editorOnboarding.editorialStandardsAcceptedAt': now,
+          'editorOnboarding.completedAt': now,
         },
       },
     )

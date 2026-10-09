@@ -29,7 +29,7 @@ export function UnreadNotificationCount({
           {label}
         </span>
 
-        <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-[var(--color-accent)] px-2 py-0.5 text-xs font-semibold text-white">
+        <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-brand-gradient px-2 py-0.5 text-xs font-semibold text-on-brand">
           {count > 99 ? '99+' : count}
         </span>
       </div>

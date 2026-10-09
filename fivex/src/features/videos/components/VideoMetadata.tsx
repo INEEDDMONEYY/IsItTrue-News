@@ -12,13 +12,13 @@ export default function VideoMetadata({
   onChange,
 }: VideoMetadataProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-heading">
           Video Metadata
         </h2>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-text-muted">
           Add the information readers and editors need to understand
           this video.
         </p>
@@ -26,7 +26,7 @@ export default function VideoMetadata({
 
       <div className="space-y-5">
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-text">
             Title
           </label>
 
@@ -36,12 +36,12 @@ export default function VideoMetadata({
               onChange({ title: event.target.value })
             }
             placeholder="Enter video title"
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+            className="w-full rounded-xl border border-border px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-text">
             Description
           </label>
 
@@ -54,13 +54,13 @@ export default function VideoMetadata({
             }
             rows={5}
             placeholder="Describe what this video contains..."
-            className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+            className="w-full resize-none rounded-xl border border-border px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
           />
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-text">
               Category
             </label>
 
@@ -72,12 +72,12 @@ export default function VideoMetadata({
                 })
               }
               placeholder="News"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+              className="w-full rounded-xl border border-border px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-text">
               Location
             </label>
 
@@ -89,13 +89,13 @@ export default function VideoMetadata({
                 })
               }
               placeholder="Location where recorded"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+              className="w-full rounded-xl border border-border px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
             />
           </div>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-text">
             Credit
           </label>
 
@@ -107,7 +107,7 @@ export default function VideoMetadata({
               })
             }
             placeholder="Source or videographer credit"
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+            className="w-full rounded-xl border border-border px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
           />
         </div>
       </div>

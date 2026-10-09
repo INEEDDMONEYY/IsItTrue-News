@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, ChevronDown, ExternalLink, LogOut, Settings, UserRound } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Bell, ChevronDown, ExternalLink, LogOut, Menu, Settings, UserRound } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { getDashboardNav } from '../constants/dashboardNav'
+import { notificationsApi } from '@/features/notifications/api/notifications.api'
+import { NOTIFICATIONS_QUERY_KEY } from '@/features/notifications/hooks/useNotifications'
+import { UserAvatar } from './UserAvatar'
 
 function useCurrentSectionLabel(role: string | undefined): string {
   const { pathname } = useLocation()
@@ -11,12 +15,18 @@ function useCurrentSectionLabel(role: string | undefined): string {
   return match?.label ?? 'Dashboard'
 }
 
-export function DashboardHeader() {
+export function DashboardHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const { user, logout } = useAuth()
   const sectionLabel = useCurrentSectionLabel(user?.role)
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const { data: notifications = [] } = useQuery({
+    queryKey: NOTIFICATIONS_QUERY_KEY,
+    queryFn: notificationsApi.listMine,
+    refetchInterval: 30_000,
+  })
+  const unreadCount = notifications.filter((notification) => !notification.read).length
 
   useEffect(() => {
     if (!isMenuOpen) return
@@ -36,8 +46,16 @@ export function DashboardHeader() {
   }
 
   return (
-    <header className="h-16 flex items-center gap-4 px-6 md:px-8 bg-bg border-b border-border">
-      <span className="text-sm font-medium text-heading">{sectionLabel}</span>
+    <header className="h-16 flex items-center gap-3 sm:gap-4 px-4 sm:px-6 md:px-8 bg-bg border-b border-border">
+      <button
+        type="button"
+        onClick={onOpenMenu}
+        aria-label="Open navigation"
+        className="md:hidden w-9 h-9 shrink-0 flex items-center justify-center rounded-xl border border-border text-text hover:bg-surface-2"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+      <span className="text-sm font-medium text-heading truncate">{sectionLabel}</span>
 
       <div className="flex-1" />
 
@@ -51,9 +69,15 @@ export function DashboardHeader() {
 
       <Link
         to="/dashboard/notifications"
-        className="w-9 h-9 rounded-xl bg-surface border border-border flex items-center justify-center text-text-muted hover:text-text transition-colors"
+        aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
+        className="relative w-9 h-9 shrink-0 rounded-xl gradient-border-card flex items-center justify-center text-card-heading hover:text-accent transition-colors"
       >
         <Bell className="w-4 h-4" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-disputed text-[10px] font-medium leading-4 text-white text-center">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
       </Link>
 
       <div className="relative" ref={menuRef}>
@@ -62,11 +86,9 @@ export function DashboardHeader() {
           onClick={() => setIsMenuOpen((open) => !open)}
           aria-expanded={isMenuOpen}
           aria-haspopup="menu"
-          className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full border border-border hover:border-accent-border transition-colors"
+          className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full gradient-border-chip transition-colors"
         >
-          <div className="w-8 h-8 rounded-full bg-accent-bg flex items-center justify-center text-xs font-medium text-accent">
-            {user?.name?.[0]?.toUpperCase() ?? '?'}
-          </div>
+          <UserAvatar user={user} className="w-8 h-8 text-xs" />
           <span className="hidden sm:block text-sm text-text">{user?.name}</span>
           <ChevronDown
             className={`w-3.5 h-3.5 text-text-muted transition-transform ${isMenuOpen ? 'rotate-180' : ''}`}

@@ -16,37 +16,37 @@ export default function VideoEditor({
   const safeDuration = Math.max(duration, 1)
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-gradient text-on-brand">
           <Scissors className="h-5 w-5" />
         </div>
 
         <div>
-          <h2 className="font-semibold text-slate-900">
+          <h2 className="font-semibold text-heading">
             Video Editor
           </h2>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-text-muted">
             Trim the beginning or end of your video.
           </p>
         </div>
       </div>
 
-      <div className="rounded-xl bg-slate-50 p-5">
+      <div className="rounded-xl bg-bg p-5">
         <div className="mb-4 flex items-center justify-between text-sm">
-          <span className="font-medium text-slate-700">
+          <span className="font-medium text-text">
             Start: {trim.start.toFixed(1)}s
           </span>
 
-          <span className="font-medium text-slate-700">
+          <span className="font-medium text-text">
             End: {trim.end.toFixed(1)}s
           </span>
         </div>
 
         <div className="space-y-5">
           <div>
-            <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500">
+            <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Start
             </label>
 
@@ -70,7 +70,7 @@ export default function VideoEditor({
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500">
+            <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-text-muted">
               End
             </label>
 

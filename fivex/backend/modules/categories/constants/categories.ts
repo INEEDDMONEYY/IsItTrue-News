@@ -19,4 +19,6 @@ export const DEFAULT_CATEGORIES = [
   'Republican Party',
   'Elections',
   'Climate',
+  'Gaming',
+  'Entertainment',
 ]

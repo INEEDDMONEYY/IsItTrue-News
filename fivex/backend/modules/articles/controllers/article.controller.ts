@@ -5,9 +5,13 @@ import { truncateToParagraphs } from '../../../utils/htmlPreview.js'
 import { articleService } from '../services/article.service.js'
 import type {
   CreateArticleInput,
+  RequestChangesInput,
+  ToggleRequirementInput,
   UpdateArticleInput,
   UpdateArticleStatusInput,
+  UpdateEditorialWorkflowInput,
 } from '../validations/article.validation.js'
+import type { ArticleDocument } from '../models/Article.js'
 
 function requireUser(req: Request) {
   if (!req.user) {
@@ -22,41 +26,50 @@ function requireUser(req: Request) {
 // resolveArticleLock for the actual gating decision).
 function serializeArticle(article: Awaited<ReturnType<typeof articleService.getArticleById>>['article'], locked: boolean) {
   const json = article.toJSON() as Record<string, unknown>
+  delete json.editorialStage
+  delete json.editorialDeadline
   if (locked) {
     json.body = truncateToParagraphs(json.body as string, 2)
   }
   return { ...json, locked }
 }
 
+function serializePublicArticle(article: ArticleDocument) {
+  const json = article.toJSON() as Record<string, unknown>
+  delete json.editorialStage
+  delete json.editorialDeadline
+  return json
+}
+
 export const articleController = {
   // Public: the reader-facing feed only ever shows published articles.
   listPublished: asyncHandler(async (_req: Request, res: Response) => {
     const articles = await articleService.listPublished()
-    res.status(200).json({ articles })
+    res.status(200).json({ articles: articles.map(serializePublicArticle) })
   }),
 
   // Public: published articles in a given category, for the category page.
   listByCategory: asyncHandler(async (req: Request, res: Response) => {
     const articles = await articleService.listPublishedByCategory(req.params.slug)
-    res.status(200).json({ articles })
+    res.status(200).json({ articles: articles.map(serializePublicArticle) })
   }),
 
   // Public: published articles carrying a given tag, for the tag page.
   listByTag: asyncHandler(async (req: Request, res: Response) => {
     const articles = await articleService.listPublishedByTag(req.params.slug)
-    res.status(200).json({ articles })
+    res.status(200).json({ articles: articles.map(serializePublicArticle) })
   }),
 
   // Public: a given author's published articles, for their public profile page.
   listByAuthor: asyncHandler(async (req: Request, res: Response) => {
     const articles = await articleService.listPublishedByAuthor(req.params.id)
-    res.status(200).json({ articles })
+    res.status(200).json({ articles: articles.map(serializePublicArticle) })
   }),
 
   // Public: a given reader's liked articles, for their public profile page.
   listLiked: asyncHandler(async (req: Request, res: Response) => {
     const articles = await articleService.listLikedByUser(req.params.id)
-    res.status(200).json({ articles })
+    res.status(200).json({ articles: articles.map(serializePublicArticle) })
   }),
 
   // Author/admin: the signed-in author's own articles, any status.
@@ -72,6 +85,17 @@ export const articleController = {
     res.status(200).json({ articles })
   }),
 
+  listEditorialWorkflow: asyncHandler(async (_req: Request, res: Response) => {
+    const articles = await articleService.listEditorialWorkflow()
+    res.status(200).json({ articles })
+  }),
+
+  // Editor/admin: drafts sent back to authors that haven't been resubmitted.
+  listChangesRequested: asyncHandler(async (_req: Request, res: Response) => {
+    const articles = await articleService.listChangesRequested()
+    res.status(200).json({ articles })
+  }),
+
   // Admin-only: every article regardless of status or author.
   listAll: asyncHandler(async (_req: Request, res: Response) => {
     const articles = await articleService.listAll()
@@ -82,7 +106,7 @@ export const articleController = {
   // featured slot.
   getFeatured: asyncHandler(async (_req: Request, res: Response) => {
     const article = await articleService.getFeatured()
-    res.status(200).json({ article })
+    res.status(200).json({ article: article ? serializePublicArticle(article) : null })
   }),
 
   getBySlug: asyncHandler(async (req: Request, res: Response) => {
@@ -105,7 +129,7 @@ export const articleController = {
   create: asyncHandler(async (req: Request, res: Response) => {
     const user = requireUser(req)
     const input = req.body as CreateArticleInput
-    const article = await articleService.createArticle(user.id, input)
+    const article = await articleService.createArticle(user, input)
     res.status(201).json({ message: 'Article created successfully.', article })
   }),
 
@@ -121,6 +145,33 @@ export const articleController = {
     const { status } = req.body as UpdateArticleStatusInput
     await articleService.updateStatus(req.params.id, status, user)
     res.status(200).json({ message: 'Article status updated successfully.' })
+  }),
+
+  updateEditorialWorkflow: asyncHandler(async (req: Request, res: Response) => {
+    const user = requireUser(req)
+    const input = req.body as UpdateEditorialWorkflowInput
+    await articleService.updateEditorialWorkflow(req.params.id, user, input)
+    res.status(200).json({ message: 'Editorial workflow updated.' })
+  }),
+
+  approve: asyncHandler(async (req: Request, res: Response) => {
+    const user = requireUser(req)
+    await articleService.approveArticle(req.params.id, user)
+    res.status(200).json({ message: 'Article approved and published.' })
+  }),
+
+  requestChanges: asyncHandler(async (req: Request, res: Response) => {
+    const user = requireUser(req)
+    const input = req.body as RequestChangesInput
+    await articleService.requestChanges(req.params.id, user, input)
+    res.status(200).json({ message: 'Article returned to the author with requested changes.' })
+  }),
+
+  setRequirementDone: asyncHandler(async (req: Request, res: Response) => {
+    const user = requireUser(req)
+    const { done } = req.body as ToggleRequirementInput
+    await articleService.setRequirementDone(req.params.id, req.params.requirementId, done, user)
+    res.status(200).json({ message: 'Requirement updated.' })
   }),
 
   remove: asyncHandler(async (req: Request, res: Response) => {

@@ -43,6 +43,7 @@ export function AuthorProfileSection({
               label="Profile photo"
               accept="image/*"
               kind="image"
+              imagePreset="avatar"
               value={profile.profileImage ?? null}
               onChange={(url) => onChange({ profileImage: url ?? '' })}
             />
@@ -53,6 +54,7 @@ export function AuthorProfileSection({
             helperText="Shown across the top of your public profile."
             accept="image/*"
             kind="image"
+            imagePreset="banner"
             value={profile.bannerImage ?? null}
             onChange={(url) => onChange({ bannerImage: url ?? '' })}
           />

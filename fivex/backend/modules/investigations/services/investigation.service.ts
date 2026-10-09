@@ -1,10 +1,12 @@
 import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
 import { INVESTIGATION_FREE_LIMITS } from '../../../shared/constants/plan.js'
+import { hasPremiumAccess } from '../../../shared/constants/features.js'
 import { slugify } from '../../../utils/slug.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
 import { investigationRepository } from '../repositories/investigation.repository.js'
 import { INVESTIGATION_STATUSES } from '../constants/investigationStatus.js'
+import type { InvestigationWorkflowStage } from '../constants/editorialWorkflow.js'
 import type { InvestigationDocument } from '../models/Investigation.js'
 import type {
   CreateInvestigationInput,
@@ -48,7 +50,7 @@ async function resolveAccessTier(actingUserId?: string): Promise<InvestigationAc
   if (!actingUserId) return 'anonymous'
   const user = await userRepository.findById(actingUserId)
   if (!user) return 'anonymous'
-  return user.plan === 'premium' ? 'premium' : 'free'
+  return hasPremiumAccess('fullInvestigations', user.plan) ? 'premium' : 'free'
 }
 
 // Reader-facing sanitization: strips every internal-only field (notes,
@@ -65,6 +67,8 @@ function serializePublic(
   delete json.internalNotes
   delete json.editorComments
   delete json.rejectionReason
+  delete json.workflowStage
+  delete json.editorialDeadline
   delete json.collaborators
   delete json.followedBy
   delete json.bookmarkedBy
@@ -133,6 +137,38 @@ export const investigationService = {
     return investigationRepository.findByStatus(INVESTIGATION_STATUSES.PENDING_REVIEW)
   },
 
+  async listEditorialWorkflow() {
+    const investigations = await investigationRepository.findEditorialWorkflow()
+    return investigations.map((investigation) => ({
+      ...investigation.toJSON(),
+      workflowStage:
+        investigation.workflowStage ??
+        (investigation.status === INVESTIGATION_STATUSES.PUBLISHED
+          ? 'publication'
+          : investigation.status === INVESTIGATION_STATUSES.PENDING_REVIEW
+            ? 'editorial_review'
+            : 'research'),
+    }))
+  },
+
+  async updateEditorialWorkflow(
+    id: string,
+    actingUser: ActingUser,
+    workflow: { workflowStage: InvestigationWorkflowStage; editorialDeadline: string | null },
+  ) {
+    if (!isPrivilegedRole(actingUser.role)) {
+      throw new AppError('Only an editor or admin can update editorial workflow.', 403)
+    }
+    const investigation = await investigationRepository.findById(id)
+    if (!investigation) throw new AppError('Investigation not found.', 404)
+    await investigationRepository.updateEditorialWorkflow(id, {
+      workflowStage: workflow.workflowStage,
+      editorialDeadline: workflow.editorialDeadline
+        ? new Date(`${workflow.editorialDeadline}T00:00:00.000Z`)
+        : null,
+    })
+  },
+
   // Public: reader-facing listing, sanitized summaries only.
   async listPublished(category?: string) {
     const investigations = await investigationRepository.findPublished(category)
@@ -192,7 +228,9 @@ export const investigationService = {
     ) {
       throw new AppError('Only a draft or rejected investigation can be submitted for review.', 400)
     }
-    await investigationRepository.setStatus(id, INVESTIGATION_STATUSES.PENDING_REVIEW)
+    await investigationRepository.setStatus(id, INVESTIGATION_STATUSES.PENDING_REVIEW, {
+      workflowStage: 'editorial_review',
+    })
   },
 
   async publish(id: string, actingUser: ActingUser) {
@@ -204,7 +242,10 @@ export const investigationService = {
     if (investigation.status !== INVESTIGATION_STATUSES.PENDING_REVIEW) {
       throw new AppError('Only an investigation pending review can be published.', 400)
     }
-    await investigationRepository.setStatus(id, INVESTIGATION_STATUSES.PUBLISHED, { publishedAt: new Date() })
+    await investigationRepository.setStatus(id, INVESTIGATION_STATUSES.PUBLISHED, {
+      publishedAt: new Date(),
+      workflowStage: 'publication',
+    })
   },
 
   async reject(id: string, actingUser: ActingUser, reason: string) {

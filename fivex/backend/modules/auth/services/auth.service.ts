@@ -1,6 +1,7 @@
 import { assertDeliverableEmail } from '../../../security/emailValidator.js'
 import { signAccessToken, signRefreshToken } from '../../../security/tokens.js'
 import { AppError } from '../../../shared/errors/AppError.js'
+import { ROLES } from '../../../shared/constants/roles.js'
 import { comparePassword, hashPassword } from '../../../utils/password.js'
 import { hashToken } from '../../../utils/tokens.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
@@ -23,6 +24,9 @@ export const authService = {
       name: input.name,
       email: input.email,
       passwordHash,
+      ...(input.accountType === 'organization'
+        ? { role: ROLES.ORGANIZATION, organizationName: input.organizationName }
+        : {}),
     })
 
     await issueAndSendVerificationEmail(user)

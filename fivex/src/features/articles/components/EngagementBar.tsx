@@ -51,7 +51,7 @@ export function EngagementBar({
         aria-pressed={liked}
         className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
           liked
-            ? 'bg-accent text-white border-accent'
+            ? 'bg-brand-gradient text-on-brand border-transparent'
             : 'border-border text-heading hover:border-accent-border hover:text-accent'
         }`}
       >
@@ -101,7 +101,7 @@ export function EngagementBar({
           bookmarkInactive
             ? 'border-border text-text-dim opacity-60 hover:opacity-100'
             : bookmarked
-              ? 'bg-accent text-white border-accent'
+              ? 'bg-brand-gradient text-on-brand border-transparent'
               : 'border-border text-heading hover:border-accent-border hover:text-accent'
         }`}
       >

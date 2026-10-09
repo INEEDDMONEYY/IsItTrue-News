@@ -68,7 +68,7 @@ export default function BookmarkFilters({
               className={[
                 'whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold transition',
                 active
-                  ? 'bg-[var(--color-accent)] text-white'
+                  ? 'bg-brand-gradient text-on-brand'
                   : 'border border-[var(--color-card-border)] bg-[var(--color-card-2)] text-[var(--color-card-text-muted)] hover:border-[var(--color-accent-border)] hover:text-[var(--color-accent)]',
               ].join(' ')}
             >

@@ -86,7 +86,7 @@ export function NotificationCard({
               'h-2.5 w-2.5 rounded-full transition-opacity',
               notification.read
                 ? 'bg-[var(--color-text-dim)] opacity-40'
-                : 'bg-[var(--color-accent)]',
+                : 'bg-brand-gradient',
             ].join(' ')}
             aria-label={notification.read ? 'Read' : 'Unread'}
           />

@@ -6,8 +6,11 @@ import { ROLES } from '../../../shared/constants/roles.js'
 import { articleController } from '../controllers/article.controller.js'
 import {
   createArticleSchema,
+  requestChangesSchema,
+  toggleRequirementSchema,
   updateArticleSchema,
   updateArticleStatusSchema,
+  updateEditorialWorkflowSchema,
 } from '../validations/article.validation.js'
 
 const router = Router()
@@ -25,6 +28,21 @@ router.get(
   authenticate,
   authorize(ROLES.EDITOR, ROLES.ADMIN),
   articleController.listPending,
+)
+
+router.get(
+  '/editorial-workflow',
+  authenticate,
+  authorize(ROLES.EDITOR, ROLES.ADMIN),
+  articleController.listEditorialWorkflow,
+)
+
+// Editor/admin: drafts sent back to authors and still awaiting their changes.
+router.get(
+  '/changes-requested',
+  authenticate,
+  authorize(ROLES.EDITOR, ROLES.ADMIN),
+  articleController.listChangesRequested,
 )
 
 // Admin-only: every article regardless of status/author.
@@ -77,7 +95,34 @@ router.patch(
   articleController.updateStatus,
 )
 
+router.patch(
+  '/:id/editorial-workflow',
+  authenticate,
+  authorize(ROLES.EDITOR, ROLES.ADMIN),
+  validate(updateEditorialWorkflowSchema),
+  articleController.updateEditorialWorkflow,
+)
+
 router.post('/:id/view', optionalAuthenticate, articleController.recordView)
+
+// Editor/admin: the editorial decision on an article awaiting review.
+router.post('/:id/approve', authenticate, authorize(ROLES.EDITOR, ROLES.ADMIN), articleController.approve)
+router.post(
+  '/:id/request-changes',
+  authenticate,
+  authorize(ROLES.EDITOR, ROLES.ADMIN),
+  validate(requestChangesSchema),
+  articleController.requestChanges,
+)
+
+// Author: tick a requirement off (or back on) while working through an editor's feedback.
+router.patch(
+  '/:id/requirements/:requirementId',
+  authenticate,
+  authorize(ROLES.AUTHOR, ROLES.ADMIN),
+  validate(toggleRequirementSchema),
+  articleController.setRequirementDone,
+)
 
 // Any authenticated reader can like/unlike a published article.
 router.post('/:id/like', authenticate, articleController.toggleLike)

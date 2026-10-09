@@ -7,6 +7,12 @@ export interface PublicArticleAuthor {
   name: string
 }
 
+export interface PublishedCorrectionNotice {
+  number: number
+  text: string
+  publishedAt: string
+}
+
 export interface PublicArticle {
   id: string
   slug: string
@@ -18,6 +24,8 @@ export interface PublicArticle {
   category: string
   tags: string[]
   sourceLinks: string[]
+  // Numbered per article (1, 2, 3...) and never removed once published.
+  corrections?: PublishedCorrectionNotice[]
   status: 'draft' | 'pending_review' | 'published'
   factCheckStatus?: 'none' | 'pending' | 'approved' | 'rejected'
   factCheckReviewedBy?: { id: string; name: string }

@@ -1,6 +1,7 @@
 import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
 import { FREE_PLAN_LIMITS } from '../../../shared/constants/plan.js'
+import { hasPremiumAccess } from '../../../shared/constants/features.js'
 import { commentRepository } from '../repositories/comment.repository.js'
 import { articleRepository } from '../../articles/repositories/article.repository.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
@@ -21,7 +22,7 @@ export const commentService = {
     }
 
     const commenter = await userRepository.findById(authorId)
-    if (commenter?.plan !== 'premium') {
+    if (!hasPremiumAccess('unlimitedComments', commenter?.plan)) {
       await userRepository.resetUsageIfNeeded(authorId)
       const fresh = await userRepository.findById(authorId)
       const used = fresh?.usage?.commentsThisMonth ?? 0

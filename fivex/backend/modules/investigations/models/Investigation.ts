@@ -4,6 +4,10 @@ import {
   INVESTIGATION_STATUSES,
   type InvestigationStatus,
 } from '../constants/investigationStatus.js'
+import {
+  INVESTIGATION_WORKFLOW_STAGES,
+  type InvestigationWorkflowStage,
+} from '../constants/editorialWorkflow.js'
 
 export interface ITimelineEntry {
   _id: Types.ObjectId
@@ -45,6 +49,8 @@ export interface IInvestigation {
   author: Types.ObjectId
   collaborators: Types.ObjectId[]
   status: InvestigationStatus
+  workflowStage?: InvestigationWorkflowStage
+  editorialDeadline?: Date
   bodyHtml?: string
   timeline: ITimelineEntry[]
   // Author-only private notes — never serialized to readers, never even
@@ -108,6 +114,8 @@ const investigationSchema = new Schema<IInvestigation>(
       enum: ALL_INVESTIGATION_STATUSES,
       default: INVESTIGATION_STATUSES.DRAFT,
     },
+    workflowStage: { type: String, enum: INVESTIGATION_WORKFLOW_STAGES },
+    editorialDeadline: { type: Date },
     bodyHtml: { type: String, default: '' },
     timeline: { type: [timelineEntrySchema], default: [] },
     internalNotes: { type: String, trim: true, maxlength: 10000 },

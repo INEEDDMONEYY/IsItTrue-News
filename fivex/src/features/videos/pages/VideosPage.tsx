@@ -117,9 +117,9 @@ function VideoCard({ video }: { video: Video }) {
   return (
     <Link
       to={`/videos/${video.slug}`}
-      className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg"
+      className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-border hover:shadow-lg"
     >
-      <div className="relative aspect-video overflow-hidden bg-slate-100">
+      <div className="relative aspect-video overflow-hidden bg-surface-2">
         <img
           src={video.thumbnail}
           alt=""
@@ -129,7 +129,7 @@ function VideoCard({ video }: { video: Video }) {
         <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
 
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-slate-900 shadow-lg">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-heading shadow-lg">
             <Play
               size={20}
               fill="currentColor"
@@ -144,7 +144,7 @@ function VideoCard({ video }: { video: Video }) {
       </div>
 
       <div className="p-4">
-        <h3 className="line-clamp-2 text-base font-semibold leading-6 text-slate-900 transition-colors group-hover:text-slate-600">
+        <h3 className="line-clamp-2 text-base font-semibold leading-6 text-heading transition-colors group-hover:text-text-muted">
           {video.title}
         </h3>
       </div>
@@ -156,20 +156,20 @@ export default function VideosPage() {
   const featuredVideos = mockVideos.filter((video) => video.featured);
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-bg">
       {/* Hero */}
-      <section className="border-b border-slate-200 bg-white">
+      <section className="border-b border-border bg-surface">
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
           <div className="max-w-3xl">
-            <span className="mb-4 inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">
+            <span className="mb-4 inline-flex rounded-full bg-surface-2 px-3 py-1 text-sm font-semibold text-text-muted">
               Video
             </span>
 
-            <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+            <h1 className="text-4xl font-bold tracking-tight text-heading sm:text-5xl">
               Watch the stories behind the truth.
             </h1>
 
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-text-muted">
               Explore investigative reporting, fact checks, explainers,
               and stories from our newsroom through video.
             </p>
@@ -183,11 +183,11 @@ export default function VideosPage() {
           <section>
             <div className="mb-6 flex items-end justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">
                   Featured
                 </p>
 
-                <h2 className="mt-1 text-2xl font-bold text-slate-950">
+                <h2 className="mt-1 text-2xl font-bold text-heading">
                   Featured videos
                 </h2>
               </div>
@@ -206,15 +206,15 @@ export default function VideosPage() {
           <section className="mt-16">
             <div className="mb-6 flex items-end justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">
                   Quick Watch
                 </p>
 
-                <h2 className="mt-1 text-2xl font-bold text-slate-950">
+                <h2 className="mt-1 text-2xl font-bold text-heading">
                   Short Videos
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-text-muted">
                   Quick stories, 3 minutes or less.
                 </p>
               </div>
@@ -243,11 +243,11 @@ export default function VideosPage() {
               <section key={category}>
                 <div className="mb-6 flex items-end justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                    <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">
                       Videos
                     </p>
 
-                    <h2 className="mt-1 text-2xl font-bold text-slate-950">
+                    <h2 className="mt-1 text-2xl font-bold text-heading">
                       {category}
                     </h2>
                   </div>
@@ -256,7 +256,7 @@ export default function VideosPage() {
                     to={`/videos/category/${category
                       .toLowerCase()
                       .replace(/\s+/g, "-")}`}
-                    className="group hidden items-center gap-2 text-sm font-semibold text-slate-700 transition-colors hover:text-slate-950 sm:flex"
+                    className="group hidden items-center gap-2 text-sm font-semibold text-text transition-colors hover:text-heading sm:flex"
                   >
                     View all
                     <ArrowRight
@@ -276,7 +276,7 @@ export default function VideosPage() {
                   to={`/videos/category/${category
                     .toLowerCase()
                     .replace(/\s+/g, "-")}`}
-                  className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-slate-950 sm:hidden"
+                  className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-text hover:text-heading sm:hidden"
                 >
                   View all {category} videos
                   <ArrowRight size={16} />

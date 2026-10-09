@@ -64,7 +64,7 @@ export function ChangeEmailSection() {
         <button
           type="submit"
           disabled={isPending}
-          className="self-start px-4 py-2.5 rounded-xl bg-accent text-white text-sm font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+          className="self-start px-4 py-2.5 rounded-xl bg-brand-gradient text-on-brand text-sm font-medium transition-colors disabled:opacity-50"
         >
           {isPending ? 'Updating...' : 'Update email'}
         </button>

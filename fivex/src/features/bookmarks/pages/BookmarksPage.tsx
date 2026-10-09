@@ -51,7 +51,7 @@ export function BookmarksPage() {
       {/* Header */}
       <section>
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-card)] text-[var(--color-blue-400)]">
             <Bookmark className="h-6 w-6" />
           </div>
 
@@ -71,7 +71,7 @@ export function BookmarksPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-sky-200)] text-[var(--color-black)]">
               <Bookmark className="h-5 w-5" />
             </div>
 
@@ -88,7 +88,7 @@ export function BookmarksPage() {
 
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-sky-200)] text-[var(--color-black)]">
               <BookOpen className="h-5 w-5" />
             </div>
 
@@ -105,7 +105,7 @@ export function BookmarksPage() {
 
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent-bg)] text-[var(--color-accent)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-sky-200)] text-[var(--color-black)]">
               <VideoIcon className="h-5 w-5" />
             </div>
 

@@ -2,7 +2,14 @@ import { z } from 'zod'
 import { ROLES } from '../../../shared/constants/roles.js'
 import { passwordSchema } from '../../auth/validations/auth.validation.js'
 
-const roleSchema = z.enum([ROLES.READER, ROLES.AUTHOR, ROLES.EDITOR, ROLES.ADMIN])
+const roleSchema = z.enum([
+  ROLES.READER,
+  ROLES.AUTHOR,
+  ROLES.EDITOR,
+  ROLES.ORGANIZATION,
+  ROLES.CONTRIBUTOR,
+  ROLES.ADMIN,
+])
 
 export const createUserSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(80, 'Name is too long'),
@@ -104,8 +111,9 @@ export type VerifyPhoneCodeInput = z.infer<typeof verifyPhoneCodeSchema>
 
 export const becomeAuthorSchema = z.object({
   fullName: z.string().trim().min(2, 'Full name must be at least 2 characters').max(80),
-  profilePhotoUrl: z.string().trim().min(1, 'A profile photo is required').max(500),
-  shortBio: z.string().trim().min(1, 'A short bio is required').max(1000),
+  // Optional: omitted when the user already saved these in their settings.
+  profilePhotoUrl: z.string().trim().min(1).max(500).optional(),
+  shortBio: z.string().trim().min(1).max(1000).optional(),
   socialLinks: socialLinksSchema,
   acceptTruthProtocol: z
     .boolean()
@@ -113,3 +121,15 @@ export const becomeAuthorSchema = z.object({
 })
 
 export type BecomeAuthorInput = z.infer<typeof becomeAuthorSchema>
+
+export const becomeEditorSchema = z.object({
+  fullName: z.string().trim().min(2, 'Full name must be at least 2 characters').max(80),
+  profilePhotoUrl: z.string().trim().min(1).max(500).optional(),
+  shortBio: z.string().trim().min(1).max(1000).optional(),
+  socialLinks: socialLinksSchema,
+  acceptEditorialStandards: z
+    .boolean()
+    .refine((value) => value === true, 'You must accept the editorial standards to become an editor'),
+})
+
+export type BecomeEditorInput = z.infer<typeof becomeEditorSchema>

@@ -29,7 +29,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
             type="button"
             onClick={() => onPageChange(n)}
             className={`w-8 h-8 rounded-full text-sm transition-colors ${
-              page === n ? 'bg-accent text-white' : 'text-text-muted hover:bg-surface-2'
+              page === n ? 'bg-brand-gradient text-on-brand' : 'text-text-muted hover:bg-surface-2'
             }`}
           >
             {n}

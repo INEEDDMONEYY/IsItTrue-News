@@ -1,5 +1,6 @@
 import { Schema, model, Types, type HydratedDocument } from 'mongoose'
 import { ALL_ARTICLE_STATUSES, ARTICLE_STATUSES, type ArticleStatus } from '../constants/articleStatus.js'
+import { ARTICLE_EDITORIAL_STAGES, type ArticleEditorialStage } from '../constants/editorialWorkflow.js'
 
 export const FACT_CHECK_STATUSES = ['none', 'pending', 'approved', 'rejected'] as const
 export type ArticleFactCheckStatus = (typeof FACT_CHECK_STATUSES)[number]
@@ -7,6 +8,20 @@ export type ArticleFactCheckStatus = (typeof FACT_CHECK_STATUSES)[number]
 export interface IArticleBookmark {
   user: Types.ObjectId
   savedAt: Date
+}
+
+// One thing the editor requires before the article can be published.
+export interface IReviewRequirement {
+  _id: Types.ObjectId
+  text: string
+  done: boolean
+}
+
+// A correction notice shown to readers on the article; never removed once published.
+export interface IPublishedCorrection {
+  number: number
+  text: string
+  publishedAt: Date
 }
 
 export interface IArticle {
@@ -25,6 +40,16 @@ export interface IArticle {
   socialLinks: string[]
   sourceLinks: string[]
   publishedAt?: Date
+  // Editorial workflow: when the author sent it for review, and the latest editor decision.
+  submittedAt?: Date
+  reviewedAt?: Date
+  reviewedBy?: Types.ObjectId
+  reviewNote?: string
+  reviewRequirements: IReviewRequirement[]
+  editorialStage?: ArticleEditorialStage
+  editorialDeadline?: Date
+  correctionsCount: number
+  corrections: IPublishedCorrection[]
   factCheckStatus: ArticleFactCheckStatus
   factCheckRejectionReason?: string
   factCheckReviewedAt?: Date
@@ -98,6 +123,37 @@ const articleSchema = new Schema<IArticle>(
     socialLinks: { type: [String], default: [] },
     sourceLinks: { type: [String], default: [] },
     publishedAt: { type: Date },
+    submittedAt: { type: Date },
+    reviewedAt: { type: Date },
+    reviewedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    reviewNote: { type: String, trim: true, maxlength: 500 },
+    editorialStage: { type: String, enum: ARTICLE_EDITORIAL_STAGES },
+    editorialDeadline: { type: Date },
+    reviewRequirements: {
+      type: [
+        new Schema(
+          {
+            text: { type: String, required: true, trim: true, maxlength: 300 },
+            done: { type: Boolean, default: false },
+          },
+        ),
+      ],
+      default: [],
+    },
+    correctionsCount: { type: Number, default: 0, min: 0 },
+    corrections: {
+      type: [
+        new Schema<IPublishedCorrection>(
+          {
+            number: { type: Number, required: true },
+            text: { type: String, required: true, trim: true, maxlength: 1000 },
+            publishedAt: { type: Date, required: true },
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
     factCheckStatus: {
       type: String,
       enum: FACT_CHECK_STATUSES,
@@ -134,6 +190,13 @@ const articleSchema = new Schema<IArticle>(
         ret.dislikes = ret.dislikesCount ?? 0
         ret.shares = ret.sharesCount ?? 0
         ret.bookmarks = ret.bookmarksCount ?? 0
+        if (Array.isArray(ret.reviewRequirements)) {
+          ret.reviewRequirements = (ret.reviewRequirements as IReviewRequirement[]).map((requirement) => ({
+            id: String(requirement._id),
+            text: requirement.text,
+            done: requirement.done,
+          }))
+        }
         delete ret._id
         delete ret.__v
         delete ret.likedBy

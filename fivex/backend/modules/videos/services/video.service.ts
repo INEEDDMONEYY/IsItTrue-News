@@ -1,6 +1,7 @@
 import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
 import { FREE_PLAN_LIMITS } from '../../../shared/constants/plan.js'
+import { hasPremiumAccess } from '../../../shared/constants/features.js'
 import { videoRepository } from '../repositories/video.repository.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
 import { VIDEO_STATUSES, type VideoStatus, type VideoVisibility } from '../constants/videoStatus.js'
@@ -33,7 +34,7 @@ async function resolveVideoLock(video: VideoDocument, actingUser?: ActingUser): 
   if (!actingUser) return true
 
   const viewer = await userRepository.findById(actingUser.id)
-  return viewer?.plan !== 'premium'
+  return !hasPremiumAccess('fullLengthVideos', viewer?.plan)
 }
 
 export const videoService = {

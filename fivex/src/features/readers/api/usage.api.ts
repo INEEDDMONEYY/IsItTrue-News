@@ -3,6 +3,8 @@ import { apiClient } from '@/api/client'
 // Drives the "Free Plan Usage Tracking" widget in the reader sidebar.
 export interface FreePlanUsage {
   plan: 'free' | 'premium'
+  // False when every paywalled feature is unlocked (dev flags) or the user is premium.
+  limitsEnforced: boolean
   articlesRead: number
   articlesLimit: number | null
   articlesRemaining: number | null

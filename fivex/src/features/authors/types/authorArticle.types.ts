@@ -17,6 +17,9 @@ export interface CreateArticleInput {
   excerpt: string
   body: string
   category: string
+  // Authors' "published" requests are routed to editorial review by the server;
+  // only editors/admins can actually publish outright.
+  status: 'draft' | 'pending_review' | 'published'
   tags?: string[]
   articleImageUrl?: string
   articleVideoUrl?: string

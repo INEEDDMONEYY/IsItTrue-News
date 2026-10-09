@@ -41,7 +41,7 @@ export function PlanFlipCard({
           title={freeTier.name}
           className={`flex h-8 w-8 items-center justify-center rounded-full border transition ${
             !showPremium
-              ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-white'
+              ? 'border-transparent bg-brand-gradient text-on-brand'
               : 'border-[var(--color-card-border)] bg-[var(--color-card)] text-[var(--color-card-text-dim)] hover:text-[var(--color-card-text)]'
           }`}
         >
@@ -55,7 +55,7 @@ export function PlanFlipCard({
           title={premiumTier.name}
           className={`flex h-8 w-8 items-center justify-center rounded-full border transition ${
             showPremium
-              ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-white'
+              ? 'border-transparent bg-brand-gradient text-on-brand'
               : 'border-[var(--color-card-border)] bg-[var(--color-card)] text-[var(--color-card-text-dim)] hover:text-[var(--color-card-text)]'
           }`}
         >

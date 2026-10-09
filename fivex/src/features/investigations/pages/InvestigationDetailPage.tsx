@@ -43,7 +43,7 @@ export function InvestigationDetailPage() {
         <p className="text-sm text-text-muted">Manage its content, evidence, and status from your workspace.</p>
         <Link
           to={`/author/investigations/${id}`}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-hover"
+          className="rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-on-brand transition"
         >
           Open in Investigation Workspace
         </Link>

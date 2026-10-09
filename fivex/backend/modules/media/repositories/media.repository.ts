@@ -1,8 +1,14 @@
-import { Media, type MediaDocument, type MediaResourceType } from '../models/Media.js'
+import {
+  Media,
+  type MediaDocument,
+  type MediaResourceType,
+  type MediaStorageProvider,
+} from '../models/Media.js'
 
 export interface CreateMediaData {
   url: string
   publicId: string
+  storage: MediaStorageProvider
   resourceType: MediaResourceType
   format: string
   bytes: number

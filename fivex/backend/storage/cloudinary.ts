@@ -31,6 +31,8 @@ export function uploadBuffer(buffer: Buffer, resourceType: CloudinaryResourceTyp
       {
         folder: `isittrue/${resourceType}s`,
         resource_type: resourceType,
+        // Fail over to backup storage promptly instead of hanging on a degraded provider.
+        timeout: 30000,
       },
       (error, result?: UploadApiResponse) => {
         if (error || !result) {

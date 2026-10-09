@@ -48,7 +48,7 @@ export function NotificationFilters({
             aria-pressed={isActive}
             className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium transition-all ${
               isActive
-                ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-white shadow-sm'
+                ? 'border-transparent bg-brand-gradient text-on-brand shadow-sm'
                 : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:border-[var(--color-accent-border)] hover:bg-[var(--color-accent-bg)] hover:text-[var(--color-accent)]'
             }`}
           >

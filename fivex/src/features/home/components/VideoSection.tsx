@@ -25,7 +25,7 @@ export function VideoSection({ videos = MOCK_VIDEOS }: { videos?: VideoItem[] })
         {videos.map((video) => (
           <button
             key={video.id}
-            className="group relative aspect-video rounded-2xl overflow-hidden border border-border bg-surface text-left"
+            className="gradient-border-surface group relative aspect-video rounded-2xl overflow-hidden text-left"
           >
             <div className="absolute inset-0 bg-surface-2" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
