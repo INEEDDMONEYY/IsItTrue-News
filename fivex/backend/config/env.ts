@@ -12,10 +12,17 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
 
+  // Comma-separated frontend origins allowed to call the API, each as scheme + host (+ port), e.g.
+  // https://www.isittruenews.com. A browser's Origin never has a path or trailing slash, so those are stripped.
   CLIENT_ORIGINS: z
     .string()
     .min(1, 'CLIENT_ORIGINS must list at least one allowed origin')
-    .transform((value) => value.split(',').map((origin) => origin.trim()).filter(Boolean)),
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim().replace(/\/+$/, ''))
+        .filter(Boolean),
+    ),
 
   MONGO_URI: z.string().url('MONGO_URI must be a valid MongoDB connection string'),
 

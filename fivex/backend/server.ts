@@ -13,6 +13,20 @@ async function main() {
   const app = createApp()
   const server = app.listen(env.PORT, () => {
     logger.info(`API server listening on port ${env.PORT} (${env.NODE_ENV}), trusting ${trustProxyHops} proxy hop(s)`)
+    logger.info(`CORS allows: ${env.CLIENT_ORIGINS.join(', ')}`)
+
+    // A bare hostname like "isittruenews.com" never matches a browser's Origin header, which always
+    // carries the scheme — the request is blocked and the browser only says "No Access-Control-Allow-Origin".
+    const malformedOrigins = env.CLIENT_ORIGINS.filter((origin) => !/^https?:\/\/[^/\s]+$/.test(origin))
+    if (malformedOrigins.length > 0) {
+      logger.warn(
+        `CLIENT_ORIGINS has entries that can never match a browser origin: ${malformedOrigins.join(', ')}. ` +
+          'Use the full origin, e.g. https://www.isittruenews.com',
+      )
+    }
+    if (isProduction && env.CLIENT_ORIGINS.every((origin) => /localhost|127\.0\.0\.1/.test(origin))) {
+      logger.warn('CLIENT_ORIGINS only lists localhost in production: the deployed frontend will be blocked by CORS.')
+    }
     if (isProduction && trustProxyHops === 0) {
       logger.warn(
         'TRUST_PROXY_HOPS is 0 in production: behind a load balancer every visitor will share one rate-limit bucket.',

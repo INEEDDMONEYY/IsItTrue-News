@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FileCheck2, FileSearch, ShieldCheck } from 'lucide-react'
 import logo from '@/assets/icons/question-icon-removebg.png'
 import { WaitlistForm } from '../components/WaitlistForm'
+import { SocialLinks } from '../components/SocialLinks'
 
 const PILLARS = [
   {
@@ -84,8 +85,9 @@ export function LandingPage() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 px-5 py-5 text-xs text-text-dim md:px-8">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-5 text-xs text-text-dim md:px-8">
           <span>© {new Date().getFullYear()} IsItTrue News</span>
+          <SocialLinks />
           <Link to="/dev-access" className="hover:text-text">
             Team access
           </Link>
