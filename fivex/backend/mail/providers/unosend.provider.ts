@@ -79,7 +79,10 @@ export async function sendWithUnosend(message: MailMessage): Promise<MailReceipt
 
   if (!response.ok || body.success === false || !body.data?.id) {
     const detail = body.error?.message ?? `HTTP ${response.status}`
-    logger.error(`Unosend rejected an email → status=${response.status} code=${body.error?.code ?? 'unknown'}`)
+    logger.error(
+      `Unosend rejected an email → status=${response.status} code=${body.error?.code ?? 'unknown'} ` +
+        `reason="${body.error?.message ?? 'none'}" from="${env.MAIL_FROM}"`,
+    )
     throw new MailDeliveryError(`Failed to send email: ${detail}`, response.status, body.error?.code)
   }
 

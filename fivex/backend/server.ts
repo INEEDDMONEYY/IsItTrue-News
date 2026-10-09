@@ -14,6 +14,11 @@ async function main() {
   const server = app.listen(env.PORT, () => {
     logger.info(`API server listening on port ${env.PORT} (${env.NODE_ENV}), trusting ${trustProxyHops} proxy hop(s)`)
     logger.info(`CORS allows: ${env.CLIENT_ORIGINS.join(', ')}`)
+    logger.info(
+      env.UNOSEND_API_KEY
+        ? `Mail: sending as ${env.MAIL_FROM} (the domain must be verified in Unosend)`
+        : 'Mail: UNOSEND_API_KEY not set, so emails are logged instead of sent',
+    )
 
     // A bare hostname like "isittruenews.com" never matches a browser's Origin header, which always
     // carries the scheme — the request is blocked and the browser only says "No Access-Control-Allow-Origin".
