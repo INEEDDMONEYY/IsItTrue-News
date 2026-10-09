@@ -37,7 +37,6 @@ export default function VideoStudioPage() {
     project,
     activeSection,
     isDirty,
-    setProject,
     updateProject,
     changeSection,
   } = useVideoStudio(mockProject)

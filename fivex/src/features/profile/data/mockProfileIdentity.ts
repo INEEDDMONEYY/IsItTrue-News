@@ -1,10 +1,5 @@
 
-import type {
-  ProfileIdentityData,
-  VerificationDocument,
-  VerificationEvent,
-  ProfileIdentity,
-} from '@/features/profile/types/profileIdentity.types'
+import type { ProfileIdentityData } from '@/features/profile/types/profileIdentity.types'
 
 export const mockProfileIdentity: ProfileIdentityData = {
   profile: {

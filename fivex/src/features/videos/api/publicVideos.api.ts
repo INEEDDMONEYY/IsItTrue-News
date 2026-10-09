@@ -1,5 +1,5 @@
-import apiClient from "../../../api/client";
-import type { PublicVideo } from "../types/videoStudio.types";
+import { apiClient } from "@/api/client";
+import type { PublicVideo } from "../types/publicVideo.types";
 
 export interface PublicVideoCategory {
   id: string;

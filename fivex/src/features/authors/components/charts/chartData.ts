@@ -1,6 +1,12 @@
-import type { AuthorArticle } from '../../types/authorArticle.types'
+// The fields the author analytics charts need, so they work with the real /api/articles/mine data.
+export interface AnalyticsArticle {
+  createdAt: string
+  views: number
+  status: string
+  category: string
+}
 
-export function buildViewsTrend(articles: AuthorArticle[]) {
+export function buildViewsTrend(articles: AnalyticsArticle[]) {
   const sorted = [...articles].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   )
@@ -11,7 +17,7 @@ export function buildViewsTrend(articles: AuthorArticle[]) {
   })
 }
 
-export function buildStatusBreakdown(articles: AuthorArticle[]) {
+export function buildStatusBreakdown(articles: AnalyticsArticle[]) {
   const counts: Record<string, number> = {}
   articles.forEach((a) => {
     counts[a.status] = (counts[a.status] ?? 0) + 1
@@ -19,7 +25,7 @@ export function buildStatusBreakdown(articles: AuthorArticle[]) {
   return Object.entries(counts).map(([status, count]) => ({ status, count }))
 }
 
-export function buildCategoryBreakdown(articles: AuthorArticle[]) {
+export function buildCategoryBreakdown(articles: AnalyticsArticle[]) {
   const counts: Record<string, number> = {}
   articles.forEach((a) => {
     counts[a.category] = (counts[a.category] ?? 0) + 1

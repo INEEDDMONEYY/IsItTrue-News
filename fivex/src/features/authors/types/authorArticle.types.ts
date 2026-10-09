@@ -123,6 +123,7 @@ export interface AuthorArticle {
   title: string
   slug: string
   excerpt: string
+  featuredImage?: string
 
   status: AuthorArticleStatus
 

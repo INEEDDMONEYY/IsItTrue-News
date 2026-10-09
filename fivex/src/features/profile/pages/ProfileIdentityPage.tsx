@@ -177,7 +177,7 @@ export function ProfileIdentityPage() {
               </p>
 
               <p className="mt-1 text-sm text-[var(--color-card-text)]">
-                {profile?.status || 'Active'}
+                {profile?.verificationLevel || 'Active'}
               </p>
             </div>
           </div>

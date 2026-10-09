@@ -1,6 +1,7 @@
 import { BarChart3, Eye, FileText, MessageSquare } from 'lucide-react'
-import { useAuthorArticles } from '../hooks/useAuthorArticles'
+import { useMyDrafts } from '../hooks/useMyDrafts'
 import { StatCard } from '@/components/cards'
+import { PageLoader } from '@/components/loaders/PageLoader'
 import { PaywallGate } from '@/features/billing/components/PaywallGate'
 import { ViewsTrendChart } from '../components/charts/ViewsTrendChart'
 import { DonutChart } from '../components/charts/DonutChart'
@@ -20,7 +21,7 @@ const CATEGORY_PALETTE = [
 ]
 
 export function AuthorAnalyticsPage() {
-  const { articles } = useAuthorArticles()
+  const { articles, isLoading, isError } = useMyDrafts()
 
   const published = articles.filter((a) => a.status === 'published')
   const totalViews = articles.reduce((sum, a) => sum + a.views, 0)
@@ -31,7 +32,7 @@ export function AuthorAnalyticsPage() {
 
   const trend = buildViewsTrend(articles)
   const statusBreakdown = buildStatusBreakdown(articles).map((s) => ({
-    label: s.status.replace('_', ' '),
+    label: s.status.replace(/[-_]/g, ' '),
     value: s.count,
     color: STATUS_COLORS[s.status] ?? 'var(--color-card-text-dim)',
   }))
@@ -48,6 +49,13 @@ export function AuthorAnalyticsPage() {
       <p className="text-sm text-text-muted mb-6">
         Performance and interactions across the articles you&apos;ve published.
       </p>
+
+      {isLoading && <PageLoader label="Loading your analytics..." />}
+      {isError && (
+        <p role="alert" className="text-sm text-disputed mb-6">
+          Couldn&apos;t load your analytics. Please refresh and try again.
+        </p>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <StatCard label="Total Views" value={totalViews.toLocaleString()} icon={Eye} />

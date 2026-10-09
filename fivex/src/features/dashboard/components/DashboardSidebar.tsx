@@ -36,7 +36,7 @@ export function DashboardSidebar() {
         }`}
       >
         <img src={logo} alt="IsItTrue News" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-        {!collapsed && <span className="font-semibold text-heading truncate">IsItTrue News</span>}
+        {!collapsed && <span className="font-semibold text-heading truncate">IsItTrueNews</span>}
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">

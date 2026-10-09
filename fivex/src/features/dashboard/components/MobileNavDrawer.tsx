@@ -55,7 +55,7 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-5">
           <Link to="/" className="flex items-center gap-2.5 min-w-0">
             <img src={logo} alt="IsItTrue News" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-            <span className="font-semibold text-heading truncate">IsItTrue News</span>
+            <span className="font-semibold text-heading truncate">IsItTrueNews</span>
           </Link>
           <button
             type="button"

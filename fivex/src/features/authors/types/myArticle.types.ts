@@ -16,6 +16,7 @@ export interface MyArticle extends ArticleReviewInfo {
   sourceLinks?: string[]
   status: 'draft' | 'pending_review' | 'published'
   factCheckStatus: 'none' | 'pending' | 'approved' | 'rejected'
+  views: number
   submittedAt?: string
   createdAt: string
   updatedAt: string

@@ -16,7 +16,7 @@ import {
   getCoAuthorCount,
   getDraftProgress,
   getDraftStatusLabel,
-  getVerifiedSourceCount,
+  getNextAssignment,
   isReadyToSubmit,
 } from '../utils/draft.utils'
 
@@ -35,7 +35,7 @@ export function DraftCard({
 }: DraftCardProps) {
   const progress = getDraftProgress(draft)
   const coAuthorCount = getCoAuthorCount(draft)
-  const verifiedSources = getVerifiedSourceCount(draft)
+  const assignment = getNextAssignment(draft)
   const ready = isReadyToSubmit(draft)
 
   return (
@@ -109,14 +109,14 @@ export function DraftCard({
             {getDraftStatusLabel(draft.status)}
           </span>
 
-          {draft.factCheckStatus === 'verified' && (
+          {draft.factCheck.status === 'verified' && (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Fact Checked
             </span>
           )}
 
-          {draft.factCheckStatus === 'needs-revision' && (
+          {draft.factCheck.status === 'issues-found' && (
             <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
               Fact Check Revision
             </span>
@@ -129,7 +129,7 @@ export function DraftCard({
               Sources
             </p>
             <p className="mt-1 text-sm font-semibold text-[var(--color-card-heading)]">
-              {verifiedSources}/{draft.sources.length} verified
+              {draft.metrics.sources} cited · {draft.metrics.evidenceItems} evidence
             </p>
           </div>
 
@@ -138,7 +138,7 @@ export function DraftCard({
               Word Count
             </p>
             <p className="mt-1 text-sm font-semibold text-[var(--color-card-heading)]">
-              {draft.wordCount.toLocaleString()}
+              {draft.metrics.wordCount.toLocaleString()}
             </p>
           </div>
         </div>
@@ -154,11 +154,11 @@ export function DraftCard({
             </div>
           )}
 
-          {draft.assignment && (
+          {assignment && (
             <div className="flex items-center gap-2 text-xs text-[var(--color-card-text-muted)]">
               <FileCheck2 className="h-4 w-4" />
               <span className="truncate">
-                Assignment: {draft.assignment.title}
+                Assignment: {assignment.task}
               </span>
             </div>
           )}
@@ -171,13 +171,13 @@ export function DraftCard({
             </span>
           </div>
 
-          {draft.assignment?.dueDate && (
+          {assignment?.dueDate && (
             <div className="flex items-center gap-2 text-xs text-[var(--color-card-text-muted)]">
               <CalendarDays className="h-4 w-4" />
               <span>
                 Due{' '}
                 {new Date(
-                  draft.assignment.dueDate,
+                  assignment.dueDate,
                 ).toLocaleDateString()}
               </span>
             </div>

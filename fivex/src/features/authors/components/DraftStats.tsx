@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 
 import type { AuthorArticle } from '../types/authorArticle.types'
+import { isReadyToSubmit } from '../utils/draft.utils'
 
 interface DraftStatsProps {
   drafts: AuthorArticle[]
@@ -15,20 +16,16 @@ interface DraftStatsProps {
 export function DraftStats({ drafts }: DraftStatsProps) {
   const total = drafts.length
 
+  const readyToSubmit = drafts.filter(isReadyToSubmit).length
+
   const inProgress = drafts.filter(
-    (draft) =>
-      draft.status === 'draft' ||
-      draft.status === 'in-progress',
+    (draft) => draft.status === 'draft' && !isReadyToSubmit(draft),
   ).length
 
   const factChecking = drafts.filter(
     (draft) =>
-      draft.status === 'fact-check-needed' ||
-      draft.status === 'fact-checking',
-  ).length
-
-  const readyToSubmit = drafts.filter(
-    (draft) => draft.status === 'ready-to-submit',
+      draft.factCheck.status === 'pending' ||
+      draft.factCheck.status === 'in-review',
   ).length
 
   const stats = [

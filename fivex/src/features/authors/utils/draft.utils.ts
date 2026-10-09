@@ -1,6 +1,7 @@
 
 import type {
   AuthorArticle,
+  AuthorArticleAssignment,
   AuthorArticleStatus,
   FactCheckStatus,
 } from '../types/authorArticle.types'
@@ -8,13 +9,11 @@ import type {
 export function getDraftStatusLabel(status: AuthorArticleStatus) {
   const labels: Record<AuthorArticleStatus, string> = {
     draft: 'Draft',
-    'in-progress': 'In Progress',
-    'fact-check-needed': 'Fact Check Needed',
-    'fact-checking': 'Fact Checking',
-    'editorial-review': 'Editorial Review',
-    'revision-requested': 'Revision Requested',
-    'ready-to-submit': 'Ready to Submit',
     submitted: 'Submitted',
+    'in-review': 'In Review',
+    approved: 'Approved',
+    published: 'Published',
+    rejected: 'Rejected',
   }
 
   return labels[status]
@@ -22,47 +21,38 @@ export function getDraftStatusLabel(status: AuthorArticleStatus) {
 
 export function getFactCheckStatusLabel(status: FactCheckStatus) {
   const labels: Record<FactCheckStatus, string> = {
-    'not-started': 'Not Started',
-    requested: 'Requested',
-    'in-progress': 'In Progress',
+    'not-submitted': 'Not Submitted',
+    pending: 'Pending',
+    'in-review': 'In Review',
+    'issues-found': 'Issues Found',
     verified: 'Verified',
-    'needs-revision': 'Needs Revision',
   }
 
   return labels[status]
 }
 
 export function getDraftProgress(article: AuthorArticle) {
-  const completedSteps = [
-    article.wordCount > 0,
-    article.sources.length > 0,
-    article.factCheckStatus === 'verified',
-    article.status === 'editorial-review' ||
-      article.status === 'ready-to-submit' ||
-      article.status === 'submitted',
-  ].filter(Boolean).length
-
-  return Math.round((completedSteps / 4) * 100)
+  return Math.min(100, Math.max(0, Math.round(article.workflow.completionPercent)))
 }
 
 export function getFactCheckCount(article: AuthorArticle) {
-  return article.factChecks.length
-}
-
-export function getVerifiedSourceCount(article: AuthorArticle) {
-  return article.sources.filter((source) => source.verified).length
+  return article.factCheck.verifiedClaims + article.factCheck.issuesFound
 }
 
 export function getCoAuthorCount(article: AuthorArticle) {
-  return article.collaborators.filter(
-    (collaborator) => collaborator.role === 'co-author',
-  ).length
+  return article.collaboration.coAuthors.length
+}
+
+// The assignment that needs attention next: the open one that is due soonest.
+export function getNextAssignment(article: AuthorArticle): AuthorArticleAssignment | null {
+  const open = article.collaboration.assignments
+    .filter((assignment) => assignment.status !== 'completed')
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+
+  return open[0] ?? null
 }
 
 export function isReadyToSubmit(article: AuthorArticle) {
-  return (
-    article.status === 'ready-to-submit' &&
-    article.factCheckStatus === 'verified'
-  )
+  return article.submission.ready && article.factCheck.status === 'verified'
 }
 
