@@ -16,7 +16,7 @@ async function main() {
     logger.info(`CORS allows: ${env.CLIENT_ORIGINS.join(', ')}`)
     logger.info(
       env.UNOSEND_API_KEY
-        ? `Mail: sending as ${env.MAIL_FROM} (the domain must be verified in Unosend)`
+        ? `Mail: sending as ${env.MAIL_FROM} (the domain must be verified in Unosend); replies go to ${env.MAIL_REPLY_TO ?? 'nobody (no Reply-To set)'}`
         : 'Mail: UNOSEND_API_KEY not set, so emails are logged instead of sent',
     )
 

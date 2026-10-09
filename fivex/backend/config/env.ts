@@ -40,6 +40,12 @@ const envSchema = z.object({
   UNOSEND_BASE_URL: z.string().url().optional().default('https://api.unosend.co'),
   // Must be an address on a domain verified in your Unosend account.
   MAIL_FROM: z.string().default('IsItTrue News <no-reply@isittruenews.com>'),
+  // Optional: where replies go (e.g. a monitored inbox). Unlike MAIL_FROM, this can be any address,
+  // including Gmail. Leave blank to send with no Reply-To.
+  MAIL_REPLY_TO: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().trim().email('MAIL_REPLY_TO must be a plain email address, e.g. support@example.com').optional(),
+  ),
 
   CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
   CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY is required'),

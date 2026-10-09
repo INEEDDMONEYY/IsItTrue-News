@@ -35,7 +35,8 @@ async function main() {
   })
 
   console.log(`Accepted by Unosend → id=${receipt?.id} status=${receipt?.status}`)
-  console.log(`  from: ${env.MAIL_FROM}`)
+  console.log(`  from:     ${env.MAIL_FROM}`)
+  console.log(`  reply-to: ${env.MAIL_REPLY_TO ?? '(none)'}`)
   console.log(`  to:   ${parsed.data}`)
 }
 

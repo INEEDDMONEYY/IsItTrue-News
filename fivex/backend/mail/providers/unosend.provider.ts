@@ -62,7 +62,8 @@ export async function sendWithUnosend(message: MailMessage): Promise<MailReceipt
         subject: message.subject,
         html: message.html,
         text: message.text,
-        ...(message.replyTo ? { reply_to: message.replyTo } : {}),
+        // A per-message reply-to wins; otherwise every email falls back to the configured MAIL_REPLY_TO.
+        ...((message.replyTo ?? env.MAIL_REPLY_TO) ? { reply_to: message.replyTo ?? env.MAIL_REPLY_TO } : {}),
         priority: message.priority ?? 'normal',
         // Transactional mail carries one-time links (e.g. email verification). Click tracking would
         // route those through a redirect domain, so it stays off; open tracking adds nothing here.
