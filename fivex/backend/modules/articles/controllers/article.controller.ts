@@ -109,6 +109,14 @@ export const articleController = {
     res.status(200).json({ article: article ? serializePublicArticle(article) : null })
   }),
 
+  // Public: newest published articles for the homepage "Latest Posts" list.
+  listLatest: asyncHandler(async (req: Request, res: Response) => {
+    const requested = Number.parseInt(String(req.query.limit ?? ''), 10)
+    const limit = Number.isFinite(requested) ? Math.min(Math.max(requested, 1), 20) : 5
+    const articles = await articleService.listLatestPublished(limit)
+    res.status(200).json({ articles })
+  }),
+
   getBySlug: asyncHandler(async (req: Request, res: Response) => {
     const { article, locked } = await articleService.getArticleBySlug(req.params.slug, req.user)
     const liked = req.user ? article.likedBy.some((id) => id.toString() === req.user!.id) : false

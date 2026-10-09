@@ -27,9 +27,12 @@ const envSchema = z.object({
   EMAIL_VERIFICATION_EXPIRES_IN_MINUTES: z.coerce.number().int().positive().default(60),
   APP_URL: z.string().url('APP_URL must be a valid URL'),
 
-  UNSEND_API_KEY: z.string().optional().default(''),
-  UNSEND_BASE_URL: z.string().url().optional().default('https://app.unsend.dev'),
-  MAIL_FROM: z.string().default('IsItTrue News <no-reply@isittrue.com>'),
+  // Unosend (https://unosend.co) transactional email. Leave the key blank in development to log
+  // emails to the console instead of sending them.
+  UNOSEND_API_KEY: z.string().optional().default(''),
+  UNOSEND_BASE_URL: z.string().url().optional().default('https://api.unosend.co'),
+  // Must be an address on a domain verified in your Unosend account.
+  MAIL_FROM: z.string().default('IsItTrue News <no-reply@isittruenews.com>'),
 
   CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
   CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY is required'),
@@ -41,6 +44,30 @@ const envSchema = z.object({
   AUTH_RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().positive().default(15),
   EMAIL_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(3),
   EMAIL_RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().positive().default(60),
+
+  // Pre-launch team access: the code developers enter at /dev-access to bypass the landing page.
+  // Leave blank to disable the bypass endpoint entirely.
+  PRELAUNCH_ACCESS_CODE: z
+    .string()
+    .default('')
+    .refine((code) => code === '' || code.length >= 12, 'PRELAUNCH_ACCESS_CODE must be at least 12 characters'),
+  PRELAUNCH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
+  PRELAUNCH_RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().positive().default(15),
+
+  // How many reverse proxies sit between the internet and this server (Render's load balancer is 1;
+  // Vercel rewriting /api to Render makes it 2). Express uses this to work out the real client IP,
+  // which the rate limiters key on. Too low: every visitor shares one limit. Too high: clients can
+  // forge their IP. Leave unset for the default (1 in production, 0 otherwise).
+  TRUST_PROXY_HOPS: z.preprocess(
+    // A blank line in .env must mean "unset", not 0 (z.coerce would turn '' into 0).
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.coerce
+      .number({ invalid_type_error: 'TRUST_PROXY_HOPS must be a whole number (e.g. 1)' })
+      .int('TRUST_PROXY_HOPS must be a whole number (e.g. 1)')
+      .min(0, 'TRUST_PROXY_HOPS cannot be negative')
+      .max(5, 'TRUST_PROXY_HOPS above 5 is almost certainly a mistake')
+      .optional(),
+  ),
 })
 
 const parsed = envSchema.safeParse(process.env)
@@ -54,3 +81,5 @@ if (!parsed.success) {
 
 export const env = parsed.data
 export const isProduction = env.NODE_ENV === 'production'
+// Production runs behind Render's load balancer (one hop); local development has no proxy.
+export const trustProxyHops = env.TRUST_PROXY_HOPS ?? (isProduction ? 1 : 0)

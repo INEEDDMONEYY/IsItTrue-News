@@ -28,3 +28,28 @@ export const emailRateLimiter = rateLimit({
   },
   message: { message: 'Too many email requests. Please try again later.' },
 })
+
+/**
+ * Per-IP limiter for the public pre-launch endpoints (waitlist signup, team access code),
+ * so one address can neither flood the waitlist with different emails nor brute-force the code.
+ */
+export const prelaunchRateLimiter = rateLimit({
+  windowMs: env.PRELAUNCH_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
+  max: env.PRELAUNCH_RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many requests. Please try again later.' },
+})
+
+/**
+ * Same window for team access attempts, but only failed guesses count, so a correct code
+ * never locks a developer out while repeated wrong guesses do.
+ */
+export const accessCodeRateLimiter = rateLimit({
+  windowMs: env.PRELAUNCH_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
+  max: env.PRELAUNCH_RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  message: { message: 'Too many attempts. Please try again later.' },
+})

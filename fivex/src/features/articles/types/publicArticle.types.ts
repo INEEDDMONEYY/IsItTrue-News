@@ -21,6 +21,8 @@ export interface PublicArticle {
   // Omitted by the backend when this reader has hit their free-plan monthly
   // article cap — see `locked`.
   body?: string
+  // Present on teaser lists that omit the body (e.g. the homepage Latest Posts).
+  readTimeMinutes?: number
   category: string
   tags: string[]
   sourceLinks: string[]

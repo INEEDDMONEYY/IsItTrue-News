@@ -91,6 +91,14 @@ export const articleRepository = {
       .populate('author', 'name')
   },
 
+  // Homepage "Latest Posts": newest published first, capped.
+  async findLatestPublished(limit: number): Promise<ArticleDocument[]> {
+    return Article.find({ status: ARTICLE_STATUSES.PUBLISHED })
+      .sort({ publishedAt: -1, createdAt: -1 })
+      .limit(limit)
+      .populate('author', 'name')
+  },
+
   async findPublishedByCategory(category: string): Promise<ArticleDocument[]> {
     return Article.find({ status: ARTICLE_STATUSES.PUBLISHED, category })
       .sort({ publishedAt: -1 })

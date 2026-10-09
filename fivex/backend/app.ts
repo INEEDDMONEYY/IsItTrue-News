@@ -4,7 +4,7 @@ import express, { type Express } from 'express'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import { corsOptions } from './config/cors.js'
-import { isProduction } from './config/env.js'
+import { isProduction, trustProxyHops } from './config/env.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 import { LOCAL_UPLOAD_ROOT, LOCAL_UPLOAD_URL_PREFIX } from './storage/local.js'
@@ -26,9 +26,16 @@ import { topicSubmissionRoutes } from './modules/topicSubmissions/routes/topicSu
 import { searchRoutes } from './modules/search/routes/search.routes.js'
 import { investigationRoutes } from './modules/investigations/routes/investigation.routes.js'
 import { correctionRoutes } from './modules/corrections/routes/correction.routes.js'
+import { prelaunchRoutes } from './modules/prelaunch/routes/prelaunch.routes.js'
+import { analyticsRoutes } from './modules/analytics/routes/analytics.routes.js'
 
 export function createApp(): Express {
   const app = express()
+
+  // Behind a proxy, req.ip is the proxy's address unless Express is told how many hops to trust.
+  // A hop count (never `true`) means only the entries the trusted proxies appended are believed, so a
+  // client can't pick its own IP by sending a forged X-Forwarded-For. See TRUST_PROXY_HOPS in env.ts.
+  app.set('trust proxy', trustProxyHops)
 
   app.use(
     helmet({
@@ -75,6 +82,8 @@ export function createApp(): Express {
   app.use('/api/search', searchRoutes)
   app.use('/api/investigations', investigationRoutes)
   app.use('/api/corrections', correctionRoutes)
+  app.use('/api/prelaunch', prelaunchRoutes)
+  app.use('/api/analytics', analyticsRoutes)
 
   app.use(notFound)
   app.use(errorHandler)

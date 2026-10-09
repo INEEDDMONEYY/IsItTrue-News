@@ -89,6 +89,8 @@ import { BecomeEditorPage } from '@/features/onboarding/pages/BecomeEditorPage'
 import { EditorOnboardingPage } from '@/features/onboarding/pages/EditorOnboardingPage'
 import { OrganizationSeatsPage } from '@/features/organizations/pages/OrganizationSeatsPage'
 import { OrganizationBillingPage } from '@/features/organizations/pages/OrganizationBillingPage'
+import { DevAccessPage } from '@/features/prelaunch/pages/DevAccessPage'
+import { PRELAUNCH_ENABLED } from '@/config/prelaunch'
 
 export const router = createBrowserRouter([
   {
@@ -217,6 +219,10 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  // Lets unlocked team members see their status and lock the preview again.
+  ...(PRELAUNCH_ENABLED
+    ? [{ path: '/dev-access', element: <DevAccessPage />, errorElement: <ErrorPage /> }]
+    : []),
   {
     element: <AuthLayout />,
     errorElement: <ErrorPage />,

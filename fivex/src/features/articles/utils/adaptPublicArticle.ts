@@ -42,7 +42,7 @@ export function adaptPublicArticle(article: PublicArticle): Article {
     },
     author: { id: article.author?.id ?? 'unknown', name: article.author?.name ?? 'Staff Writer' },
     publishedAt: article.publishedAt ?? article.createdAt,
-    readTimeMinutes: estimateReadTimeMinutes(article.body ?? article.excerpt),
+    readTimeMinutes: article.readTimeMinutes ?? estimateReadTimeMinutes(article.body ?? article.excerpt),
     stats: { views: article.views, comments: 0, shares: 0 },
     verificationStatus: VERIFICATION_STATUS_MAP[article.factCheckStatus ?? 'none'],
   }

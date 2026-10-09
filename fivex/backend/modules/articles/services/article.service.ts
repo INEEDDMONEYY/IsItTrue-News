@@ -259,6 +259,19 @@ export const articleService = {
     return articleRepository.findFeatured()
   },
 
+  // Public teaser list: the body is never sent, only a read-time estimate derived from it.
+  async listLatestPublished(limit: number) {
+    const articles = await articleRepository.findLatestPublished(limit)
+    return articles.map((article) => {
+      const words = article.body.trim().split(/\s+/).filter(Boolean).length
+      const json = article.toJSON() as Record<string, unknown>
+      delete json.body
+      delete json.editorialStage
+      delete json.editorialDeadline
+      return { ...json, readTimeMinutes: Math.max(1, Math.ceil(words / 200)) }
+    })
+  },
+
   async getArticleById(id: string, actingUser?: ActingUser) {
     const article = await articleRepository.findById(id)
     if (!article) {

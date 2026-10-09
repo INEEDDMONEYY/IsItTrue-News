@@ -7,9 +7,9 @@ import { EditorsPicksCarousel } from '../components/EditorsPicksCarousel'
 import { useCategories } from '@/features/categories/hooks/useCategories'
 import { usePagination } from '@/hooks/usePagination'
 import { Pagination } from '@/components/ui/Pagination'
+import { useLatestPosts } from '../hooks/useLatestPosts'
 import {
   FEATURED_ARTICLE,
-  LATEST_POSTS,
   TRENDING_ARTICLES,
 } from '../data/mockHome'
 
@@ -17,6 +17,7 @@ const PAGE_SIZE = 6
 
 export function HomePage() {
   const { categories } = useCategories()
+  const latestPosts = useLatestPosts()
   const { page, setPage, totalPages, paginatedItems } = usePagination(
     TRENDING_ARTICLES,
     PAGE_SIZE,
@@ -26,7 +27,11 @@ export function HomePage() {
     <div className="py-6 md:py-10 flex flex-col gap-10">
       <section className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         <FeaturedArticle article={FEATURED_ARTICLE} />
-        <LatestPostsList articles={LATEST_POSTS} />
+        <LatestPostsList
+          articles={latestPosts.articles}
+          isLoading={latestPosts.isLoading}
+          isError={latestPosts.isError}
+        />
       </section>
 
       <VideoSection />

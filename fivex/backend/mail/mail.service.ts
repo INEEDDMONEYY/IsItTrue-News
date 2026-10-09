@@ -1,47 +1,47 @@
 import { env } from '../config/env.js'
 import { logger } from '../config/logger.js'
-import { getUnsendClient } from './providers/unsend.provider.js'
+import {
+  isMailConfigured,
+  sendWithUnosend,
+  type MailMessage,
+  type MailReceipt,
+} from './providers/unosend.provider.js'
 import { verificationEmailTemplate } from './templates/verificationEmail.js'
+import { waitlistWelcomeTemplate } from './templates/waitlistWelcome.js'
 
-interface SendMailInput {
-  to: string
-  subject: string
-  html: string
-  text: string
-}
+export type EmailTemplate = Pick<MailMessage, 'subject' | 'html' | 'text'>
 
-async function sendMail({ to, subject, html, text }: SendMailInput): Promise<void> {
-  const client = getUnsendClient()
-
-  if (!client) {
-    logger.info(`(dev) Email logged instead of sent → to=${to} subject="${subject}"`)
-    return
+// Resolves to null when no provider key is configured and the message was only logged (local dev).
+async function deliver(message: MailMessage): Promise<MailReceipt | null> {
+  if (!isMailConfigured()) {
+    logger.info(`(dev) Email logged instead of sent → to=${message.to} subject="${message.subject}"`)
+    return null
   }
 
-  const { error } = await client.emails.send({
-    from: env.MAIL_FROM,
-    to,
-    subject,
-    html,
-    text,
-  })
-
-  if (error) {
-    logger.error(`Failed to send email via Unsend → to=${to} subject="${subject}"`, error)
-    throw new Error(`Failed to send email: ${error.message}`)
-  }
+  return sendWithUnosend(message)
 }
-
 
 export const mailService = {
-  async sendVerificationEmail(params: { name: string; email: string; token: string }): Promise<void> {
+  isConfigured: isMailConfigured,
+
+  // Sends any rendered template (see templates/layout.ts) — new emails only need a template.
+  sendTemplated(to: string, template: EmailTemplate, options: Pick<MailMessage, 'priority' | 'replyTo'> = {}) {
+    return deliver({ to, ...template, ...options })
+  },
+
+  async sendVerificationEmail(params: { name: string; email: string; token: string }): Promise<MailReceipt | null> {
     const verificationUrl = `${env.APP_URL}/verify-email?token=${encodeURIComponent(params.token)}`
-    const { subject, html, text } = verificationEmailTemplate({
+    const template = verificationEmailTemplate({
       name: params.name,
       verificationUrl,
       expiresInMinutes: env.EMAIL_VERIFICATION_EXPIRES_IN_MINUTES,
     })
 
-    await sendMail({ to: params.email, subject, html, text })
+    // One-time links should arrive fast.
+    return this.sendTemplated(params.email, template, { priority: 'high' })
+  },
+
+  async sendWaitlistWelcomeEmail(params: { name?: string; email: string }): Promise<MailReceipt | null> {
+    return this.sendTemplated(params.email, waitlistWelcomeTemplate({ name: params.name }))
   },
 }

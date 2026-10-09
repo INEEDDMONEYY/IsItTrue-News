@@ -1,5 +1,5 @@
 import { createApp } from './app.js'
-import { env } from './config/env.js'
+import { env, isProduction, trustProxyHops } from './config/env.js'
 import { logger } from './config/logger.js'
 import { connectDatabase, disconnectDatabase } from './database/connection.js'
 import { categoryService } from './modules/categories/services/category.service.js'
@@ -12,7 +12,12 @@ async function main() {
 
   const app = createApp()
   const server = app.listen(env.PORT, () => {
-    logger.info(`API server listening on port ${env.PORT} (${env.NODE_ENV})`)
+    logger.info(`API server listening on port ${env.PORT} (${env.NODE_ENV}), trusting ${trustProxyHops} proxy hop(s)`)
+    if (isProduction && trustProxyHops === 0) {
+      logger.warn(
+        'TRUST_PROXY_HOPS is 0 in production: behind a load balancer every visitor will share one rate-limit bucket.',
+      )
+    }
   })
 
   async function shutdown(signal: string) {

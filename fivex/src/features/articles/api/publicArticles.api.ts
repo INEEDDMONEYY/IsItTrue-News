@@ -8,6 +8,13 @@ import type { PublicArticle } from '../types/publicArticle.types'
  * mock filler content.
  */
 export const publicArticlesApi = {
+  listLatest: async (limit = 5): Promise<PublicArticle[]> => {
+    const { data } = await apiClient.get<{ articles: PublicArticle[] }>('/api/articles/latest', {
+      params: { limit },
+    })
+    return data.articles
+  },
+
   listByCategory: async (slug: string): Promise<PublicArticle[]> => {
     const { data } = await apiClient.get<{ articles: PublicArticle[] }>(
       `/api/articles/category/${encodeURIComponent(slug)}`,

@@ -89,8 +89,9 @@ communication goes through `state/`, `api/`, or `shared/`.
 └── utils/          # helpers specific to this module (e.g. articles/readingTime)
 ```
 
-Modules: `articles`, `auth`, `bookmarks`, `categories`, `comments`, `media`,
-`notifications`, `search`, `tags`, `users`.
+Modules: `analytics` (admin overview: waitlist, accounts, content), `articles`, `auth`, `bookmarks`,
+`categories`, `comments`, `media`, `notifications`, `prelaunch` (waitlist signup and team access
+code), `search`, `tags`, `users`.
 
 A module owns its own model(s) — models are never scattered in a top-level `models/`
 folder. If a piece of logic is needed by more than one module, move it to `shared/`,

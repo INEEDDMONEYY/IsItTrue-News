@@ -52,6 +52,10 @@ router.get('/all', authenticate, authorize(ROLES.ADMIN), articleController.listA
 // featured slot. Declared before "/:id" for the same reason as above.
 router.get('/featured', articleController.getFeatured)
 
+// Public: newest published articles (no bodies) for the homepage "Latest Posts".
+// Declared before "/:id" for the same reason as above.
+router.get('/latest', articleController.listLatest)
+
 // Public: published articles for a given category/tag page, looked up by
 // slug. Declared before "/:id" for the same reason as above.
 router.get('/category/:slug', articleController.listByCategory)
