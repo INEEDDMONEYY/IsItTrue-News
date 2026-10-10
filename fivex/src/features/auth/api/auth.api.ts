@@ -13,4 +13,8 @@ export const authApi = {
   me: () => apiClient.get<{ user: AuthUser }>(AUTH_ENDPOINTS.me),
   resendVerification: (email: string) =>
     apiClient.post<{ message: string }>(AUTH_ENDPOINTS.resendVerification, { email }),
+  forgotPassword: (email: string) =>
+    apiClient.post<{ message: string }>(AUTH_ENDPOINTS.forgotPassword, { email }),
+  resetPassword: (payload: { token: string; password: string }) =>
+    apiClient.post<{ message: string }>(AUTH_ENDPOINTS.resetPassword, payload),
 }

@@ -4,7 +4,15 @@ import { clearAuthCookies, setAuthCookies } from '../../../utils/cookies.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
 import { authService } from '../services/auth.service.js'
-import type { LoginInput, RegisterInput, ResendVerificationInput, VerifyEmailInput } from '../validations/auth.validation.js'
+import { passwordResetService } from '../services/passwordReset.service.js'
+import type {
+  ForgotPasswordInput,
+  LoginInput,
+  RegisterInput,
+  ResendVerificationInput,
+  ResetPasswordInput,
+  VerifyEmailInput,
+} from '../validations/auth.validation.js'
 
 export const authController = {
   register: asyncHandler(async (req: Request, res: Response) => {
@@ -31,6 +39,23 @@ export const authController = {
     await authService.verifyEmail(token)
 
     res.status(200).json({ message: 'Email verified successfully. You can now sign in.' })
+  }),
+
+  forgotPassword: asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body as ForgotPasswordInput
+    await passwordResetService.requestReset(email)
+
+    // Identical for every address: never confirm or deny that an account exists.
+    res.status(200).json({
+      message: 'If an account with that email exists, we have sent a link to reset its password.',
+    })
+  }),
+
+  resetPassword: asyncHandler(async (req: Request, res: Response) => {
+    const { token, password } = req.body as ResetPasswordInput
+    await passwordResetService.resetPassword(token, password)
+
+    res.status(200).json({ message: 'Your password has been updated. You can now sign in.' })
   }),
 
   login: asyncHandler(async (req: Request, res: Response) => {

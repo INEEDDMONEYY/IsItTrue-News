@@ -86,6 +86,49 @@ export const userRepository = {
     )
   },
 
+  async findByEmailWithResetState(email: string): Promise<UserDocument | null> {
+    return User.findOne({ email: normalizeEmail(email) }).select('+passwordResetLastSentAt')
+  },
+
+  // Issuing a new link overwrites the hash, which invalidates any earlier link.
+  async setPasswordResetToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {
+    await User.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          passwordResetTokenHash: tokenHash,
+          passwordResetExpires: expiresAt,
+          passwordResetLastSentAt: new Date(),
+        },
+      },
+    )
+  },
+
+  async findByPasswordResetTokenHash(tokenHash: string): Promise<UserDocument | null> {
+    return User.findOne({ passwordResetTokenHash: tokenHash }).select('+passwordResetExpires')
+  },
+
+  // Sets the new password and burns the token in ONE atomic update, so a link can be used exactly once even
+  // if it is submitted twice at the same moment. Returns null if the token was already used or has expired.
+  // A reset link only ever reaches the account's own inbox, so completing it also proves the address is
+  // theirs: verification is marked complete, otherwise someone who never verified would stay locked out.
+  async consumePasswordResetToken(tokenHash: string, passwordHash: string): Promise<UserDocument | null> {
+    return User.findOneAndUpdate(
+      { passwordResetTokenHash: tokenHash, passwordResetExpires: { $gt: new Date() } },
+      {
+        $set: { passwordHash, isEmailVerified: true },
+        $unset: {
+          passwordResetTokenHash: '',
+          passwordResetExpires: '',
+          passwordResetLastSentAt: '',
+          emailVerificationTokenHash: '',
+          emailVerificationExpires: '',
+        },
+      },
+      { new: true },
+    )
+  },
+
   async findAll(): Promise<UserDocument[]> {
     return User.find().sort({ createdAt: -1 })
   },

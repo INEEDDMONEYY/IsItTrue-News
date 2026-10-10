@@ -1,16 +1,19 @@
 import { useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, ExternalLink, Lock } from 'lucide-react'
-import DOMPurify from 'dompurify'
+import { ArrowLeft, Lock } from 'lucide-react'
 import dayjs from '@/lib/dayjs'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { PageLoader } from '@/components/loaders/PageLoader'
 import { SignUpPromptModal } from '@/components/modals/SignUpPromptModal'
-import { VerdictBadge } from '@/features/fact-checks/components/VerdictBadge'
 import { EngagementBar } from '../components/EngagementBar'
 import { FactCheckPanel } from '../components/FactCheckPanel'
 import { CommentSection } from '../components/CommentSection'
+import { ArticleHeader } from '../components/ArticleHeader'
+import { ArticleCover } from '../components/ArticleCover'
+import { ArticleBodyHtml } from '../components/ArticleBody'
+import { sanitizeArticleHtml } from '../utils/articleBody'
+import { ArticleSources } from '../components/ArticleSources'
 import { getArticleDetailBySlug } from '../data/mockArticleDetails'
 import { publicArticlesApi } from '../api/publicArticles.api'
 import { adaptPublicArticleDetail } from '../utils/adaptPublicArticle'
@@ -48,8 +51,7 @@ export function ArticlePage() {
   // Sanitize the author's rich-text HTML before rendering it so the body
   // keeps its original formatting (headings, lists, bold/italic, images,
   // links) without exposing readers to stored XSS from article content.
-  const bodyHtml = article?.bodyHtml
-  const sanitizedBodyHtml = bodyHtml ? DOMPurify.sanitize(bodyHtml).trim() || null : null
+  const sanitizedBodyHtml = sanitizeArticleHtml(article?.bodyHtml)
 
   const factCheckRef = useRef<HTMLDivElement>(null)
   const commentsRef = useRef<HTMLDivElement>(null)
@@ -98,34 +100,16 @@ export function ArticlePage() {
         Return to Feed
       </button>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] uppercase tracking-wide font-medium text-accent">
-            {article.category.name}
-          </span>
-          <VerdictBadge verdict={article.factCheck.status} />
-        </div>
+      <ArticleHeader
+        category={article.category.name}
+        verdict={article.factCheck.status}
+        title={article.title}
+        authorName={article.author.name}
+        publishedAt={article.publishedAt}
+        readTimeMinutes={article.readTimeMinutes}
+      />
 
-        <h1 className="text-2xl md:text-3xl font-semibold text-heading leading-snug">
-          {article.title}
-        </h1>
-
-        <div className="flex items-center gap-2 text-sm text-text-muted">
-          <span className="font-medium text-heading">{article.author.name}</span>
-          <span>·</span>
-          <span>{dayjs(article.publishedAt).format('MMM D, YYYY')}</span>
-          <span>·</span>
-          <span>{article.readTimeMinutes} min read</span>
-        </div>
-      </div>
-
-      <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-card-2">
-        <img
-          src={article.thumbnailUrl}
-          alt={article.title}
-          className={`w-full h-full object-cover ${isAnonLocked ? 'blur-md select-none' : ''}`}
-        />
-      </div>
+      <ArticleCover src={article.thumbnailUrl} alt={article.title} blurred={isAnonLocked} />
 
       <EngagementBar
         likes={article.likes}
@@ -205,13 +189,7 @@ export function ArticlePage() {
         </div>
       ) : sanitizedBodyHtml ? (
         <div className={isAnonLocked ? 'relative max-h-[420px] overflow-hidden' : undefined}>
-          <div
-            className="article-body text-[15px] text-text leading-relaxed space-y-4 [&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-2 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-heading [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-heading [&_blockquote]:border-l-2 [&_blockquote]:border-accent-border [&_blockquote]:pl-3 [&_blockquote]:text-text-muted [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold"
-            style={isAnonLocked ? { userSelect: 'none' } : undefined}
-            onCopy={isAnonLocked ? (event) => event.preventDefault() : undefined}
-            onCut={isAnonLocked ? (event) => event.preventDefault() : undefined}
-            dangerouslySetInnerHTML={{ __html: sanitizedBodyHtml }}
-          />
+          <ArticleBodyHtml html={sanitizedBodyHtml} protectedContent={isAnonLocked} />
 
           {isAnonLocked && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center justify-end gap-3 bg-gradient-to-t from-bg via-bg/95 to-transparent px-4 pb-6 pt-24 text-center">
@@ -243,24 +221,7 @@ export function ArticlePage() {
       )}
 
       {!isAnonLocked && article.sourceLinks && article.sourceLinks.length > 0 && (
-        <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-4">
-          <h2 className="text-sm font-semibold text-heading">Sources</h2>
-          <ul className="flex flex-col gap-1.5">
-            {article.sourceLinks.map((link, i) => (
-              <li key={i}>
-                <a
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-accent hover:underline break-all"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                  {link}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ArticleSources links={article.sourceLinks} />
       )}
 
       <FactCheckPanel ref={factCheckRef} factCheck={article.factCheck} />

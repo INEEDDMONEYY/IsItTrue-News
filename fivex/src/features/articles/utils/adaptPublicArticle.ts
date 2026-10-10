@@ -18,7 +18,7 @@ function slugify(value: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-function estimateReadTimeMinutes(body: string): number {
+export function estimateReadTimeMinutes(body: string): number {
   const words = body.trim().split(/\s+/).filter(Boolean).length
   return Math.max(1, Math.ceil(words / 200))
 }

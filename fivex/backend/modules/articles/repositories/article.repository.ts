@@ -45,9 +45,9 @@ export interface UpdateArticleInput {
   body?: string
   category?: string
   tags?: string[]
-  articleImageUrl?: string
-  articleVideoUrl?: string
-  videoThumbnailUrl?: string
+  articleImageUrl?: string | null
+  articleVideoUrl?: string | null
+  videoThumbnailUrl?: string | null
   socialLinks?: string[]
   sourceLinks?: string[]
 }
@@ -167,7 +167,20 @@ export const articleRepository = {
   },
 
   async updateById(id: string, input: UpdateArticleInput): Promise<void> {
-    await Article.updateOne({ _id: id }, { $set: input })
+    const set: Record<string, unknown> = {}
+    const unset: Record<string, 1> = {}
+    for (const [key, value] of Object.entries(input)) {
+      if (value === undefined) continue
+      if (value === null) unset[key] = 1
+      else set[key] = value
+    }
+    await Article.updateOne(
+      { _id: id },
+      {
+        ...(Object.keys(set).length ? { $set: set } : {}),
+        ...(Object.keys(unset).length ? { $unset: unset } : {}),
+      },
+    )
   },
 
   async updateStatus(id: string, status: ArticleStatus): Promise<void> {

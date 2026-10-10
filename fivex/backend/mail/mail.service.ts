@@ -8,6 +8,8 @@ import {
 } from './providers/unosend.provider.js'
 import { verificationEmailTemplate } from './templates/verificationEmail.js'
 import { waitlistWelcomeTemplate } from './templates/waitlistWelcome.js'
+import { passwordResetTemplate } from './templates/passwordReset.js'
+import { passwordChangedTemplate } from './templates/passwordChanged.js'
 
 export type EmailTemplate = Pick<MailMessage, 'subject' | 'html' | 'text'>
 
@@ -43,5 +45,26 @@ export const mailService = {
 
   async sendWaitlistWelcomeEmail(params: { name?: string; email: string }): Promise<MailReceipt | null> {
     return this.sendTemplated(params.email, waitlistWelcomeTemplate({ name: params.name }))
+  },
+
+  async sendPasswordResetEmail(params: { name: string; email: string; token: string }): Promise<MailReceipt | null> {
+    const resetUrl = `${env.APP_URL}/reset-password?token=${encodeURIComponent(params.token)}`
+    const template = passwordResetTemplate({
+      name: params.name,
+      resetUrl,
+      expiresInMinutes: env.PASSWORD_RESET_EXPIRES_IN_MINUTES,
+    })
+
+    return this.sendTemplated(params.email, template, { priority: 'high' })
+  },
+
+  async sendPasswordChangedEmail(params: { name: string; email: string }): Promise<MailReceipt | null> {
+    const template = passwordChangedTemplate({
+      name: params.name,
+      signInUrl: `${env.APP_URL}/login`,
+      resetUrl: `${env.APP_URL}/forgot-password`,
+    })
+
+    return this.sendTemplated(params.email, template, { priority: 'high' })
   },
 }

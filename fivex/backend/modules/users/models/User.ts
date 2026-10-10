@@ -90,7 +90,10 @@ export interface IUser {
   emailVerificationTokenHash?: string
   emailVerificationExpires?: Date
   emailVerificationLastSentAt?: Date
-  // Set (unverified) as soon as a code is sent; only trusted once isPhoneVerified.
+  // Only the SHA-256 hash of the emailed reset token is stored, never the token itself.
+  passwordResetTokenHash?: string
+  passwordResetExpires?: Date
+  passwordResetLastSentAt?: Date
   phone?: string
   isPhoneVerified: boolean
   phoneVerificationCodeHash?: string
@@ -159,6 +162,18 @@ const userSchema = new Schema<IUser>(
       select: false,
     },
     emailVerificationLastSentAt: {
+      type: Date,
+      select: false,
+    },
+    passwordResetTokenHash: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
+    },
+    passwordResetLastSentAt: {
       type: Date,
       select: false,
     },
@@ -311,6 +326,9 @@ const userSchema = new Schema<IUser>(
         delete ret.emailVerificationTokenHash
         delete ret.emailVerificationExpires
         delete ret.emailVerificationLastSentAt
+        delete ret.passwordResetTokenHash
+        delete ret.passwordResetExpires
+        delete ret.passwordResetLastSentAt
         delete ret.phoneVerificationCodeHash
         delete ret.phoneVerificationExpires
         delete ret.phoneVerificationLastSentAt
@@ -323,5 +341,8 @@ const userSchema = new Schema<IUser>(
     },
   },
 )
+
+// Reset links are looked up by token hash; only users with a pending reset carry the field.
+userSchema.index({ passwordResetTokenHash: 1 }, { sparse: true })
 
 export const User = model<IUser>('User', userSchema)

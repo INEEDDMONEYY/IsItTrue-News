@@ -36,15 +36,21 @@ export function NewArticlePage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-heading mb-1">New Article</h1>
-      <p className="text-sm text-text-muted mb-6">
-        Save as a draft to keep working on it, or{' '}
-        {canPublishDirectly
-          ? 'publish it now to post it right away.'
-          : 'submit it for review — an editor will approve it before it goes live.'}
+      <p className="text-sm text-text-muted mb-5">
+        Write your story, check it in the preview, then{' '}
+        {canPublishDirectly ? 'publish it.' : 'submit it for review — an editor approves it before it goes live.'}
       </p>
 
       <ArticleForm
         submitLabel={canPublishDirectly ? 'Publish' : 'Submit for review'}
+        submitConfirmation={
+          canPublishDirectly
+            ? {
+                title: 'Publish this article?',
+                description: 'It will go live straight away, without an editor’s review.',
+              }
+            : undefined
+        }
         isSaving={createMutation.isPending}
         error={createMutation.error}
         onSubmit={handleSubmit}

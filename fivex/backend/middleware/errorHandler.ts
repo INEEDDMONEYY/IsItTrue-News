@@ -20,6 +20,17 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
 
   logger.error(`Unhandled error on ${req.method} ${req.originalUrl}`, err)
 
+  // body-parser failures are the client's problem, not a crash: say so instead of a generic 500.
+  const parserError = (err as { type?: string } | null)?.type
+  if (parserError === 'entity.too.large') {
+    res.status(413).json({ message: 'That is too large to send. Shorten it, and upload images instead of pasting them in.' })
+    return
+  }
+  if (parserError === 'entity.parse.failed') {
+    res.status(400).json({ message: 'The request could not be read. Please try again.' })
+    return
+  }
+
 
   res.status(500).json({
     message: isProduction ? 'Something went wrong. Please try again later.' : String(err),

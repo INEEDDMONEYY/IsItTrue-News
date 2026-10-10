@@ -6,6 +6,7 @@ import morgan from 'morgan'
 import { corsOptions } from './config/cors.js'
 import { isProduction, trustProxyHops } from './config/env.js'
 import { errorHandler } from './middleware/errorHandler.js'
+import { articleWriteJsonParser } from './middleware/articleBodyParser.js'
 import { notFound } from './middleware/notFound.js'
 import { LOCAL_UPLOAD_ROOT, LOCAL_UPLOAD_URL_PREFIX } from './storage/local.js'
 import { authRoutes } from './modules/auth/routes/auth.routes.js'
@@ -46,6 +47,10 @@ export function createApp(): Express {
     }),
   )
   app.use(cors(corsOptions))
+  // Article text is rich-text HTML and legitimately runs past 10 KB, so saving an article gets a larger limit.
+  // This must come before the global parser below, which skips bodies that are already parsed. Every other
+  // endpoint (including the rest of /api/articles) keeps the small default.
+  app.use('/api/articles', articleWriteJsonParser)
   app.use(express.json({ limit: '10kb' }))
   app.use(cookieParser())
   app.use(morgan(isProduction ? 'combined' : 'dev'))

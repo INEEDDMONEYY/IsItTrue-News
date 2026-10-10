@@ -98,7 +98,7 @@ export function Header() {
               className="h-9 w-auto rounded-md bg-white px-2 py-1 border border-border"
             />
             <span className="hidden sm:block text-lg font-semibold text-heading tracking-tight">
-              IsItTrue News
+              IsItTrueNews
             </span>
           </Link>
 

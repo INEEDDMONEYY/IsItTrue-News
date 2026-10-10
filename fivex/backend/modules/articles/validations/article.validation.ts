@@ -2,6 +2,10 @@ import { z } from 'zod'
 import { ARTICLE_STATUSES } from '../constants/articleStatus.js'
 import { ARTICLE_EDITORIAL_STAGES } from '../constants/editorialWorkflow.js'
 
+// Same ceiling the request parser enforces (see middleware/articleBodyParser.ts), stated as a readable error.
+const MAX_BODY_CHARACTERS = 200_000
+const bodySchema = z.string().max(MAX_BODY_CHARACTERS, 'This article is too long. Shorten it and upload images instead of pasting them in.')
+
 const urlListSchema = z.array(z.string().trim().url()).max(10).optional()
 
 const tagListSchema = z.array(z.string().trim().min(1).max(30)).max(15).optional().default([])
@@ -9,7 +13,7 @@ const tagListSchema = z.array(z.string().trim().min(1).max(30)).max(15).optional
 export const createArticleSchema = z.object({
   title: z.string().trim().min(1, 'Title is required').max(200, 'Title is too long'),
   excerpt: z.string().trim().max(400, 'Excerpt is too long').default(''),
-  body: z.string().default(''),
+  body: bodySchema.default(''),
   category: z.string().trim().min(1, 'Category is required'),
   // Authors can save a draft or submit for editorial review. "published" is
   // still accepted so editors/admins can publish directly; for authors the
@@ -28,12 +32,13 @@ export type CreateArticleInput = z.infer<typeof createArticleSchema>
 export const updateArticleSchema = z.object({
   title: z.string().trim().min(1).max(200).optional(),
   excerpt: z.string().trim().max(400).optional(),
-  body: z.string().optional(),
+  body: bodySchema.optional(),
   category: z.string().trim().min(1).optional(),
   tags: z.array(z.string().trim().min(1).max(30)).max(15).optional(),
-  articleImageUrl: z.string().trim().url().optional(),
-  articleVideoUrl: z.string().trim().url().optional(),
-  videoThumbnailUrl: z.string().trim().url().optional(),
+  // null removes the media from the article; leaving the field out keeps it.
+  articleImageUrl: z.string().trim().url().nullable().optional(),
+  articleVideoUrl: z.string().trim().url().nullable().optional(),
+  videoThumbnailUrl: z.string().trim().url().nullable().optional(),
   socialLinks: urlListSchema,
   sourceLinks: urlListSchema,
 })

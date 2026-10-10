@@ -3,9 +3,9 @@ import { usePasswordStrength } from '../hooks/usePasswordStrength'
 const BAR_COLORS = ['bg-disputed', 'bg-disputed', 'bg-pending', 'bg-accent', 'bg-verified']
 
 export function PasswordStrength({ password }: { password: string }) {
-  if (!password) return null
-
   const { score, label } = usePasswordStrength(password)
+
+  if (!password) return null
 
   return (
     <div className="mt-2">

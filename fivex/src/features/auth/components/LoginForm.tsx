@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useLogin } from '../hooks/useLogin'
+import { getErrorMessage } from '@/lib/getErrorMessage'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -61,8 +62,8 @@ export function LoginForm() {
       </label>
 
       {error && (
-        <p className="text-sm text-disputed">
-          {error instanceof Error ? error.message : 'Something went wrong. Please try again.'}
+        <p role="alert" className="text-sm text-disputed">
+          {getErrorMessage(error)}
         </p>
       )}
 

@@ -32,6 +32,8 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
 
   EMAIL_VERIFICATION_EXPIRES_IN_MINUTES: z.coerce.number().int().positive().default(60),
+  // How long a "reset your password" link stays valid. Short on purpose: it grants access to the account.
+  PASSWORD_RESET_EXPIRES_IN_MINUTES: z.coerce.number().int().positive().max(1440).default(30),
   APP_URL: z.string().url('APP_URL must be a valid URL'),
 
   // Unosend (https://unosend.co) transactional email. Leave the key blank in development to log

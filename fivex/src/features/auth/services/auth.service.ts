@@ -27,4 +27,14 @@ export const authService = {
     const response = await authApi.resendVerification(email)
     return response.data
   },
+
+  async forgotPassword(email: string) {
+    const response = await authApi.forgotPassword(email)
+    return response.data
+  },
+
+  async resetPassword(payload: { token: string; password: string }) {
+    const response = await authApi.resetPassword(payload)
+    return response.data
+  },
 }

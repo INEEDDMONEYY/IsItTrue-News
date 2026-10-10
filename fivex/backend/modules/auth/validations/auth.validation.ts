@@ -49,3 +49,17 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Please provide a valid email address').max(254),
+})
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
+
+export const resetPasswordSchema = z.object({
+  // Tokens are 64 hex characters; the cap just stops oversized input reaching the database.
+  token: z.string().trim().min(1, 'A reset token is required').max(200, 'This reset link is invalid.'),
+  password: passwordSchema,
+})
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
+

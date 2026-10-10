@@ -28,9 +28,9 @@ export interface UpdateArticleInput {
   body?: string
   category?: string
   tags?: string[]
-  articleImageUrl?: string
-  articleVideoUrl?: string
-  videoThumbnailUrl?: string
+  articleImageUrl?: string | null
+  articleVideoUrl?: string | null
+  videoThumbnailUrl?: string | null
   socialLinks?: string[]
   sourceLinks?: string[]
 }

@@ -89,6 +89,8 @@ import { BecomeEditorPage } from '@/features/onboarding/pages/BecomeEditorPage'
 import { EditorOnboardingPage } from '@/features/onboarding/pages/EditorOnboardingPage'
 import { OrganizationSeatsPage } from '@/features/organizations/pages/OrganizationSeatsPage'
 import { OrganizationBillingPage } from '@/features/organizations/pages/OrganizationBillingPage'
+import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
+import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage'
 import { DevAccessPage } from '@/features/prelaunch/pages/DevAccessPage'
 import { PRELAUNCH_ENABLED } from '@/config/prelaunch'
 
@@ -228,6 +230,8 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: '/login', element: <LoginPage /> },
+      { path: '/forgot-password', element: <ForgotPasswordPage /> },
+      { path: '/reset-password', element: <ResetPasswordPage /> },
       { path: '/register', element: <RegisterPage /> },
       { path: '/organizations/signup', element: <OrganizationSignUpPage /> },
     ],

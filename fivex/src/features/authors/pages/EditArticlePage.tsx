@@ -26,9 +26,9 @@ export function EditArticlePage() {
         body: values.body,
         category: values.category,
         tags: values.tags,
-        articleImageUrl: values.articleImageUrl ?? undefined,
-        articleVideoUrl: values.articleVideoUrl ?? undefined,
-        videoThumbnailUrl: values.videoThumbnailUrl ?? undefined,
+        articleImageUrl: values.articleImageUrl,
+        articleVideoUrl: values.articleVideoUrl,
+        videoThumbnailUrl: values.videoThumbnailUrl,
         socialLinks: values.socialLinks,
         sourceLinks: values.sourceLinks,
       })
@@ -78,10 +78,10 @@ export function EditArticlePage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-heading mb-1">Edit Article</h1>
-      <p className="text-sm text-text-muted mb-6">
+      <p className="text-sm text-text-muted mb-5">
         {isResubmission
           ? 'Work through the editor’s requirements below, then resubmit for review.'
-          : 'Update your draft, then save it or submit it for review.'}
+          : 'Update your draft, check it in the preview, then save it or submit it for review.'}
       </p>
 
       <ArticleForm
@@ -109,6 +109,15 @@ export function EditArticlePage() {
           ) : undefined
         }
         submitLabel={isResubmission ? 'Resubmit for review' : 'Submit for review'}
+        submitConfirmation={
+          isResubmission
+            ? {
+                title: 'Resubmit this article for review?',
+                description:
+                  'It goes back to the editor, who will check your changes against their requirements. You won’t be able to edit it while it is in review.',
+              }
+            : undefined
+        }
         submitBlockedReason={
           openRequirements > 0
             ? `Mark all ${requirements.length} requirements as done before resubmitting.`
