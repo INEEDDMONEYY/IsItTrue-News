@@ -5,7 +5,7 @@ import { useAuth } from '@/app/providers/AuthProvider'
 import { hasPremiumAccess } from '@/features/billing/utils/plan'
 import { getDashboardNav } from '../constants/dashboardNav'
 import { UserAvatar } from './UserAvatar'
-import logo from '@/assets/icons/question-icon-removebg.png'
+import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 
 interface MobileNavDrawerProps {
   open: boolean

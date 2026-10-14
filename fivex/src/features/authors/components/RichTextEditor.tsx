@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent, type ReactNode } from 'react'
 import {
   Bold,
   Italic,
@@ -35,7 +35,101 @@ const FORMAT_BLOCK_OPTIONS = [
 ]
 
 const TOOLBAR_BTN_CLASS =
-  'w-8 h-8 rounded-md flex items-center justify-center text-text-muted hover:text-accent hover:bg-surface-2 transition-colors disabled:opacity-50'
+  'w-8 h-8 rounded-md flex items-center justify-center transition-colors disabled:opacity-50'
+const TOOLBAR_BTN_IDLE = 'text-text-muted hover:text-accent hover:bg-surface-2'
+// A format that is switched on where the caret is: filled, so it reads as "on" until it is turned off.
+const TOOLBAR_BTN_ACTIVE = 'bg-accent-bg text-accent ring-1 ring-accent-border'
+
+interface FormatState {
+  bold: boolean
+  italic: boolean
+  underline: boolean
+  unorderedList: boolean
+  orderedList: boolean
+  link: boolean
+  // 'p', 'h2', 'h3' or 'blockquote'; empty when it is something else or mixed.
+  block: string
+  // The execCommand size value ('2', '3', '5', '6'); empty when it is something else or mixed.
+  size: string
+}
+
+const NO_FORMATS: FormatState = {
+  bold: false,
+  italic: false,
+  underline: false,
+  unorderedList: false,
+  orderedList: false,
+  link: false,
+  block: '',
+  size: '',
+}
+
+// What is applied at the caret or across the selection, as the browser itself reports it.
+function readFormats(editor: HTMLElement, selection: Selection): FormatState {
+  const state = (command: string) => {
+    try {
+      return document.queryCommandState(command)
+    } catch {
+      return false
+    }
+  }
+  const value = (command: string) => {
+    try {
+      return document.queryCommandValue(command)
+    } catch {
+      return ''
+    }
+  }
+
+  const anchor = selection.anchorNode
+  const element = anchor && anchor.nodeType === Node.TEXT_NODE ? anchor.parentElement : (anchor as Element | null)
+  const insideLink = Boolean(element?.closest('a') && editor.contains(element.closest('a')))
+
+  // Browsers report the block as "p", "h2", "<p>" or "div" depending on the engine.
+  const block = value('formatBlock').toLowerCase().replace(/[<>]/g, '')
+  const size = value('fontSize')
+
+  return {
+    bold: state('bold'),
+    italic: state('italic'),
+    underline: state('underline'),
+    unorderedList: state('insertUnorderedList'),
+    orderedList: state('insertOrderedList'),
+    link: insideLink,
+    block: block === 'div' ? 'p' : FORMAT_BLOCK_OPTIONS.some((option) => option.tag === block) ? block : '',
+    size: FONT_SIZE_OPTIONS.some((option) => option.execValue === size) ? size : '',
+  }
+}
+
+const sameFormats = (a: FormatState, b: FormatState) => (Object.keys(a) as (keyof FormatState)[]).every((key) => a[key] === b[key])
+
+// A toolbar toggle. It looks "on" and says so to assistive tech for as long as its format applies at the caret.
+function FormatButton({
+  label,
+  active,
+  onToggle,
+  children,
+}: {
+  label: string
+  active: boolean
+  onToggle: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      title={active ? `${label} (on)` : label}
+      aria-label={label}
+      aria-pressed={active}
+      // Pressing a button would otherwise pull focus, and the selection, out of the text.
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={onToggle}
+      className={`${TOOLBAR_BTN_CLASS} ${active ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN_IDLE}`}
+    >
+      {children}
+    </button>
+  )
+}
 
 /**
  * A lightweight contentEditable rich-text editor. A minimal toolbar built on execCommand keeps things simple
@@ -51,6 +145,21 @@ export function RichTextEditor({ value, onChange, placeholder, ariaLabel = 'Arti
   const savedRangeRef = useRef<Range | null>(null)
   const { upload, isUploading } = useMediaUpload()
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [formats, setFormats] = useState<FormatState>(NO_FORMATS)
+
+  const refreshFormats = () => {
+    const editor = editorRef.current
+    const selection = window.getSelection()
+    if (!editor || !selection || !selection.anchorNode || !editor.contains(selection.anchorNode)) return
+    const next = readFormats(editor, selection)
+    setFormats((current) => (sameFormats(current, next) ? current : next))
+  }
+
+  // The caret moving, or a selection changing, changes which formats apply, so the toolbar follows it.
+  useEffect(() => {
+    document.addEventListener('selectionchange', refreshFormats)
+    return () => document.removeEventListener('selectionchange', refreshFormats)
+  }, [])
 
   // Set the initial content once on mount; after that the DOM owns its own
   // state so typing doesn't fight React re-renders / cursor position.
@@ -67,6 +176,8 @@ export function RichTextEditor({ value, onChange, placeholder, ariaLabel = 'Arti
     editorRef.current?.focus()
     document.execCommand(command, false, commandValue)
     emitChange()
+    // Turning bold on at a bare caret fires no selection change, so read the result straight away.
+    refreshFormats()
   }
 
   const rememberCaret = () => {
@@ -94,6 +205,11 @@ export function RichTextEditor({ value, onChange, placeholder, ariaLabel = 'Arti
   }
 
   const handleInsertLink = () => {
+    // Inside a link the button is "on", and pressing it takes the link off again.
+    if (formats.link) {
+      runCommand('unlink')
+      return
+    }
     rememberCaret()
     const entered = window.prompt('Link URL')?.trim()
     if (!entered) return
@@ -150,13 +266,11 @@ export function RichTextEditor({ value, onChange, placeholder, ariaLabel = 'Arti
       >
         <select
           aria-label="Text format"
-          onChange={(e) => {
-            const tag = e.target.value
-            runCommand('formatBlock', `<${tag}>`)
-            e.target.value = ''
-          }}
-          defaultValue=""
-          className="text-xs bg-transparent text-text px-1.5 py-1 rounded-md hover:bg-surface-2 focus:outline-none"
+          value={formats.block}
+          onChange={(e) => runCommand('formatBlock', `<${e.target.value}>`)}
+          className={`text-xs px-1.5 py-1 rounded-md focus:outline-none ${
+            formats.block && formats.block !== 'p' ? 'bg-accent-bg text-accent font-medium' : 'bg-transparent text-text hover:bg-surface-2'
+          }`}
         >
           <option value="" disabled>
             Format
@@ -170,12 +284,11 @@ export function RichTextEditor({ value, onChange, placeholder, ariaLabel = 'Arti
 
         <select
           aria-label="Font size"
-          onChange={(e) => {
-            runCommand('fontSize', e.target.value)
-            e.target.value = ''
-          }}
-          defaultValue=""
-          className="text-xs bg-transparent text-text px-1.5 py-1 rounded-md hover:bg-surface-2 focus:outline-none"
+          value={formats.size}
+          onChange={(e) => runCommand('fontSize', e.target.value)}
+          className={`text-xs px-1.5 py-1 rounded-md focus:outline-none ${
+            formats.size && formats.size !== '3' ? 'bg-accent-bg text-accent font-medium' : 'bg-transparent text-text hover:bg-surface-2'
+          }`}
         >
           <option value="" disabled>
             Font size
@@ -189,48 +302,30 @@ export function RichTextEditor({ value, onChange, placeholder, ariaLabel = 'Arti
 
         <div className="w-px h-5 bg-border mx-1" />
 
-        <button type="button" title="Bold" aria-label="Bold" onClick={() => runCommand('bold')} className={TOOLBAR_BTN_CLASS}>
+        <FormatButton label="Bold" active={formats.bold} onToggle={() => runCommand('bold')}>
           <Bold className="w-4 h-4" />
-        </button>
-        <button type="button" title="Italic" aria-label="Italic" onClick={() => runCommand('italic')} className={TOOLBAR_BTN_CLASS}>
+        </FormatButton>
+        <FormatButton label="Italic" active={formats.italic} onToggle={() => runCommand('italic')}>
           <Italic className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          title="Underline"
-          aria-label="Underline"
-          onClick={() => runCommand('underline')}
-          className={TOOLBAR_BTN_CLASS}
-        >
+        </FormatButton>
+        <FormatButton label="Underline" active={formats.underline} onToggle={() => runCommand('underline')}>
           <Underline className="w-4 h-4" />
-        </button>
+        </FormatButton>
 
         <div className="w-px h-5 bg-border mx-1" />
 
-        <button
-          type="button"
-          title="Bullet list"
-          aria-label="Bullet list"
-          onClick={() => runCommand('insertUnorderedList')}
-          className={TOOLBAR_BTN_CLASS}
-        >
+        <FormatButton label="Bullet list" active={formats.unorderedList} onToggle={() => runCommand('insertUnorderedList')}>
           <List className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          title="Numbered list"
-          aria-label="Numbered list"
-          onClick={() => runCommand('insertOrderedList')}
-          className={TOOLBAR_BTN_CLASS}
-        >
+        </FormatButton>
+        <FormatButton label="Numbered list" active={formats.orderedList} onToggle={() => runCommand('insertOrderedList')}>
           <ListOrdered className="w-4 h-4" />
-        </button>
+        </FormatButton>
 
         <div className="w-px h-5 bg-border mx-1" />
 
-        <button type="button" title="Insert link" aria-label="Insert link" onClick={handleInsertLink} className={TOOLBAR_BTN_CLASS}>
+        <FormatButton label={formats.link ? 'Remove link' : 'Insert link'} active={formats.link} onToggle={handleInsertLink}>
           <LinkIcon className="w-4 h-4" />
-        </button>
+        </FormatButton>
         <button
           type="button"
           title="Insert image"
@@ -239,7 +334,7 @@ export function RichTextEditor({ value, onChange, placeholder, ariaLabel = 'Arti
           onMouseDown={rememberCaret}
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className={TOOLBAR_BTN_CLASS}
+          className={`${TOOLBAR_BTN_CLASS} ${TOOLBAR_BTN_IDLE}`}
         >
           {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
         </button>

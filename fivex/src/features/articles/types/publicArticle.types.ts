@@ -45,4 +45,6 @@ export interface PublicArticle {
   // True when the full body was withheld because a free-plan reader is
   // past their monthly unlock cap. Headline/excerpt stay available either way.
   locked: boolean
+  // Only on locked articles: scrambled stand-in paragraphs for the withheld rest of the body, to be shown blurred.
+  lockedPreview?: string[]
 }

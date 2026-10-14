@@ -30,15 +30,29 @@ export interface AdminNavItem {
   to: string
   icon: LucideIcon
   end?: boolean
+  // Stays at the top, ahead of the alphabetical list. Used for the home link.
+  pinned?: boolean
 }
 
-export const ADMIN_NAV: AdminNavItem[] = [
+// Orders nav items by label, ignoring case and treating digits as numbers, so a new item can be added anywhere
+// in the list below and still land in the right place. Pinned items come first, in the order they are listed.
+export function sortNavItems<T extends Pick<AdminNavItem, 'label' | 'pinned'>>(items: readonly T[]): T[] {
+  const pinned = items.filter((item) => item.pinned)
+  const rest = items
+    .filter((item) => !item.pinned)
+    .sort((a, b) => a.label.localeCompare(b.label, 'en', { sensitivity: 'base', numeric: true }))
+  return [...pinned, ...rest]
+}
+
+// Add new pages here in any order; ADMIN_NAV below is what the sidebar and header actually use.
+const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   // Dashboard
   {
     label: 'Dashboard',
     to: '/admin',
     icon: LayoutDashboard,
     end: true,
+    pinned: true,
   },
 
   // Content
@@ -168,3 +182,5 @@ export const ADMIN_NAV: AdminNavItem[] = [
     icon: Settings,
   },
 ]
+
+export const ADMIN_NAV: AdminNavItem[] = sortNavItems(ADMIN_NAV_ITEMS)

@@ -5,6 +5,8 @@ import { ArticleBodyHtml } from '@/features/articles/components/ArticleBody'
 import { sanitizeArticleHtml } from '@/features/articles/utils/articleBody'
 import { ArticleSources } from '@/features/articles/components/ArticleSources'
 import { FactCheckPanel } from '@/features/articles/components/FactCheckPanel'
+import { ArticleTags } from '@/features/articles/components/ArticleTags'
+import { NOT_FACT_CHECKED } from '@/features/fact-checks/utils/notFactChecked'
 import { adaptPublicArticleDetail } from '@/features/articles/utils/adaptPublicArticle'
 import { ArticleCard } from '@/features/home/components/ArticleCard'
 import { buildPreviewArticle } from '../utils/articleDraft'
@@ -31,7 +33,6 @@ export function ArticlePreview({ values, author }: ArticlePreviewProps) {
 
   const notShownYet = [
     values.articleVideoUrl && 'video',
-    values.tags.length > 0 && 'tags',
     values.socialLinks.length > 0 && 'social links',
   ].filter(Boolean) as string[]
 
@@ -50,9 +51,10 @@ export function ArticlePreview({ values, author }: ArticlePreviewProps) {
           <article className="flex flex-col gap-6 max-w-3xl mx-auto">
             <ArticleHeader
               category={article.category.name}
-              verdict={article.factCheck.status}
+              verdict={NOT_FACT_CHECKED.verdict}
               title={article.title}
               authorName={article.author.name}
+              authorId={article.author.id}
               publishedAt={article.publishedAt}
               readTimeMinutes={article.readTimeMinutes}
             />
@@ -67,9 +69,12 @@ export function ArticlePreview({ values, author }: ArticlePreviewProps) {
               </p>
             )}
 
+            {/* Not links here: following one would take the author away from unsaved work. */}
+            <ArticleTags tags={article.tags} linked={false} />
+
             {article.sourceLinks && article.sourceLinks.length > 0 && <ArticleSources links={article.sourceLinks} />}
 
-            <FactCheckPanel factCheck={article.factCheck} />
+            <FactCheckPanel factCheck={NOT_FACT_CHECKED} linked={false} />
           </article>
         </div>
       </section>

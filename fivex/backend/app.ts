@@ -14,10 +14,13 @@ import { userRoutes } from './modules/users/routes/user.routes.js'
 import { categoryRoutes } from './modules/categories/routes/category.routes.js'
 import { tagRoutes } from './modules/tags/routes/tag.routes.js'
 import { articleRoutes } from './modules/articles/routes/article.routes.js'
+import { adminArticleRoutes } from './modules/articles/routes/adminArticle.routes.js'
 import { bannerRoutes } from './modules/banners/routes/banner.routes.js'
 import { ticketRoutes } from './modules/tickets/routes/ticket.routes.js'
 import { factCheckRoutes } from './modules/factChecks/routes/factCheck.routes.js'
 import { claimRoutes } from './modules/claims/routes/claim.routes.js'
+import { adminClaimRoutes } from './modules/claims/routes/adminClaim.routes.js'
+import { publicClaimRoutes } from './modules/claims/routes/publicClaim.routes.js'
 import { mediaRoutes } from './modules/media/routes/media.routes.js'
 import { commentRoutes } from './modules/comments/routes/comment.routes.js'
 import { bookmarkRoutes } from './modules/bookmarks/routes/bookmark.routes.js'
@@ -74,10 +77,13 @@ export function createApp(): Express {
   app.use('/api/categories', categoryRoutes)
   app.use('/api/tags', tagRoutes)
   app.use('/api/articles', articleRoutes)
+  app.use('/api/admin/articles', adminArticleRoutes)
   app.use('/api/banners', bannerRoutes)
   app.use('/api/tickets', ticketRoutes)
   app.use('/api/fact-checks', factCheckRoutes)
   app.use('/api/claims', claimRoutes)
+  app.use('/api/admin/fact-checks', adminClaimRoutes)
+  app.use('/api/public/fact-checks', publicClaimRoutes)
   app.use('/api/comments', commentRoutes)
   app.use('/api/media', mediaRoutes)
   app.use('/api/bookmarks', bookmarkRoutes)

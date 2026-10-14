@@ -35,6 +35,14 @@ export const userRepository = {
     return users.map((user) => String(user._id))
   },
 
+  // Case-insensitive "name contains" for admin search. The caller must pass an already-escaped pattern.
+  async findIdsByNamePattern(escapedPattern: string): Promise<string[]> {
+    const users = await User.find({ name: { $regex: escapedPattern, $options: 'i' } })
+      .select('_id')
+      .limit(200)
+    return users.map((user) => String(user._id))
+  },
+
   async findByIdWithSecrets(id: string): Promise<UserDocument | null> {
     return User.findById(id).select('+passwordHash')
   },
@@ -127,6 +135,14 @@ export const userRepository = {
       },
       { new: true },
     )
+  },
+
+  // People who can be made responsible for a fact-check, for the admin reviewer picker.
+  async findByRoles(roles: Role[]): Promise<UserDocument[]> {
+    return User.find({ role: { $in: roles } })
+      .select('name role')
+      .sort({ name: 1 })
+      .limit(200)
   },
 
   async findAll(): Promise<UserDocument[]> {

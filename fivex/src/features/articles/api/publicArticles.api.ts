@@ -31,13 +31,20 @@ export const publicArticlesApi = {
 
   getBySlug: async (
     slug: string,
-  ): Promise<{ article: PublicArticle; liked: boolean; disliked: boolean; bookmarked: boolean } | null> => {
+  ): Promise<{
+    article: PublicArticle
+    liked: boolean
+    disliked: boolean
+    bookmarked: boolean
+    shared: boolean
+  } | null> => {
     try {
       const { data } = await apiClient.get<{
         article: PublicArticle
         liked: boolean
         disliked: boolean
         bookmarked: boolean
+        shared: boolean
       }>(`/api/articles/slug/${encodeURIComponent(slug)}`)
       return data
     } catch {
@@ -59,8 +66,10 @@ export const publicArticlesApi = {
     return data
   },
 
-  share: async (id: string): Promise<{ sharesCount: number }> => {
-    const { data } = await apiClient.post<{ sharesCount: number }>(`/api/articles/${id}/share`)
+  share: async (id: string): Promise<{ sharesCount: number; shared: boolean; counted: boolean }> => {
+    const { data } = await apiClient.post<{ sharesCount: number; shared: boolean; counted: boolean }>(
+      `/api/articles/${id}/share`,
+    )
     return data
   },
 

@@ -1,5 +1,5 @@
 import type { Article } from '@/shared/types/article.types'
-import type { ArticleComment, ArticleDetail, FactCheckDetails } from '../types/articleDetail.types'
+import type { ArticleComment, ArticleDetail } from '../types/articleDetail.types'
 import { FEATURED_ARTICLE, LATEST_POSTS, TRENDING_ARTICLES } from '@/features/home/data/mockHome'
 import { RECOMMENDED_ARTICLES } from '@/features/for-you/data/mockForYou'
 import { LOCAL_ARTICLES } from '@/features/local/data/mockLocal'
@@ -40,44 +40,6 @@ const COMMENT_TEMPLATES = [
   'Following this closely, hope there\u2019s a follow-up once more details come out.',
 ]
 
-const FACT_CHECK_COPY: Record<
-  NonNullable<Article['verificationStatus']>,
-  { summary: string; source: string }
-> = {
-  verified: {
-    summary:
-      'Our team cross-referenced the core claims in this story against public records and at least two independent sources. The claims check out.',
-    source: 'Public records, primary source interviews',
-  },
-  disputed: {
-    summary:
-      'Some claims in this story conflict with publicly available data. We are seeking clarification from the original source before updating the verdict.',
-    source: 'Conflicting public statements',
-  },
-  pending: {
-    summary:
-      'This story is currently under review by our fact-checking team. The verdict will be updated once the review is complete.',
-    source: 'Awaiting confirmation',
-  },
-  unverified: {
-    summary: 'This story has not yet been submitted for fact-checking.',
-    source: 'Not yet reviewed',
-  },
-}
-
-function buildFactCheck(article: Article, seed: number): FactCheckDetails {
-  const status = article.verificationStatus ?? 'unverified'
-  const { summary, source } = FACT_CHECK_COPY[status]
-
-  return {
-    status,
-    summary,
-    source,
-    checkedBy: seed % 2 === 0 ? 'IsItTrue Fact-Check Team' : 'IsItTrue Research Desk',
-    checkedAt: article.publishedAt,
-  }
-}
-
 function buildContent(article: Article, seed: number): string[] {
   const paragraphs = [article.excerpt ?? BODY_PARAGRAPHS[seed % BODY_PARAGRAPHS.length]]
   for (let i = 0; i < 3; i++) {
@@ -109,7 +71,6 @@ function toArticleDetail(article: Article): ArticleDetail {
     dislikes: Math.max(1, Math.round(article.stats.views * 0.004)),
     reposts: article.stats.shares,
     bookmarks: Math.max(3, Math.round(article.stats.views * 0.006)),
-    factCheck: buildFactCheck(article, seed),
     comments: buildComments(article, seed),
   }
 }

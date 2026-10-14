@@ -6,7 +6,7 @@ import { hasPremiumAccess, isPremiumUser } from '@/features/billing/utils/plan'
 import { FreePlanUsageWidget } from '@/features/readers/components/FreePlanUsageWidget'
 import { getDashboardNav } from '../constants/dashboardNav'
 import { UserAvatar } from './UserAvatar'
-import logo from '@/assets/icons/question-icon-removebg.png'
+import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 
 const COLLAPSE_STORAGE_KEY = 'itt-dashboard-sidebar-collapsed'
 
@@ -35,7 +35,7 @@ export function DashboardSidebar() {
           collapsed ? 'justify-center px-2' : 'px-5'
         }`}
       >
-        <img src={logo} alt="IsItTrue News" className="w-8 h-8 rounded-lg object-cover shrink-0" />
+        <img src={logo} alt="IsItTrueNews" className="w-8 h-8 rounded-lg object-cover shrink-0" />
         {!collapsed && <span className="font-semibold text-heading truncate">IsItTrueNews</span>}
       </Link>
 

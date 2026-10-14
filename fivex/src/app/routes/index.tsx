@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { MainLayout } from '../layouts/MainLayout'
 import { AuthLayout } from '../layouts/AuthLayout'
 import { AdminLayout } from '../layouts/AdminLayout'
@@ -8,10 +8,12 @@ import { ErrorPage } from '../pages/ErrorPage'
 import { ProtectedRoute } from './ProtectedRoute'
 import { AdminRoute } from './AdminRoute'
 import { AuthorRoute } from './AuthorRoute'
+import { RoleRoute } from './RoleRoute'
 import { HomePage } from '@/features/home/pages/HomePage'
 import { ForYouPage } from '@/features/for-you/pages/ForYouPage'
 import { LocalPage } from '@/features/local/pages/LocalPage'
 import { FactChecksPage } from '@/features/fact-checks/pages/FactChecksPage'
+import { FactCheckPage } from '@/features/fact-checks/pages/FactCheckPage'
 import { ArticlePage } from '@/features/articles/pages/ArticlePage'
 import { CategoryPage } from '@/features/categories/pages/CategoryPage'
 import { TagPage } from '@/features/tags/pages/TagPage'
@@ -31,6 +33,10 @@ import { SeoPage } from '@/features/admin/seo/pages/SeoPage'
 import { CategoriesPage } from '@/features/admin/categories/pages/CategoriesPage'
 import { TicketsPage } from '@/features/admin/tickets/pages/TicketsPage'
 import { FactCheckVerificationPage } from '@/features/admin/fact-check-verification/pages/FactCheckVerificationPage'
+import { ArticlesPage as AdminArticlesPage } from '@/features/admin/articles/pages/ArticlesPage'
+import { FactChecksPage as AdminFactChecksPage } from '@/features/admin/fact-checks/pages/FactChecksPage'
+import { FactCheckDetailsPage as AdminFactCheckDetailsPage } from '@/features/admin/fact-checks/pages/FactCheckDetailsPage'
+import { ArticleDetailsPage as AdminArticleDetailsPage } from '@/features/admin/articles/pages/ArticleDetailsPage'
 import { DashboardHomePage } from '@/features/dashboard/pages/DashboardHomePage'
 import { AccountSettingsPage } from '@/features/settings/pages/AccountSettingsPage'
 import { ArticlesListPage } from '@/features/authors/pages/ArticlesListPage'
@@ -66,7 +72,6 @@ import { ReaderSettingsPage } from '@/features/readers/pages/ReaderSettingsPage'
 import { TopicSubmissionPage } from '@/features/readers/pages/TopicSubmissionPage'
 import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage'
 import { NotificationsPage as AdminNotificationsPage } from '@/features/admin/notifications/pages/NotificationsPage'
-import { ProfileIdentityPage } from '@/features/profile/pages/ProfileIdentityPage'
 import { DraftsPage } from '@/features/authors/pages/DraftsPage'
 import { SubmissionQueuePage } from '@/features/authors/pages/SubmissionQueuePage'
 import { PitchCenterPage } from '@/features/authors/pages/PitchCenterPage'
@@ -104,6 +109,7 @@ export const router = createBrowserRouter([
       { path: 'for-you', element: <ForYouPage /> },
       { path: 'local', element: <LocalPage /> },
       { path: 'fact-checks', element: <FactChecksPage /> },
+      { path: 'fact-checks/:id', element: <FactCheckPage /> },
       { path: 'article/:slug', element: <ArticlePage /> },
       { path: 'category/:slug', element: <CategoryPage /> },
       { path: 'tag/:slug', element: <TagPage /> },
@@ -145,6 +151,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <AdminDashboardPage /> },
           { path: 'users', element: <UsersPage /> },
+          { path: 'articles', element: <AdminArticlesPage /> },
+          { path: 'articles/:id', element: <AdminArticleDetailsPage /> },
           { path: 'cms', element: <CmsPage /> },
           { path: 'moderation', element: <ModerationPage /> },
           { path: 'analytics', element: <AnalyticsPage /> },
@@ -153,6 +161,8 @@ export const router = createBrowserRouter([
           { path: 'seo', element: <SeoPage /> },
           { path: 'categories', element: <CategoriesPage /> },
           { path: 'tickets', element: <TicketsPage /> },
+          { path: 'fact-checks', element: <AdminFactChecksPage /> },
+          { path: 'fact-checks/:id', element: <AdminFactCheckDetailsPage /> },
           { path: 'fact-check-verification', element: <FactCheckVerificationPage /> },
           { path: 'notifications', element: <AdminNotificationsPage /> },
           { path: 'settings', element: <SettingsPage /> },
@@ -185,8 +195,11 @@ export const router = createBrowserRouter([
           { path: 'videos', element: <MyVideosPage /> },
           { path: 'videos/studio', element: <VideoStudioPage /> },
           { path: 'notifications', element: <NotificationsPage /> },
-          { path: 'profile', element: <ProfileIdentityPage /> },
-          { path: 'author-settings', element: <AuthorSettingsPage /> },
+          { path: 'profile', element: <Navigate to="/dashboard/settings" replace /> },
+          {
+            element: <RoleRoute roles={['author']} redirectTo="/dashboard/settings" />,
+            children: [{ path: 'author-settings', element: <AuthorSettingsPage /> }],
+          },
           { path: 'reader-settings', element: <ReaderSettingsPage /> },
           { path: 'topic-submission', element: <TopicSubmissionPage /> },
           { path: 'become-author', element: <BecomeAuthorPage /> },

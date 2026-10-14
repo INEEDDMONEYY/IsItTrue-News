@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FileCheck2, FileSearch, ShieldCheck } from 'lucide-react'
-import logo from '@/assets/icons/question-icon-removebg.png'
+import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 import { WaitlistForm } from '../components/WaitlistForm'
 import { SocialLinks } from '../components/SocialLinks'
 
@@ -46,7 +46,7 @@ export function LandingPage() {
     <div className="flex min-h-screen flex-col bg-bg text-text">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-5 md:px-8">
         <div className="flex items-center gap-2.5">
-          <img src={logo} alt="" className="size-8" />
+          <img src={logo} alt="" className="size-8 shrink-0 rounded-lg object-cover" />
           <span className="text-base font-semibold text-heading">IsItTrue News</span>
         </div>
         <span className="rounded-full border border-accent-border bg-accent-bg px-3 py-1 text-xs font-medium text-accent">

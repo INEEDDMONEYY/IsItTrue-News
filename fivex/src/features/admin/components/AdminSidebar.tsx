@@ -3,7 +3,7 @@ import { NavLink, Link } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { ADMIN_NAV } from '../constants/adminNav'
-import logo from '@/assets/logos/isittrue-logo.jpg'
+import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 
 const COLLAPSE_STORAGE_KEY = 'itt-admin-sidebar-collapsed'
 

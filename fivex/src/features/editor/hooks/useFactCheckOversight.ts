@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { claimsApi } from '../api/claims.api'
-import type { ClaimUpdate } from '../types/claim.types'
+import type { ClaimUpdate, NewEvidence } from '../types/claim.types'
 
 const CLAIMS_KEY = ['editor', 'claims'] as const
 const ARTICLES_KEY = ['editor', 'fact-check-articles'] as const
@@ -25,6 +25,14 @@ export function useFactCheckOversight() {
   })
   const removeMutation = useMutation({ mutationFn: claimsApi.remove, onSuccess: refresh })
   const takeMutation = useMutation({ mutationFn: claimsApi.takeResponsibility, onSuccess: refresh })
+  const addEvidenceMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: NewEvidence }) => claimsApi.addEvidence(id, input),
+    onSuccess: refresh,
+  })
+  const removeEvidenceMutation = useMutation({
+    mutationFn: ({ id, itemId }: { id: string; itemId: string }) => claimsApi.removeEvidence(id, itemId),
+    onSuccess: refresh,
+  })
   const factCheckedMutation = useMutation({
     mutationFn: ({ articleId, factChecked }: { articleId: string; factChecked: boolean }) =>
       claimsApi.setArticleFactChecked(articleId, factChecked),
@@ -40,6 +48,8 @@ export function useFactCheckOversight() {
     updateClaim: (id: string, changes: ClaimUpdate) => updateMutation.mutateAsync({ id, changes }),
     deleteClaim: removeMutation.mutateAsync,
     takeResponsibility: takeMutation.mutateAsync,
+    addEvidence: (id: string, input: NewEvidence) => addEvidenceMutation.mutateAsync({ id, input }),
+    removeEvidence: (id: string, itemId: string) => removeEvidenceMutation.mutateAsync({ id, itemId }),
     setFactChecked: (articleId: string, factChecked: boolean) =>
       factCheckedMutation.mutateAsync({ articleId, factChecked }),
     isSaving:
@@ -47,6 +57,8 @@ export function useFactCheckOversight() {
       updateMutation.isPending ||
       removeMutation.isPending ||
       takeMutation.isPending ||
+      addEvidenceMutation.isPending ||
+      removeEvidenceMutation.isPending ||
       factCheckedMutation.isPending,
   }
 }

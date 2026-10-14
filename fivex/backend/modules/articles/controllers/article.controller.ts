@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 import { asyncHandler } from '../../../utils/asyncHandler.js'
 import { AppError } from '../../../shared/errors/AppError.js'
-import { truncateToParagraphs } from '../../../utils/htmlPreview.js'
+import { scrambledRemainder, truncateToParagraphs } from '../../../utils/htmlPreview.js'
 import { articleService } from '../services/article.service.js'
 import type {
   CreateArticleInput,
@@ -21,15 +21,18 @@ function requireUser(req: Request) {
 }
 
 // Locked readers (anonymous viewers, or free-plan readers past their monthly
-// unlock cap) get a short preview of the body instead of the full article —
-// headline/excerpt/author/comments stay unlimited (see articleService's
+// unlock cap) get the first paragraph of the body plus a scrambled stand-in for
+// the rest, which the page shows blurred — never the real remaining text.
+// Headline/excerpt/author/comments stay unlimited (see articleService's
 // resolveArticleLock for the actual gating decision).
 function serializeArticle(article: Awaited<ReturnType<typeof articleService.getArticleById>>['article'], locked: boolean) {
   const json = article.toJSON() as Record<string, unknown>
   delete json.editorialStage
   delete json.editorialDeadline
   if (locked) {
-    json.body = truncateToParagraphs(json.body as string, 2)
+    const body = json.body as string
+    json.body = truncateToParagraphs(body, 1)
+    json.lockedPreview = scrambledRemainder(body, 1)
   }
   return { ...json, locked }
 }
@@ -126,7 +129,10 @@ export const articleController = {
     const bookmarked = req.user
       ? article.bookmarkedBy.some((entry) => entry.user.toString() === req.user!.id)
       : false
-    res.status(200).json({ article: serializeArticle(article, locked), liked, disliked, bookmarked })
+    const shared = req.user ? article.sharedBy.some((id) => id.toString() === req.user!.id) : false
+    res
+      .status(200)
+      .json({ article: serializeArticle(article, locked), liked, disliked, bookmarked, shared })
   }),
 
   getById: asyncHandler(async (req: Request, res: Response) => {
@@ -206,8 +212,8 @@ export const articleController = {
   }),
 
   share: asyncHandler(async (req: Request, res: Response) => {
-    const sharesCount = await articleService.incrementShare(req.params.id)
-    res.status(200).json({ sharesCount })
+    const result = await articleService.recordShare(req.params.id, req.user?.id)
+    res.status(200).json(result)
   }),
 
   toggleBookmark: asyncHandler(async (req: Request, res: Response) => {

@@ -111,7 +111,23 @@ function fromApi(name: string, role: string, profile: AuthorProfileApi): AuthorS
   }
 }
 
-function toApi(settings: AuthorSettings): Partial<AuthorProfileApi> {
+// The author profile is edited on three pages: "Author Settings" (identity and expertise), the account Settings
+// page (publishing preferences and notifications for authors; a lighter public profile for editors and
+// organizations). Each saves only its own fields, so none can overwrite another's changes with stale values.
+export type AuthorSettingsScope = 'profile' | 'publishing' | 'staff' | 'identity'
+
+function toExpertiseApi(settings: AuthorSettings): Partial<AuthorProfileApi> {
+  return {
+    primaryBeats: settings.expertise.primaryBeats,
+    secondaryBeats: settings.expertise.secondaryBeats,
+    areasOfExpertise: settings.expertise.areasOfExpertise,
+    geographicCoverage: settings.expertise.geographicCoverage,
+    languages: settings.expertise.languages,
+    yearsOfExperience: settings.expertise.yearsOfExperience,
+  }
+}
+
+function toProfileApi(settings: AuthorSettings): Partial<AuthorProfileApi> {
   return {
     professionalName: settings.profile.professionalName,
     bio: settings.profile.bio,
@@ -120,12 +136,28 @@ function toApi(settings: AuthorSettings): Partial<AuthorProfileApi> {
     profileImage: settings.profile.profileImage,
     bannerImage: settings.profile.bannerImage,
     socialLinks: settings.profile.socialLinks,
-    primaryBeats: settings.expertise.primaryBeats,
-    secondaryBeats: settings.expertise.secondaryBeats,
-    areasOfExpertise: settings.expertise.areasOfExpertise,
-    geographicCoverage: settings.expertise.geographicCoverage,
-    languages: settings.expertise.languages,
-    yearsOfExperience: settings.expertise.yearsOfExperience,
+    ...toExpertiseApi(settings),
+  }
+}
+
+// Editors and organizations have a single display name. It is also what their public profile shows, so the
+// professional name is kept equal to it rather than left to drift. Admins have the same identity fields without
+// expertise.
+function toIdentityApi(settings: AuthorSettings): Partial<AuthorProfileApi> {
+  return {
+    professionalName: settings.profile.displayName,
+    bio: settings.profile.bio,
+    profileImage: settings.profile.profileImage,
+    bannerImage: settings.profile.bannerImage,
+  }
+}
+
+function toStaffApi(settings: AuthorSettings): Partial<AuthorProfileApi> {
+  return { ...toIdentityApi(settings), ...toExpertiseApi(settings) }
+}
+
+function toPublishingApi(settings: AuthorSettings): Partial<AuthorProfileApi> {
+  return {
     defaultCategory: settings.publishing.defaultCategory,
     defaultVisibility: settings.publishing.defaultVisibility,
     factCheckingEnabled: settings.publishing.factCheckingEnabled,
@@ -207,24 +239,42 @@ export function useAuthorSettings() {
   }
 
   const saveMutation = useMutation({
-    mutationFn: async (next: AuthorSettings) => {
+    mutationFn: async ({ next, scope }: { next: AuthorSettings; scope: AuthorSettingsScope }) => {
+      if (scope === 'publishing') {
+        await authorSettingsApi.updateProfile(toPublishingApi(next))
+        return
+      }
       const nameChanged = data && next.profile.displayName !== data.name
       await Promise.all([
-        authorSettingsApi.updateProfile(toApi(next)),
+        authorSettingsApi.updateProfile(
+          scope === 'staff' ? toStaffApi(next) : scope === 'identity' ? toIdentityApi(next) : toProfileApi(next),
+        ),
         nameChanged ? authorSettingsApi.updateName(next.profile.displayName) : Promise.resolve(),
       ])
     },
-    onSuccess: (_result, next) => {
-      updateUser({
-        name: next.profile.displayName,
-        authorProfile: { ...user?.authorProfile, profileImage: next.profile.profileImage },
-      })
+    onSuccess: (_result, { next, scope }) => {
+      if (scope !== 'publishing') {
+        updateUser({
+          name: next.profile.displayName,
+          authorProfile: { ...user?.authorProfile, profileImage: next.profile.profileImage },
+        })
+      }
       return queryClient.invalidateQueries({ queryKey: ['authors', 'settings', 'mine'] })
     },
   })
 
   const saveSettings = async () => {
-    await saveMutation.mutateAsync(settings)
+    await saveMutation.mutateAsync({ next: settings, scope: 'profile' })
+    return settings
+  }
+
+  const savePublishingSettings = async () => {
+    await saveMutation.mutateAsync({ next: settings, scope: 'publishing' })
+    return settings
+  }
+
+  const saveStaffProfile = async (scope: 'staff' | 'identity' = 'staff') => {
+    await saveMutation.mutateAsync({ next: settings, scope })
     return settings
   }
 
@@ -237,5 +287,7 @@ export function useAuthorSettings() {
     updatePublishing,
     updatePreferences,
     saveSettings,
+    savePublishingSettings,
+    saveStaffProfile,
   }
 }

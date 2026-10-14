@@ -1,4 +1,5 @@
-import { ThumbsUp, ThumbsDown, MessageCircle, Repeat2, Bookmark, ShieldCheck } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MessageCircle, Bookmark, ShieldCheck } from 'lucide-react'
+import { ShareMenu } from './ShareMenu'
 
 function formatCount(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}m`
@@ -20,7 +21,13 @@ interface EngagementBarProps {
   bookmarkInactive?: boolean
   onLike: () => void
   onDislike: () => void
-  onShare: () => void
+  /** The address people are given when they share the story. */
+  shareUrl: string
+  shareTitle: string
+  /** Whether this reader's share is counted at all (signed-in readers only). */
+  sharesCounted: boolean
+  /** A real share happened (link copied, network opened, device share completed). */
+  onShared: () => void
   onBookmark: () => void
   onCommentClick: () => void
   onFactCheckClick: () => void
@@ -39,7 +46,10 @@ export function EngagementBar({
   bookmarkInactive = false,
   onLike,
   onDislike,
-  onShare,
+  shareUrl,
+  shareTitle,
+  sharesCounted,
+  onShared,
   onBookmark,
   onCommentClick,
   onFactCheckClick,
@@ -80,18 +90,14 @@ export function EngagementBar({
         {formatCount(commentsCount)}
       </button>
 
-      <button
-        onClick={onShare}
-        aria-pressed={reposted}
-        className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
-          reposted
-            ? 'bg-verified/10 text-verified border-verified/30'
-            : 'border-border text-heading hover:border-accent-border hover:text-accent'
-        }`}
-      >
-        <Repeat2 className="w-4 h-4" />
-        {formatCount(reposts)}
-      </button>
+      <ShareMenu
+        url={shareUrl}
+        title={shareTitle}
+        count={reposts}
+        shared={reposted}
+        countsShare={sharesCounted}
+        onShared={onShared}
+      />
 
       <button
         onClick={onBookmark}

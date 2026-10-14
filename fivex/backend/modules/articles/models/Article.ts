@@ -59,6 +59,8 @@ export interface IArticle {
   dislikedBy: Types.ObjectId[]
   dislikesCount: number
   sharesCount: number
+  // Who has shared the article. A person is counted once however many times they share it.
+  sharedBy: Types.ObjectId[]
   bookmarkedBy: IArticleBookmark[]
   bookmarksCount: number
   createdAt: Date
@@ -167,6 +169,7 @@ const articleSchema = new Schema<IArticle>(
     dislikedBy: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
     dislikesCount: { type: Number, default: 0, min: 0 },
     sharesCount: { type: Number, default: 0, min: 0 },
+    sharedBy: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
     bookmarkedBy: {
       type: [
         new Schema(
@@ -204,6 +207,7 @@ const articleSchema = new Schema<IArticle>(
         delete ret.dislikedBy
         delete ret.dislikesCount
         delete ret.sharesCount
+        delete ret.sharedBy
         delete ret.bookmarkedBy
         delete ret.bookmarksCount
         return ret

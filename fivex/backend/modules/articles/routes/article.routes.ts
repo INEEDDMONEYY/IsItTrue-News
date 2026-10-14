@@ -134,8 +134,8 @@ router.post('/:id/like', authenticate, articleController.toggleLike)
 // Any authenticated reader can dislike/un-dislike a published article.
 router.post('/:id/dislike', authenticate, articleController.toggleDislike)
 
-// Anyone can share an article; this just increments a counter, no auth needed.
-router.post('/:id/share', articleController.share)
+// Anyone can share the link. Signed-in people are counted once each; everyone else just isn't counted.
+router.post('/:id/share', optionalAuthenticate, articleController.share)
 
 // Any authenticated reader (reader, author, or editor) can bookmark/unbookmark
 // a published article.

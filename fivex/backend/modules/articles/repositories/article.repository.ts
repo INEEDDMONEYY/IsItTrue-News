@@ -19,6 +19,14 @@ export interface ToggleBookmarkResult {
   bookmarked: boolean
 }
 
+export interface ShareResult {
+  sharesCount: number
+  // This person is among those counted.
+  shared: boolean
+  // This very request is what added them.
+  counted: boolean
+}
+
 export interface CreateArticleInput {
   title: string
   slug: string
@@ -337,14 +345,25 @@ export const articleRepository = {
     return { dislikesCount: article.dislikesCount, disliked: !alreadyDisliked }
   },
 
-  // Shares aren't tied to a single user/toggle — every share click just
-  // increments the count, same as a view.
-  async incrementShares(id: string): Promise<number | null> {
-    const article = await Article.findByIdAndUpdate(
-      id,
-      { $inc: { sharesCount: 1 } },
+  // A person is counted once per article, however many times they share it. The check and the increment are one
+  // atomic update, so even 15 shares arriving at the same moment add exactly 1.
+  async recordShare(id: string, userId: string): Promise<ShareResult | null> {
+    const counted = await Article.findOneAndUpdate(
+      { _id: id, status: ARTICLE_STATUSES.PUBLISHED, sharedBy: { $ne: new Types.ObjectId(userId) } },
+      { $addToSet: { sharedBy: new Types.ObjectId(userId) }, $inc: { sharesCount: 1 } },
       { new: true },
     )
+    if (counted) return { sharesCount: counted.sharesCount, shared: true, counted: true }
+
+    // Either they have shared it before (still shared, nothing added), or it can't be shared at all.
+    const existing = await Article.findOne({ _id: id, status: ARTICLE_STATUSES.PUBLISHED }).select('sharesCount sharedBy')
+    if (!existing) return null
+    return { sharesCount: existing.sharesCount, shared: existing.sharedBy.some((sharer) => sharer.toString() === userId), counted: false }
+  },
+
+  // For someone who isn't signed in: sharing still works for them, but there is no person to count.
+  async findShareCount(id: string): Promise<number | null> {
+    const article = await Article.findOne({ _id: id, status: ARTICLE_STATUSES.PUBLISHED }).select('sharesCount')
     return article ? article.sharesCount : null
   },
 

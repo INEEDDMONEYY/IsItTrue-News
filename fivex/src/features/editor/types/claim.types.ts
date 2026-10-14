@@ -41,13 +41,50 @@ export interface ClaimPerson {
   name?: string
 }
 
+export type ClaimWorkflow = 'unreviewed' | 'in_review' | 'returned' | 'escalated' | 'completed'
+export type EvidenceStance = 'supporting' | 'contradicting' | 'context'
+export type SourceReliability = 'high' | 'medium' | 'low' | 'unknown'
+
+export const evidenceStanceLabels: Record<EvidenceStance, string> = {
+  supporting: 'Supporting',
+  contradicting: 'Contradicting',
+  context: 'Context',
+}
+
+export const reliabilityLabels: Record<SourceReliability, string> = {
+  high: 'High reliability',
+  medium: 'Medium reliability',
+  low: 'Low reliability',
+  unknown: 'Reliability not assessed',
+}
+
+// A restricted item is hidden by an admin: only its place in the list is shown.
+export interface ClaimEvidenceItem {
+  id: string
+  stance: EvidenceStance
+  restricted: boolean
+  title?: string
+  url?: string
+  citation?: string
+  reliability?: SourceReliability
+  reliabilityNote?: string
+}
+
 export interface Claim {
   id: string
   text: string
+  // The combined status shown in the picker. It is derived from the two fields below.
   status: ClaimStatus
+  workflowStatus: ClaimWorkflow
   evidenceStatus: EvidenceStatus
   evidenceSummary?: string
   sources: string[]
+  // Why the conclusion was reached, once there is one.
+  assessment?: { conclusion?: string; reasoning?: string; limitations?: string; uncertainty?: string }
+  evidence: ClaimEvidenceItem[]
+  // Set while an admin has sent it back, so the reviewer sees why.
+  returnReason?: string
+  evidenceFlag?: { reason: string; flaggedAt: string }
   article: { id: string; title: string; slug: string; status: string } | null
   assignee?: ClaimPerson | null
   createdBy?: ClaimPerson | null
@@ -81,4 +118,17 @@ export interface ClaimUpdate {
   evidenceStatus?: EvidenceStatus
   evidenceSummary?: string
   sources?: string[]
+  conclusion?: string
+  reasoning?: string
+  limitations?: string
+  uncertainty?: string
+}
+
+export interface NewEvidence {
+  stance: EvidenceStance
+  title: string
+  url?: string
+  citation?: string
+  reliability: SourceReliability
+  reliabilityNote?: string
 }

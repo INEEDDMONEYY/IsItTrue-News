@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import logo from '@/assets/icons/question-icon-removebg.png'
+import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 
 interface AuthHeaderProps {
   title: string

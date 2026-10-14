@@ -1,5 +1,5 @@
 import { apiClient } from '@/api/client'
-import type { Claim, ClaimUpdate, FactCheckArticle } from '../types/claim.types'
+import type { Claim, ClaimUpdate, FactCheckArticle, NewEvidence } from '../types/claim.types'
 
 export const claimsApi = {
   list: async (): Promise<Claim[]> => {
@@ -26,6 +26,14 @@ export const claimsApi = {
 
   remove: async (id: string): Promise<void> => {
     await apiClient.delete(`/api/claims/${id}`)
+  },
+
+  addEvidence: async (id: string, input: NewEvidence): Promise<void> => {
+    await apiClient.post(`/api/claims/${id}/evidence`, input)
+  },
+
+  removeEvidence: async (id: string, itemId: string): Promise<void> => {
+    await apiClient.delete(`/api/claims/${id}/evidence/${itemId}`)
   },
 
   setArticleFactChecked: async (articleId: string, factChecked: boolean): Promise<void> => {

@@ -26,7 +26,6 @@ import {
   CalendarDays,
   Bell,
   CircleHelp,
-  IdCard,
   Megaphone,
   ScrollText,
   Sparkles,
@@ -81,11 +80,6 @@ export function getDashboardNav(
       label: 'Notifications',
       to: '/dashboard/notifications',
       icon: Bell,
-    },
-    {
-      label: 'Profile & Identity Verification',
-      to: '/dashboard/profile',
-      icon: IdCard,
     },
     {
       label: 'Help Center / Support',

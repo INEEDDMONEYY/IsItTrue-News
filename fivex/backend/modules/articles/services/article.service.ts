@@ -1,3 +1,4 @@
+import { Types } from 'mongoose'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES, type Role } from '../../../shared/constants/roles.js'
 import { FREE_PLAN_LIMITS } from '../../../shared/constants/plan.js'
@@ -11,6 +12,7 @@ import type { ArticleDocument } from '../models/Article.js'
 import { tagService } from '../../tags/services/tag.service.js'
 import { categoryService } from '../../categories/services/category.service.js'
 import { notificationService } from '../../notifications/services/notification.service.js'
+import { articleAuditService, actionForTransition } from './articleAudit.service.js'
 import { logger } from '../../../config/logger.js'
 import type { RequestChangesInput } from '../validations/article.validation.js'
 
@@ -90,6 +92,28 @@ async function notifyAuthorOfDecision(
     })
   } catch (error) {
     logger.error('Failed to notify author of an editorial decision.', error)
+  }
+}
+
+// Same rule as the other notifiers: a failure to notify must never fail the action itself.
+async function notifyAuthorOfUnpublish(article: ArticleDocument, admin: ActingUser, reason: string) {
+  try {
+    const adminUser = await userRepository.findById(admin.id)
+    await notificationService.notify({
+      recipient: article.author.toString(),
+      type: 'editorial',
+      title: 'Your article was unpublished',
+      message: `"${article.title}" was taken offline and returned to your drafts. Reason: ${reason}`.slice(0, 500),
+      priority: 'high',
+      action: 'manage',
+      actionLabel: 'See feedback',
+      href: '/dashboard/drafts',
+      relatedId: article._id.toString(),
+      relatedType: 'article',
+      ...(adminUser ? { actor: { id: admin.id, name: adminUser.name } } : {}),
+    })
+  } catch (error) {
+    logger.error('Failed to notify author that their article was unpublished.', error)
   }
 }
 
@@ -182,6 +206,13 @@ export const articleService = {
     if (status === ARTICLE_STATUSES.PENDING_REVIEW) {
       await notifyEditorsOfSubmission(article, author)
     }
+
+    await articleAuditService.record({
+      article,
+      actor: author,
+      action: 'created',
+      toStatus: status,
+    })
 
     return article
   },
@@ -330,12 +361,24 @@ export const articleService = {
     return result
   },
 
-  async incrementShare(id: string) {
-    const sharesCount = await articleRepository.incrementShares(id)
-    if (sharesCount === null) {
+  // Counts a signed-in person's share once. Anyone else can still share the link, but there is nobody to count,
+  // so the number is returned unchanged.
+  async recordShare(id: string, userId: string | undefined) {
+    if (!Types.ObjectId.isValid(id)) {
       throw new AppError('Article not found.', 404)
     }
-    return sharesCount
+
+    if (!userId) {
+      const sharesCount = await articleRepository.findShareCount(id)
+      if (sharesCount === null) throw new AppError('Article not found.', 404)
+      return { sharesCount, shared: false, counted: false }
+    }
+
+    const result = await articleRepository.recordShare(id, userId)
+    if (!result) {
+      throw new AppError('Article not found.', 404)
+    }
+    return result
   },
 
   async toggleBookmark(id: string, userId: string) {
@@ -378,16 +421,30 @@ export const articleService = {
       throw new AppError('This article is in editorial review and cannot be edited right now.', 400)
     }
 
-    const slug = input.title ? `${slugify(input.title) || 'article'}-${Date.now()}` : undefined
+    // The article's address only changes when its title does, and never once it is published: readers and other
+    // sites have linked to it, and the edit form sends the title on every save, so saving a tag change must not
+    // move the article.
+    const titleChanged = input.title !== undefined && input.title !== article.title
+    const slug =
+      titleChanged && article.status !== ARTICLE_STATUSES.PUBLISHED
+        ? `${slugify(input.title as string) || 'article'}-${Date.now()}`
+        : undefined
     const tags = input.tags ? await tagService.normalizeTags(input.tags) : undefined
     await articleRepository.updateById(id, {
       ...input,
       ...(tags ? { tags } : {}),
       ...(slug ? { slug } : {}),
     })
+
+    await articleAuditService.record({
+      article,
+      actor: actingUser,
+      action: 'edited',
+      changedFields: Object.keys(input).filter((key) => (input as Record<string, unknown>)[key] !== undefined),
+    })
   },
 
-  async updateStatus(id: string, status: ArticleStatus, actingUser: ActingUser) {
+  async updateStatus(id: string, status: ArticleStatus, actingUser: ActingUser, options: { note?: string } = {}) {
     const article = await articleRepository.findById(id)
     if (!article) {
       throw new AppError('Article not found.', 404)
@@ -401,6 +458,17 @@ export const articleService = {
     }
 
     await articleRepository.updateStatus(id, status)
+
+    if (status !== article.status) {
+      await articleAuditService.record({
+        article,
+        actor: actingUser,
+        action: actionForTransition(article.status, status),
+        fromStatus: article.status,
+        toStatus: status,
+        note: options.note,
+      })
+    }
 
     if (status === ARTICLE_STATUSES.PENDING_REVIEW && article.status !== ARTICLE_STATUSES.PENDING_REVIEW) {
       await notifyEditorsOfSubmission(article, { id: article.author.toString(), role: ROLES.AUTHOR })
@@ -417,6 +485,13 @@ export const articleService = {
     }
 
     await articleRepository.recordReview(id, { status: ARTICLE_STATUSES.PUBLISHED, reviewerId: reviewer.id })
+    await articleAuditService.record({
+      article,
+      actor: reviewer,
+      action: 'approved',
+      fromStatus: article.status,
+      toStatus: ARTICLE_STATUSES.PUBLISHED,
+    })
     await notifyAuthorOfDecision(article, reviewer, { approved: true })
   },
 
@@ -435,11 +510,49 @@ export const articleService = {
       note: input.note,
       requirements: input.requirements,
     })
+    await articleAuditService.record({
+      article,
+      actor: reviewer,
+      action: 'changes_requested',
+      fromStatus: article.status,
+      toStatus: ARTICLE_STATUSES.DRAFT,
+      note: [input.note, ...input.requirements.map((requirement) => `• ${requirement}`)]
+        .filter(Boolean)
+        .join('\n')
+        .slice(0, 500),
+    })
     await notifyAuthorOfDecision(article, reviewer, {
       approved: false,
       requirementCount: input.requirements.length,
       note: input.note,
     })
+  },
+
+  // Admin: takes a live article offline and returns it to the author's drafts, with the reason shown to them.
+  async unpublishArticle(id: string, admin: ActingUser, reason: string) {
+    const article = await articleRepository.findById(id)
+    if (!article) {
+      throw new AppError('Article not found.', 404)
+    }
+    if (article.status !== ARTICLE_STATUSES.PUBLISHED) {
+      throw new AppError('Only published articles can be unpublished.', 400)
+    }
+
+    await articleRepository.recordReview(id, {
+      status: ARTICLE_STATUSES.DRAFT,
+      reviewerId: admin.id,
+      note: reason,
+      requirements: [],
+    })
+    await articleAuditService.record({
+      article,
+      actor: admin,
+      action: 'unpublished',
+      fromStatus: article.status,
+      toStatus: ARTICLE_STATUSES.DRAFT,
+      note: reason,
+    })
+    await notifyAuthorOfUnpublish(article, admin, reason)
   },
 
   // The author ticks off each requirement as they address it.
@@ -473,6 +586,12 @@ export const articleService = {
     assertCanManage(article, actingUser)
 
     await articleRepository.deleteById(id)
+    await articleAuditService.record({
+      article,
+      actor: actingUser,
+      action: 'deleted',
+      fromStatus: article.status,
+    })
   },
 
   async recordView(id: string, viewerId?: string) {

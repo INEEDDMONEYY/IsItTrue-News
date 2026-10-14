@@ -58,6 +58,7 @@ export function TagsInput({ label, helperText, placeholder, tags, onChange }: Ta
         </datalist>
         <button
           type="button"
+          aria-label="Add tag"
           onClick={addTag}
           disabled={!draft.trim()}
           className="px-3 py-2.5 rounded-xl border border-border text-sm text-heading hover:border-accent-border hover:text-accent transition-colors disabled:opacity-50"
@@ -77,6 +78,7 @@ export function TagsInput({ label, helperText, placeholder, tags, onChange }: Ta
               <span className="text-card-text">{tag}</span>
               <button
                 type="button"
+                aria-label={`Remove tag ${tag}`}
                 onClick={() => removeTag(index)}
                 className="text-text-dim hover:text-disputed transition-colors shrink-0"
               >

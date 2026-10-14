@@ -1,4 +1,4 @@
-import type { Article, VerificationStatus } from '@/shared/types/article.types'
+import type { Article } from '@/shared/types/article.types'
 
 export interface ArticleComment {
   id: string
@@ -11,13 +11,10 @@ export interface ArticleComment {
   liked?: boolean
 }
 
-export interface FactCheckDetails {
-  status: VerificationStatus
-  summary: string
-  source: string
-  checkedBy: string
-  checkedById?: string
-  checkedAt: string
+export interface ArticleTag {
+  name: string
+  // The tag page's address: /tag/<slug>.
+  slug: string
 }
 
 export interface ArticleDetail extends Article {
@@ -34,14 +31,17 @@ export interface ArticleDetail extends Article {
    * reader hit their monthly article cap. Mock stories are never locked.
    */
   locked?: boolean
+  /** Scrambled stand-in paragraphs for the withheld rest of a locked article (shown blurred, never real text). */
+  lockedPreview?: string[]
   /** Citation links the author attached when creating the article. */
   sourceLinks?: string[]
+  /** Topic tags the author gave the story. Mock stories have none. */
+  tags?: ArticleTag[]
   /** Published correction notices, numbered per article. */
   corrections?: { number: number; text: string; publishedAt: string }[]
   likes: number
   dislikes: number
   reposts: number
   bookmarks: number
-  factCheck: FactCheckDetails
   comments: ArticleComment[]
 }

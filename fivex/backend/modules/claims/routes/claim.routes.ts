@@ -5,6 +5,7 @@ import { validate } from '../../../middleware/validate.js'
 import { ROLES } from '../../../shared/constants/roles.js'
 import { claimController } from '../controllers/claim.controller.js'
 import {
+  addEvidenceSchema,
   createClaimSchema,
   setArticleFactCheckSchema,
   updateClaimSchema,
@@ -29,5 +30,8 @@ router.patch(
 router.post('/:id/take', claimController.takeResponsibility)
 router.patch('/:id', validate(updateClaimSchema), claimController.update)
 router.delete('/:id', claimController.remove)
+
+router.post('/:id/evidence', validate(addEvidenceSchema), claimController.addEvidence)
+router.delete('/:id/evidence/:itemId', claimController.removeEvidence)
 
 export const claimRoutes = router

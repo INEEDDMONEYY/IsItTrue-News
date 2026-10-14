@@ -1,0 +1,25 @@
+export const CLAIM_EVENT_ACTIONS = [
+  'created',
+  'assigned',
+  'reassigned',
+  'unassigned',
+  'workflow_changed',
+  'assessment_recorded',
+  'assessment_revised',
+  'returned',
+  'escalated',
+  'escalation_resolved',
+  'evidence_updated',
+  'evidence_added',
+  'evidence_removed',
+  'evidence_flagged',
+  'evidence_flag_cleared',
+  'evidence_restricted',
+  'evidence_unrestricted',
+  'metadata_corrected',
+  'investigation_linked',
+  'comment',
+  'deleted',
+] as const
+
+export type ClaimEventAction = (typeof CLAIM_EVENT_ACTIONS)[number]

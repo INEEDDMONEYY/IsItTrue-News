@@ -5,7 +5,7 @@ import { useAuth } from '@/app/providers/AuthProvider'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { useCategories } from '@/features/categories/hooks/useCategories'
 import { SearchBar } from '@/features/search/components/SearchBar'
-import logo from '@/assets/icons/question-icon-removebg.png'
+import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
@@ -95,7 +95,7 @@ export function Header() {
             <img
               src={logo}
               alt="IsItTrue"
-              className="h-9 w-auto rounded-md bg-white px-2 py-1 border border-border"
+              className="h-9 w-auto rounded-md px-2 py-1 "
             />
             <span className="hidden sm:block text-lg font-semibold text-heading tracking-tight">
               IsItTrueNews

@@ -1,6 +1,7 @@
 import type { Article } from '@/shared/types/article.types'
+import { slugify } from '@/lib/slugify'
 import type { PublicArticle } from '../types/publicArticle.types'
-import type { ArticleDetail } from '../types/articleDetail.types'
+import type { ArticleDetail, ArticleTag } from '../types/articleDetail.types'
 import fallbackImage from '@/assets/images/speak-up.jpg'
 
 const VERIFICATION_STATUS_MAP: Record<string, Article['verificationStatus']> = {
@@ -10,12 +11,18 @@ const VERIFICATION_STATUS_MAP: Record<string, Article['verificationStatus']> = {
   none: 'unverified',
 }
 
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+// The author's tag names, each with the address of its tag page. A name that has no usable slug (only symbols)
+// can't be linked to, so it is left out, and a tag typed twice with different casing shows once.
+export function toArticleTags(names: readonly string[] | undefined): ArticleTag[] {
+  const seen = new Set<string>()
+  const tags: ArticleTag[] = []
+  for (const name of names ?? []) {
+    const slug = slugify(name)
+    if (!slug || seen.has(slug)) continue
+    seen.add(slug)
+    tags.push({ name: name.trim(), slug })
+  }
+  return tags
 }
 
 export function estimateReadTimeMinutes(body: string): number {
@@ -48,39 +55,16 @@ export function adaptPublicArticle(article: PublicArticle): Article {
   }
 }
 
-const FACT_CHECK_COPY: Record<NonNullable<Article['verificationStatus']>, { summary: string; source: string }> = {
-  verified: {
-    summary:
-      'Our team cross-referenced the core claims in this story against public records and at least two independent sources. The claims check out.',
-    source: 'Public records, primary source interviews',
-  },
-  disputed: {
-    summary:
-      'Some claims in this story conflict with publicly available data. We are seeking clarification from the original source before updating the verdict.',
-    source: 'Conflicting public statements',
-  },
-  pending: {
-    summary:
-      'This story is currently under review by our fact-checking team. The verdict will be updated once the review is complete.',
-    source: 'Awaiting confirmation',
-  },
-  unverified: {
-    summary: 'This story has not yet been submitted for fact-checking.',
-    source: 'Not yet reviewed',
-  },
-}
-
 /**
  * Adapts a real backend article (looked up by slug) into the full
  * `ArticleDetail` shape the article detail page renders — used as a
  * fallback when the requested slug isn't one of the mock stories, so
  * newly-published real articles are viewable instead of hitting a
- * false "Article not found".
+ * false "Article not found". Fact-check data is not part of this: the page
+ * loads it separately from the real fact-check records.
  */
 export function adaptPublicArticleDetail(article: PublicArticle): ArticleDetail {
   const base = adaptPublicArticle(article)
-  const status = base.verificationStatus ?? 'unverified'
-  const { summary, source } = FACT_CHECK_COPY[status]
 
   const content = (article.body ?? '')
     .split(/\n{2,}/)
@@ -92,20 +76,14 @@ export function adaptPublicArticleDetail(article: PublicArticle): ArticleDetail 
     content: content.length ? content : [article.excerpt || article.title],
     bodyHtml: article.body,
     locked: article.locked,
+    lockedPreview: article.lockedPreview,
     sourceLinks: article.sourceLinks ?? [],
+    tags: toArticleTags(article.tags),
     corrections: article.corrections ?? [],
     likes: article.likes,
     dislikes: article.dislikes,
     reposts: article.shares,
     bookmarks: article.bookmarks,
-    factCheck: {
-      status,
-      summary,
-      source,
-      checkedBy: article.factCheckReviewedBy?.name ?? 'IsItTrue Fact-Check Team',
-      checkedById: article.factCheckReviewedBy?.id,
-      checkedAt: base.publishedAt,
-    },
     comments: [],
   }
 }

@@ -5,8 +5,6 @@ import { PageLoader } from '@/components/loaders/PageLoader'
 import { Spinner } from '@/components/ui/Spinner'
 import { AuthorProfileSection } from '../components/settings/AuthorProfileSection'
 import { AuthorExpertiseSection } from '../components/settings/AuthorExpertiseSection'
-import { AuthorPublishingSection } from '../components/settings/AuthorPublishingSection'
-import { AuthorPreferencesSection } from '../components/settings/AuthorPreferencesSection'
 import { AuthorStatusSection } from '../components/settings/AuthorStatusSection'
 import { useAuthorSettings } from '../hooks/useAuthorSettings'
 
@@ -17,8 +15,6 @@ export function AuthorSettingsPage() {
     isSaving,
     updateProfile,
     updateExpertise,
-    updatePublishing,
-    updatePreferences,
     saveSettings,
   } = useAuthorSettings()
 
@@ -51,8 +47,9 @@ export function AuthorSettingsPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            Manage your journalist profile, expertise, publishing
-            preferences, and editorial notifications.
+            Manage your journalist profile and expertise. Publishing
+            preferences and author notifications are in your account
+            Settings.
           </p>
         </div>
 
@@ -86,16 +83,6 @@ export function AuthorSettingsPage() {
         <AuthorExpertiseSection
           expertise={settings.expertise}
           onChange={updateExpertise}
-        />
-
-        <AuthorPublishingSection
-          publishing={settings.publishing}
-          onChange={updatePublishing}
-        />
-
-        <AuthorPreferencesSection
-          preferences={settings.preferences}
-          onChange={updatePreferences}
         />
 
         <AuthorStatusSection status={settings.status} />

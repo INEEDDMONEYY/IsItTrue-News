@@ -340,6 +340,8 @@ export function FactCheckOversightPage() {
                   onSave={(changes) => oversight.updateClaim(claim.id, changes)}
                   onDelete={() => oversight.deleteClaim(claim.id)}
                   onTake={() => oversight.takeResponsibility(claim.id)}
+                  onAddEvidence={(input) => oversight.addEvidence(claim.id, input)}
+                  onRemoveEvidence={(itemId) => oversight.removeEvidence(claim.id, itemId)}
                 />
               ))}
             </div>

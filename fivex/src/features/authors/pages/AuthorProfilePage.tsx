@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   Award,
+  BadgeCheck,
   Camera,
   FileText,
   Globe,
@@ -27,6 +28,14 @@ import { useAuthorProfile } from '../hooks/useAuthorProfile'
 import type { PublicLibraryItem } from '../types/authorProfile.types'
 
 type ProfileTab = 'articles' | 'videos' | 'library'
+
+// Only authors have the author workspace settings; readers have their own, admins use the admin settings, and
+// everyone else (editors, organizations, contributors) edits their account in the shared dashboard settings.
+const SETTINGS_PATH_BY_ROLE: Record<string, string> = {
+  reader: '/dashboard/reader-settings',
+  author: '/dashboard/author-settings',
+  admin: '/admin/settings',
+}
 
 function formatDuration(seconds: number) {
   const minutes = Math.floor(seconds / 60)
@@ -84,7 +93,8 @@ export function AuthorProfilePage() {
   const isOwnProfile = currentUser?.id === profile.id
   const info = profile.authorProfile
   const displayName = info?.professionalName || profile.name
-  const settingsPath = profile.role === 'reader' ? '/dashboard/reader-settings' : '/dashboard/author-settings'
+  const isAdmin = profile.role === 'admin'
+  const settingsPath = SETTINGS_PATH_BY_ROLE[profile.role] ?? '/dashboard/settings'
 
   const handleBannerChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -140,6 +150,13 @@ export function AuthorProfilePage() {
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <h1 className="text-xl md:text-2xl font-semibold text-heading">{displayName}</h1>
+              {isAdmin && (
+                <BadgeCheck
+                  role="img"
+                  aria-label="Verified admin"
+                  className="w-5 h-5 shrink-0 text-accent"
+                />
+              )}
               {isOwnProfile && (
                 <Link
                   to={settingsPath}
@@ -241,7 +258,14 @@ export function AuthorProfilePage() {
           </div>
         )}
 
-        {(info?.primaryBeats?.length ||
+        {isAdmin ? (
+          <div>
+            <span className="inline-flex items-center rounded-full bg-gradient-to-r from-red-500 to-red-700 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+              Admin
+            </span>
+          </div>
+        ) : (
+          (info?.primaryBeats?.length ||
           info?.secondaryBeats?.length ||
           info?.areasOfExpertise?.length ||
           info?.geographicCoverage?.length ||
@@ -267,17 +291,21 @@ export function AuthorProfilePage() {
               </span>
             )}
           </div>
-        )}
+          ))}
 
-        <div className="grid grid-cols-3 max-w-md gap-3 pt-2">
-          <div className="rounded-xl border border-card-border bg-card px-3 py-2.5 text-center">
-            <p className="text-lg font-semibold text-card-heading">{stats?.articles ?? 0}</p>
-            <p className="text-xs text-card-text-dim">Articles</p>
-          </div>
-          <div className="rounded-xl border border-card-border bg-card px-3 py-2.5 text-center">
-            <p className="text-lg font-semibold text-card-heading">{stats?.videos ?? 0}</p>
-            <p className="text-xs text-card-text-dim">Videos</p>
-          </div>
+        <div className={`grid gap-3 pt-2 ${isAdmin ? 'grid-cols-1 max-w-[8rem]' : 'grid-cols-3 max-w-md'}`}>
+          {!isAdmin && (
+            <>
+              <div className="rounded-xl border border-card-border bg-card px-3 py-2.5 text-center">
+                <p className="text-lg font-semibold text-card-heading">{stats?.articles ?? 0}</p>
+                <p className="text-xs text-card-text-dim">Articles</p>
+              </div>
+              <div className="rounded-xl border border-card-border bg-card px-3 py-2.5 text-center">
+                <p className="text-lg font-semibold text-card-heading">{stats?.videos ?? 0}</p>
+                <p className="text-xs text-card-text-dim">Videos</p>
+              </div>
+            </>
+          )}
           <div className="rounded-xl border border-card-border bg-card px-3 py-2.5 text-center">
             <p className="text-lg font-semibold text-card-heading">{stats?.factChecksVerified ?? 0}</p>
             <p className="text-xs text-card-text-dim">Verified</p>

@@ -4,11 +4,13 @@ import { logger } from './config/logger.js'
 import { connectDatabase, disconnectDatabase } from './database/connection.js'
 import { categoryService } from './modules/categories/services/category.service.js'
 import { tagService } from './modules/tags/services/tag.service.js'
+import { migrateLegacyClaims } from './modules/claims/services/claimMigration.service.js'
 
 async function main() {
   await connectDatabase()
   await categoryService.ensureDefaultCategories()
   await tagService.ensureDefaultTags()
+  await migrateLegacyClaims()
 
   const app = createApp()
   const server = app.listen(env.PORT, () => {

@@ -1,23 +1,28 @@
 import { useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Lock } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import dayjs from '@/lib/dayjs'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { PageLoader } from '@/components/loaders/PageLoader'
 import { SignUpPromptModal } from '@/components/modals/SignUpPromptModal'
 import { EngagementBar } from '../components/EngagementBar'
 import { FactCheckPanel } from '../components/FactCheckPanel'
+import { ArticleTags } from '../components/ArticleTags'
+import { useArticleFactCheck } from '@/features/fact-checks/hooks/usePublicFactChecks'
+import { NOT_FACT_CHECKED } from '@/features/fact-checks/utils/notFactChecked'
 import { CommentSection } from '../components/CommentSection'
 import { ArticleHeader } from '../components/ArticleHeader'
 import { ArticleCover } from '../components/ArticleCover'
 import { ArticleBodyHtml } from '../components/ArticleBody'
+import { LockedArticleRest } from '../components/LockedArticleRest'
 import { sanitizeArticleHtml } from '../utils/articleBody'
 import { ArticleSources } from '../components/ArticleSources'
 import { getArticleDetailBySlug } from '../data/mockArticleDetails'
 import { publicArticlesApi } from '../api/publicArticles.api'
 import { adaptPublicArticleDetail } from '../utils/adaptPublicArticle'
 import { useArticleEngagement } from '../hooks/useArticleEngagement'
+import { articleShareUrl } from '../utils/shareLinks'
 
 export function ArticlePage() {
   const { slug } = useParams<{ slug: string }>()
@@ -47,6 +52,11 @@ export function ArticlePage() {
   const [mockReposted, setMockReposted] = useState(false)
   const [mockBookmarked, setMockBookmarked] = useState(false)
   const { toggleLike, toggleDislike, share, toggleBookmark } = useArticleEngagement(realArticle?.id, slug)
+
+  // The story's fact-check comes from the real claim records. Mock stories have none behind them, so they are
+  // shown as not fact-checked rather than with invented results.
+  const factCheckQuery = useArticleFactCheck(slug, isRealArticle)
+  const factCheck = mockArticle ? NOT_FACT_CHECKED : factCheckQuery.data
 
   // Sanitize the author's rich-text HTML before rendering it so the body
   // keeps its original formatting (headings, lists, bold/italic, images,
@@ -102,24 +112,25 @@ export function ArticlePage() {
 
       <ArticleHeader
         category={article.category.name}
-        verdict={article.factCheck.status}
+        verdict={factCheck?.verdict}
         title={article.title}
         authorName={article.author.name}
+        authorId={isRealArticle ? article.author.id : undefined}
         publishedAt={article.publishedAt}
         readTimeMinutes={article.readTimeMinutes}
       />
 
-      <ArticleCover src={article.thumbnailUrl} alt={article.title} blurred={isAnonLocked} />
+      <ArticleCover src={article.thumbnailUrl} alt={article.title} />
 
       <EngagementBar
         likes={article.likes}
         dislikes={article.dislikes}
         commentsCount={article.comments.length}
-        reposts={article.reposts}
+        reposts={isRealArticle ? article.reposts : article.reposts + (mockReposted ? 1 : 0)}
         bookmarks={isRealArticle ? (realArticleData?.article.bookmarks ?? article.bookmarks) : article.bookmarks}
         liked={isRealArticle ? realArticleData?.liked : mockReaction === 'like'}
         disliked={isRealArticle ? realArticleData?.disliked : mockReaction === 'dislike'}
-        reposted={isRealArticle ? false : mockReposted}
+        reposted={isRealArticle ? realArticleData?.shared : mockReposted}
         bookmarked={isRealArticle ? realArticleData?.bookmarked : mockBookmarked}
         onLike={() => {
           if (isRealArticle) {
@@ -135,11 +146,14 @@ export function ArticlePage() {
             setMockReaction((prev) => (prev === 'dislike' ? null : 'dislike'))
           }
         }}
-        onShare={() => {
-          if (isRealArticle) {
+        shareUrl={articleShareUrl(slug ?? '')}
+        shareTitle={article.title}
+        sharesCounted={isAuthenticated}
+        onShared={() => {
+          if (!isRealArticle) {
+            setMockReposted(true)
+          } else if (isAuthenticated) {
             share()
-          } else {
-            setMockReposted((prev) => !prev)
           }
         }}
         onBookmark={() => {
@@ -188,27 +202,9 @@ export function ArticlePage() {
           </Link>
         </div>
       ) : sanitizedBodyHtml ? (
-        <div className={isAnonLocked ? 'relative max-h-[420px] overflow-hidden' : undefined}>
+        <div className="flex flex-col gap-4">
           <ArticleBodyHtml html={sanitizedBodyHtml} protectedContent={isAnonLocked} />
-
-          {isAnonLocked && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center justify-end gap-3 bg-gradient-to-t from-bg via-bg/95 to-transparent px-4 pb-6 pt-24 text-center">
-              <div className="pointer-events-auto flex flex-col items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-bg text-accent">
-                  <Lock className="h-5 w-5" />
-                </span>
-                <p className="max-w-sm text-sm font-semibold text-heading">
-                  Members get full access to investigations, evidence, and videos
-                </p>
-                <Link
-                  to="/register"
-                  className="rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-on-brand transition"
-                >
-                  Sign up to keep reading
-                </Link>
-              </div>
-            </div>
-          )}
+          {isAnonLocked && <LockedArticleRest paragraphs={article.lockedPreview ?? []} />}
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -220,11 +216,18 @@ export function ArticlePage() {
         </div>
       )}
 
+      <ArticleTags tags={article.tags} />
+
       {!isAnonLocked && article.sourceLinks && article.sourceLinks.length > 0 && (
         <ArticleSources links={article.sourceLinks} />
       )}
 
-      <FactCheckPanel ref={factCheckRef} factCheck={article.factCheck} />
+      <FactCheckPanel
+        ref={factCheckRef}
+        factCheck={factCheck}
+        isLoading={isRealArticle && factCheckQuery.isLoading}
+        isError={isRealArticle && factCheckQuery.isError}
+      />
 
       <CommentSection
         ref={commentsRef}

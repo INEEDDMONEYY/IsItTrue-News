@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import logo from '@/assets/icons/question-icon-removebg.png'
+import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 
 const FOOTER_COLUMNS = [
   {
@@ -66,7 +66,7 @@ export function Footer() {
               alt="IsItTrue"
               className="h-8 w-auto rounded-md bg-white/95 px-2 py-1"
             />
-            <span className="font-semibold text-heading">IsItTrue News</span>
+            <span className="font-semibold text-heading">IsItTrueNews</span>
           </Link>
           <p className="text-sm text-text-dim leading-relaxed">
             Verified news, checked sources, no noise.
@@ -95,8 +95,8 @@ export function Footer() {
       </div>
 
       <div className="border-t border-border">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 text-xs text-text-dim">
-          © {new Date().getFullYear()} IsItTrue. All rights reserved.
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 text-xs text-text-dim text-center">
+          © {new Date().getFullYear()} IsItTrueNews. All rights reserved.
         </div>
       </div>
     </footer>

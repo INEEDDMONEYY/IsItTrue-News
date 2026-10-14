@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { KeyRound, Lock, LockOpen } from 'lucide-react'
-import logo from '@/assets/icons/question-icon-removebg.png'
+import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import { prelaunchApi } from '../api/prelaunch.api'
 import { grantPreLaunchAccess, hasPreLaunchAccess, revokePreLaunchAccess } from '../utils/access'
@@ -53,7 +53,7 @@ export function DevAccessPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-bg px-5 py-12 text-text">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex items-center justify-center gap-2.5">
-          <img src={logo} alt="" className="size-8" />
+          <img src={logo} alt="" className="size-8 shrink-0 rounded-lg object-cover" />
           <span className="text-base font-semibold text-heading">IsItTrue News</span>
         </div>
 

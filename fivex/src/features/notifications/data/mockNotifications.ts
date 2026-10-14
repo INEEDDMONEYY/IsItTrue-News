@@ -179,7 +179,7 @@ export const mockNotifications: Notification[] = [
     priority: 'normal',
     action: 'view',
     actionLabel: 'View Profile',
-    href: '/dashboard/profile',
+    href: '/dashboard/settings',
     relatedId: 'profile-001',
     relatedType: 'profile',
   },
