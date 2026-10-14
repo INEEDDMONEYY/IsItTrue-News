@@ -1,4 +1,5 @@
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { ReviewQueueCard } from '../components/ReviewQueueCard'
 import { useReviewQueue } from '../hooks/useReviewQueue'
 
@@ -16,7 +17,7 @@ export function PendingApprovalsPage() {
       {isLoading ? (
         <PageLoader label="Loading submissions..." />
       ) : isError ? (
-        <p className="text-sm text-disputed">Couldn&apos;t load the review queue. Please refresh and try again.</p>
+        <LoaderState compact alert message="Couldn't load the review queue. Please refresh and try again." />
       ) : articles.length === 0 ? (
         <div className="rounded-xl border border-card-border bg-card p-8 text-center text-sm text-card-text-muted">
           Nothing is waiting for approval right now.

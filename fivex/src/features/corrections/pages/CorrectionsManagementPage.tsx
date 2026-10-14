@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { CorrectionCard } from '../components/CorrectionCard'
 import { NewCorrectionForm } from '../components/NewCorrectionForm'
@@ -110,7 +111,7 @@ export function CorrectionsManagementPage() {
       {isLoading ? (
         <PageLoader label="Loading corrections..." />
       ) : isError ? (
-        <p className="text-sm text-disputed">Couldn&apos;t load corrections. Please refresh and try again.</p>
+        <LoaderState compact alert message="Couldn't load corrections. Please refresh and try again." />
       ) : corrections.length === 0 ? (
         <div className="rounded-xl border border-card-border bg-card p-8 text-center text-sm text-card-text-muted">
           {activeTab.empty}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import type { Article } from '@/shared/types/article.types'
 import dayjs from '@/lib/dayjs'
 
@@ -26,9 +27,7 @@ export function LatestPostsList({ articles, isLoading = false, isError = false }
           ))}
         </ul>
       ) : isError ? (
-        <p role="alert" className="text-sm text-card-text-dim">
-          Couldn&apos;t load the latest posts. Please try again shortly.
-        </p>
+        <LoaderState compact alert message="Couldn't load the latest posts. Please try again shortly." />
       ) : articles.length === 0 ? (
         <p className="text-sm text-card-text-dim">No posts have been published yet.</p>
       ) : (

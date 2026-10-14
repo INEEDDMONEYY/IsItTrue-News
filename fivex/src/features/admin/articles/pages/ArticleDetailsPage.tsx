@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import { ArticleActions } from '../components/ArticleActions'
 import { ArticleAuditHistory } from '../components/ArticleAuditHistory'
@@ -29,10 +30,12 @@ export function ArticleDetailsPage() {
     return (
       <div className="flex flex-col gap-3">
         <BackLink />
-        <h1 className="text-2xl font-semibold text-heading">Article not found</h1>
-        <p role="alert" className="text-sm text-text-muted">
-          {getErrorMessage(error, 'This article may have been deleted.')}
-        </p>
+        <LoaderState
+          alert
+          className="py-8"
+          title="Article not found"
+          message={getErrorMessage(error, 'This article may have been deleted.')}
+        />
         {/* A deleted article's history is kept, so it stays reachable here. */}
         {audit.data && audit.data.entries.length > 0 && <ArticleAuditHistory trail={audit.data} isLoading={false} error={null} />}
       </div>

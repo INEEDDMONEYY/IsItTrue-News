@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Eye, FilePlus2, Loader2, Pencil, Send, Trash2 } from 'lucide-react'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { PaywallGate } from '@/features/billing/components/PaywallGate'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import { ReviewFeedbackPanel } from '../components/ReviewFeedbackPanel'
@@ -205,7 +206,7 @@ export function DraftsPage() {
         {isLoading ? (
           <PageLoader label="Loading your drafts..." />
         ) : isError ? (
-          <p className="text-sm text-disputed">Couldn&apos;t load your articles. Please refresh and try again.</p>
+          <LoaderState compact alert message="Couldn't load your articles. Please refresh and try again." />
         ) : visible.length === 0 ? (
           <div className="rounded-xl border border-card-border bg-card p-8 text-center text-sm text-card-text-muted">
             {articles.length === 0 ? 'You have no articles yet.' : 'Nothing here yet.'}

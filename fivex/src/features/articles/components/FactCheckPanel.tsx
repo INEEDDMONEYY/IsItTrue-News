@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
 import { Link } from 'react-router-dom'
 import dayjs from '@/lib/dayjs'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { VerdictBadge } from '@/features/fact-checks/components/VerdictBadge'
 import type { ArticleFactCheck } from '@/features/fact-checks/types/publicFactCheck.types'
 import { VERDICT_MEANINGS, describeCounts } from '@/features/fact-checks/utils/verdicts'
@@ -46,9 +47,11 @@ export const FactCheckPanel = forwardRef<HTMLDivElement, FactCheckPanelProps>(fu
       )}
 
       {isError && !factCheck && (
-        <p role="alert" className="text-sm text-card-text-muted">
-          We couldn&apos;t load this story&apos;s fact-check right now. Please try again in a moment.
-        </p>
+        <LoaderState
+          compact
+          alert
+          message="We couldn't load this story's fact-check right now. Please try again in a moment."
+        />
       )}
 
       {factCheck && (

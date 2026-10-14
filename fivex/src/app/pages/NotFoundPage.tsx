@@ -2,7 +2,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import logo from '@/assets/icons/question-icon-removebg.png'
+import loader from '@/assets/isittrue-loader.svg'
 import heroImage from '@/assets/images/lost.png'
 
 export function NotFoundPage() {
@@ -17,9 +17,12 @@ export function NotFoundPage() {
       {/* Content */}
       <section className="relative z-10 flex w-full max-w-lg flex-col items-center px-6 text-center">
         <img
-          src={logo}
-          alt="IsItTrue News"
-          className="mb-8 h-14 w-auto object-contain rounded-3xl"
+          src={loader}
+          alt=""
+          width={280}
+          height={144}
+          draggable={false}
+          className="mb-6 h-auto w-56 max-w-full select-none"
         />
 
         <p className="mb-3 text-sm font-semibold uppercase text-accent text-white">

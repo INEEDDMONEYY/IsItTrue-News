@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, ShieldCheck } from 'lucide-react'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { Pagination } from '@/components/ui/Pagination'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import { FactCheckCard } from '../components/FactCheckCard'
@@ -129,12 +130,11 @@ export function FactChecksPage() {
       {isLoading && <PageLoader label="Loading fact checks..." />}
 
       {error && !data && (
-        <div role="alert" className="flex items-center gap-3 text-sm text-disputed">
-          <span>{getErrorMessage(error, 'We could not load the fact checks right now.')}</span>
-          <button type="button" onClick={() => refetch()} className="underline hover:no-underline">
+        <LoaderState alert compact message={getErrorMessage(error, 'We could not load the fact checks right now.')}>
+          <button type="button" onClick={() => refetch()} className="text-sm text-accent underline hover:no-underline">
             Try again
           </button>
-        </div>
+        </LoaderState>
       )}
 
       {data && data.total === 0 && (

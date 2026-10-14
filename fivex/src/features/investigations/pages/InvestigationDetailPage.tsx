@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify'
 import dayjs from '@/lib/dayjs'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { EvidenceViewer } from '@/features/evidence/components/EvidenceViewer'
 import { useInvestigation } from '../hooks/useInvestigation'
 import { InvestigationTimeline } from '../components/InvestigationTimeline'
@@ -22,13 +23,11 @@ export function InvestigationDetailPage() {
 
   if (!investigation) {
     return (
-      <div className="py-16 flex flex-col items-center text-center gap-3">
-        <h1 className="text-2xl font-semibold text-heading">Investigation not found</h1>
-        <p className="text-sm text-text-muted">This investigation may not be published yet.</p>
+      <LoaderState title="Investigation not found" message="This investigation may not be published yet.">
         <Link to="/investigations" className="text-accent font-medium hover:underline text-sm">
           Back to Investigations
         </Link>
-      </div>
+      </LoaderState>
     )
   }
 

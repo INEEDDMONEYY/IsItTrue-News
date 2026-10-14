@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import { ClaimDetailsSection } from '../components/ClaimDetailsSection'
 import { EvidenceSourcesSection } from '../components/EvidenceSourcesSection'
@@ -35,10 +36,12 @@ export function FactCheckDetailsPage() {
     return (
       <div className="flex flex-col gap-3">
         <BackLink />
-        <h1 className="text-2xl font-semibold text-heading">Fact-check record not found</h1>
-        <p role="alert" className="text-sm text-text-muted">
-          {getErrorMessage(error, 'This record may have been deleted.')}
-        </p>
+        <LoaderState
+          alert
+          className="py-8"
+          title="Fact-check record not found"
+          message={getErrorMessage(error, 'This record may have been deleted.')}
+        />
         {/* A deleted record's history is kept, so it stays reachable here. */}
         {history.data && history.data.entries.length > 0 && <ReviewHistorySection id={id} />}
       </div>

@@ -1,5 +1,6 @@
-import { AlertTriangle, ArrowLeft, RotateCw } from 'lucide-react'
+import { ArrowLeft, RotateCw } from 'lucide-react'
 import { Link, isRouteErrorResponse, useRouteError } from 'react-router-dom'
+import loader from '@/assets/isittrue-loader.svg'
 
 export function ErrorPage() {
   const error = useRouteError()
@@ -15,9 +16,14 @@ export function ErrorPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--color-surface)] px-6">
       <section className="w-full max-w-lg rounded-2xl border border-[var(--color-card-border)] bg-[var(--color-card)] p-8 text-center shadow-sm">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-          <AlertTriangle className="h-7 w-7" />
-        </div>
+        <img
+          src={loader}
+          alt=""
+          width={280}
+          height={144}
+          draggable={false}
+          className="mx-auto mb-4 h-auto w-52 max-w-full select-none"
+        />
 
         <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-red-600">
           {status ? `Error ${status}` : 'Something went wrong'}

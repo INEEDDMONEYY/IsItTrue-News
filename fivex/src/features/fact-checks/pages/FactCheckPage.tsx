@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import dayjs from '@/lib/dayjs'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { FactCheckSources } from '../components/FactCheckSources'
 import { VerdictBadge } from '../components/VerdictBadge'
 import { usePublicFactCheck } from '../hooks/usePublicFactChecks'
@@ -25,13 +26,11 @@ export function FactCheckPage() {
 
   if (error || !factCheck) {
     return (
-      <div className="py-16 flex flex-col items-center text-center gap-3">
-        <h1 className="text-2xl font-semibold text-heading">Fact check not found</h1>
-        <p className="text-sm text-text-muted">It may have been withdrawn while it is looked at again, or it never existed.</p>
+      <LoaderState title="Fact check not found" message="It may have been withdrawn while it is looked at again, or it never existed.">
         <Link to="/fact-checks" className="text-accent font-medium hover:underline text-sm">
           All fact checks
         </Link>
-      </div>
+      </LoaderState>
     )
   }
 

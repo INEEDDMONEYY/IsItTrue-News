@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { WorkflowCard } from '../components/EditorialCalendar'
 import { useEditorialCalendar } from '../hooks/useEditorialCalendar'
 import {
@@ -334,7 +335,7 @@ export function EditorialCalendarPage() {
 
   if (isLoading) return <PageLoader label="Loading editorial workflows..." />
   if (isError) {
-    return <p role="alert" className="text-sm text-disputed">Couldn&apos;t load editorial workflows. Please refresh and try again.</p>
+    return <LoaderState compact alert message="Couldn't load editorial workflows. Please refresh and try again." />
   }
 
   const tabs: { id: DashboardPanel; label: string }[] = [

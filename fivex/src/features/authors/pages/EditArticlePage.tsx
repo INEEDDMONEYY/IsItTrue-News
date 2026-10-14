@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { articlesApi } from '../api/articles.api'
 import { ArticleForm, type ArticleFormIntent, type ArticleFormValues } from '../components/ArticleForm'
 import { ReviewFeedbackPanel } from '../components/ReviewFeedbackPanel'
@@ -47,12 +48,11 @@ export function EditArticlePage() {
 
   if (isError || !article) {
     return (
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-heading">Article not found</h1>
+      <LoaderState title="Article not found">
         <Link to="/dashboard/drafts" className="text-sm text-accent hover:underline">
           Back to My Drafts
         </Link>
-      </div>
+      </LoaderState>
     )
   }
 

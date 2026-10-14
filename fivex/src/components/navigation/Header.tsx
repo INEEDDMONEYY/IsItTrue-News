@@ -6,6 +6,7 @@ import { useTheme } from '@/app/providers/ThemeProvider'
 import { useCategories } from '@/features/categories/hooks/useCategories'
 import { SearchBar } from '@/features/search/components/SearchBar'
 import logo from '@/assets/icons/isittrue-icon-dark.jpg'
+import animatedLogo from '@/assets/isittrue-profile-animation.svg'
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
@@ -92,11 +93,11 @@ export function Header() {
           </button>
 
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img
-              src={logo}
-              alt="IsItTrue"
-              className="h-9 w-auto rounded-md px-2 py-1 "
-            />
+            {/* The animated logo; people who ask their system for reduced motion get the still icon. */}
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcSet={logo} />
+              <img src={animatedLogo} alt="IsItTrue" width={40} height={40} className="size-10 rounded-lg ring-1 ring-border" />
+            </picture>
             <span className="hidden sm:block text-lg font-semibold text-heading tracking-tight">
               IsItTrueNews
             </span>

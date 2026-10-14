@@ -3,6 +3,7 @@ import { BadgeCheck, CircleHelp, ClipboardList, ShieldCheck, UserX } from 'lucid
 import { StatCard } from '@/components/cards'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import { ClaimCard } from '../components/ClaimCard'
 import { useFactCheckOversight } from '../hooks/useFactCheckOversight'
@@ -218,11 +219,7 @@ export function FactCheckOversightPage() {
 
   if (oversight.isLoading) return <PageLoader label="Loading fact-check oversight..." />
   if (oversight.isError) {
-    return (
-      <p role="alert" className="text-sm text-disputed">
-        Couldn&apos;t load fact-check oversight. Please refresh and try again.
-      </p>
-    )
+    return <LoaderState compact alert message="Couldn't load fact-check oversight. Please refresh and try again." />
   }
 
   const openClaims = claims.filter((claim) => isOpenClaim(claim.status))

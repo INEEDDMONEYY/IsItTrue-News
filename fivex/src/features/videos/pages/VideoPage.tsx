@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Eye, ThumbsUp, MessageSquare } from 'lucide-react'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { mockMyVideos } from '@/features/videos/data/mockMyVideos'
 
 function formatCount(n: number) {
@@ -14,12 +15,11 @@ export function VideoPage() {
 
   if (!video) {
     return (
-      <div className="py-16 flex flex-col items-center text-center gap-3">
-        <h1 className="text-2xl font-semibold text-heading">Video not found</h1>
+      <LoaderState title="Video not found">
         <Link to="/videos" className="text-sm text-accent hover:underline">
           Back to videos
         </Link>
-      </div>
+      </LoaderState>
     )
   }
 

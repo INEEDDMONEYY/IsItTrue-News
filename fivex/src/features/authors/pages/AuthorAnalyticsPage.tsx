@@ -2,6 +2,7 @@ import { BarChart3, Eye, FileText, MessageSquare } from 'lucide-react'
 import { useMyDrafts } from '../hooks/useMyDrafts'
 import { StatCard } from '@/components/cards'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { PaywallGate } from '@/features/billing/components/PaywallGate'
 import { ViewsTrendChart } from '../components/charts/ViewsTrendChart'
 import { DonutChart } from '../components/charts/DonutChart'
@@ -52,9 +53,7 @@ export function AuthorAnalyticsPage() {
 
       {isLoading && <PageLoader label="Loading your analytics..." />}
       {isError && (
-        <p role="alert" className="text-sm text-disputed mb-6">
-          Couldn&apos;t load your analytics. Please refresh and try again.
-        </p>
+        <LoaderState compact alert className="mb-6" message="Couldn't load your analytics. Please refresh and try again." />
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">

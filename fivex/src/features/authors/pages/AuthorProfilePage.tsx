@@ -18,6 +18,7 @@ import {
 import dayjs from '@/lib/dayjs'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { SignUpPromptModal } from '@/components/modals/SignUpPromptModal'
 import { ArticleCard } from '@/features/home/components/ArticleCard'
 import { adaptPublicArticle } from '@/features/articles/utils/adaptPublicArticle'
@@ -80,13 +81,11 @@ export function AuthorProfilePage() {
 
   if (isError || !profile) {
     return (
-      <div className="py-16 flex flex-col items-center text-center gap-3">
-        <h1 className="text-2xl font-semibold text-heading">Author not found</h1>
-        <p className="text-sm text-text-muted">This profile may have been moved or no longer exists.</p>
+      <LoaderState title="Author not found" message="This profile may have been moved or no longer exists.">
         <Link to="/" className="text-accent font-medium hover:underline text-sm">
           Back to Home
         </Link>
-      </div>
+      </LoaderState>
     )
   }
 

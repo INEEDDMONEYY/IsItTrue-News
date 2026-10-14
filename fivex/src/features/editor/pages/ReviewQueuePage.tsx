@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { ReviewFeedbackPanel } from '@/features/authors/components/ReviewFeedbackPanel'
 import { useChangesRequested, useReviewQueue } from '../hooks/useReviewQueue'
 import type { PendingArticle } from '../types/reviewQueue.types'
@@ -60,7 +61,7 @@ export function ReviewQueuePage() {
       {active.isLoading ? (
         <PageLoader label="Loading the queue..." />
       ) : active.isError ? (
-        <p className="text-sm text-disputed">Couldn&apos;t load the queue. Please refresh and try again.</p>
+        <LoaderState compact alert message="Couldn't load the queue. Please refresh and try again." />
       ) : active.articles.length === 0 ? (
         <div className="rounded-xl border border-card-border bg-card p-8 text-center text-sm text-card-text-muted">
           {tab === 'awaiting_review' ? 'Nothing is waiting for review.' : 'No authors are working on changes right now.'}

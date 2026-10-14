@@ -5,6 +5,7 @@ import dayjs from '@/lib/dayjs'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { Spinner } from '@/components/ui/Spinner'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { LoaderState } from '@/components/loaders/LoaderState'
 import { RichTextEditor } from '@/features/authors/components/RichTextEditor'
 import { useInvestigationDetail } from '@/features/authors/hooks/useInvestigationDetail'
 import { useEvidenceVault } from '@/features/authors/hooks/useEvidenceVault'
@@ -91,12 +92,11 @@ export function InvestigationPage() {
 
   if (!investigation) {
     return (
-      <div className="py-16 flex flex-col items-center text-center gap-3">
-        <h1 className="text-2xl font-semibold text-heading">Investigation not found</h1>
+      <LoaderState title="Investigation not found">
         <Link to="/author/investigations" className="text-accent font-medium hover:underline text-sm">
           Back to My Investigations
         </Link>
-      </div>
+      </LoaderState>
     )
   }
 
