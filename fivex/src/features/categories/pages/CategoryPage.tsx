@@ -10,6 +10,7 @@ import type { Article } from '@/shared/types/article.types'
 import { usePagination } from '@/hooks/usePagination'
 import { Pagination } from '@/components/ui/Pagination'
 import { PageLoader } from '@/components/loaders/PageLoader'
+import { AdSlot } from '@/features/ads/components/AdSlot'
 
 const MOCK_POOL: Article[] = [FEATURED_ARTICLE, ...LATEST_POSTS, ...TRENDING_ARTICLES]
 const PAGE_SIZE = 6
@@ -55,19 +56,37 @@ export function CategoryPage() {
         </p>
       </div>
 
-      {isLoading && <PageLoader label="Loading articles..." />}
+      <AdSlot placement="header" />
 
-      {!isLoading && articles.length === 0 && (
-        <p className="text-sm text-text-muted">No stories in this category yet.</p>
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+        <div className="flex min-w-0 flex-col gap-6">
+          {isLoading && <PageLoader label="Loading articles..." />}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {paginatedItems.map((article) => (
-          <ArticleCard key={article.id} article={article} />
-        ))}
+          {!isLoading && articles.length === 0 && (
+            <p className="text-sm text-text-muted">No stories in this category yet.</p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginatedItems.slice(0, 3).map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+            {paginatedItems.length > 3 && (
+              <div className="sm:col-span-2 lg:col-span-3">
+                <AdSlot placement="selected_page" category={slug} />
+              </div>
+            )}
+            {paginatedItems.slice(3).map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        </div>
+
+        <aside className="lg:sticky lg:top-6">
+          <AdSlot placement="sidepage" />
+        </aside>
       </div>
-
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   )
 }

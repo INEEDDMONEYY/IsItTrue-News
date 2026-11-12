@@ -159,6 +159,16 @@ async function resolveArticleLock(
   return false
 }
 
+// Public list shape: the body is never sent, only a read-time estimate derived from it.
+function toPublicTeaser(article: ArticleDocument) {
+  const words = article.body.trim().split(/\s+/).filter(Boolean).length
+  const json = article.toJSON() as Record<string, unknown>
+  delete json.body
+  delete json.editorialStage
+  delete json.editorialDeadline
+  return { ...json, readTimeMinutes: Math.max(1, Math.ceil(words / 200)) }
+}
+
 export const articleService = {
   async createArticle(
     author: ActingUser,
@@ -293,14 +303,13 @@ export const articleService = {
   // Public teaser list: the body is never sent, only a read-time estimate derived from it.
   async listLatestPublished(limit: number) {
     const articles = await articleRepository.findLatestPublished(limit)
-    return articles.map((article) => {
-      const words = article.body.trim().split(/\s+/).filter(Boolean).length
-      const json = article.toJSON() as Record<string, unknown>
-      delete json.body
-      delete json.editorialStage
-      delete json.editorialDeadline
-      return { ...json, readTimeMinutes: Math.max(1, Math.ceil(words / 200)) }
-    })
+    return articles.map(toPublicTeaser)
+  },
+
+  // Public teaser list ordered by view count, for the homepage "Trending" grid.
+  async listTrendingPublished(limit: number) {
+    const articles = await articleRepository.findTrendingPublished(limit)
+    return articles.map(toPublicTeaser)
   },
 
   async getArticleById(id: string, actingUser?: ActingUser) {

@@ -18,6 +18,8 @@ export interface ArticleStats {
   views: number;
   comments: number;
   shares: number;
+  likes?: number;
+  dislikes?: number;
 }
 
 export interface Article {

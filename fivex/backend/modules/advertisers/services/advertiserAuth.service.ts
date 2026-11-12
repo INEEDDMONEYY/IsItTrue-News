@@ -39,12 +39,35 @@ async function issueAndSendVerificationEmail(advertiser: AdvertiserDocument): Pr
   }
 }
 
+function assertResendAllowed(advertiser: AdvertiserDocument): void {
+  if (
+    advertiser.emailVerificationLastSentAt &&
+    Date.now() - advertiser.emailVerificationLastSentAt.getTime() < MIN_RESEND_INTERVAL_MS
+  ) {
+    throw new AppError('Please wait a moment before requesting another email.', 429)
+  }
+}
+
 export const advertiserAuthService = {
   async register(input: RegisterAdvertiserInput): Promise<AdvertiserDocument> {
     await assertDeliverableEmail(input.email)
 
-    if (await advertiserRepository.findByEmail(input.email)) {
-      throw new AppError('An advertiser account with this email already exists.', 409)
+    const existing = await advertiserRepository.findByEmailWithRegistrationState(input.email)
+    if (existing) {
+      // An unverified account whose link expired or was lost gets a fresh link, but only for someone who
+      // knows its password, so this never reveals or hands out a link to a stranger.
+      const knowsPassword =
+        !existing.isEmailVerified && (await comparePassword(input.password, existing.passwordHash))
+      if (!knowsPassword) {
+        throw new AppError(
+          'An advertiser account with this email already exists. Sign in instead, or reset your password if you have forgotten it.',
+          409,
+        )
+      }
+
+      assertResendAllowed(existing)
+      await issueAndSendVerificationEmail(existing)
+      return existing
     }
 
     const passwordHash = await hashPassword(input.password)
@@ -65,13 +88,7 @@ export const advertiserAuthService = {
     const advertiser = await advertiserRepository.findByEmailWithVerificationState(email)
     if (!advertiser || advertiser.isEmailVerified) return
 
-    if (
-      advertiser.emailVerificationLastSentAt &&
-      Date.now() - advertiser.emailVerificationLastSentAt.getTime() < MIN_RESEND_INTERVAL_MS
-    ) {
-      throw new AppError('Please wait a moment before requesting another email.', 429)
-    }
-
+    assertResendAllowed(advertiser)
     await issueAndSendVerificationEmail(advertiser)
   },
 

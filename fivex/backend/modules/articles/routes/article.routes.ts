@@ -56,6 +56,10 @@ router.get('/featured', articleController.getFeatured)
 // Declared before "/:id" for the same reason as above.
 router.get('/latest', articleController.listLatest)
 
+// Public: most-viewed published articles (no bodies) for the homepage "Trending".
+// Declared before "/:id" for the same reason as above.
+router.get('/trending', articleController.listTrending)
+
 // Public: published articles for a given category/tag page, looked up by
 // slug. Declared before "/:id" for the same reason as above.
 router.get('/category/:slug', articleController.listByCategory)

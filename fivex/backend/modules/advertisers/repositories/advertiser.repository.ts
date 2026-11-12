@@ -1,5 +1,6 @@
 import { Advertiser, type AdvertiserDocument } from '../models/Advertiser.js'
 import { ADVERTISER_STATUSES } from '../constants/advertiser.js'
+import type { UpdateNotificationsInput, UpdateProfileInput } from '../validations/advertiser.validation.js'
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
@@ -16,6 +17,10 @@ export const advertiserRepository = {
 
   async findByEmailWithSecrets(email: string): Promise<AdvertiserDocument | null> {
     return Advertiser.findOne({ email: normalizeEmail(email) }).select('+passwordHash')
+  },
+
+  async findByEmailWithRegistrationState(email: string): Promise<AdvertiserDocument | null> {
+    return Advertiser.findOne({ email: normalizeEmail(email) }).select('+passwordHash +emailVerificationLastSentAt')
   },
 
   async findByEmailWithVerificationState(email: string): Promise<AdvertiserDocument | null> {
@@ -102,5 +107,37 @@ export const advertiserRepository = {
 
   async recordLogin(id: string): Promise<void> {
     await Advertiser.updateOne({ _id: id }, { $set: { lastLoginAt: new Date() } })
+  },
+
+  async findByIdWithSecrets(id: string): Promise<AdvertiserDocument | null> {
+    return Advertiser.findById(id).select('+passwordHash')
+  },
+
+  async updateProfile(id: string, input: UpdateProfileInput): Promise<AdvertiserDocument | null> {
+    const { businessName, address, ...profile } = input
+    const $set: Record<string, unknown> = { businessName }
+    for (const [key, value] of Object.entries(profile)) $set[`profile.${key}`] = value
+    for (const [key, value] of Object.entries(address)) $set[`profile.address.${key}`] = value
+    return Advertiser.findByIdAndUpdate(id, { $set }, { new: true, runValidators: true })
+  },
+
+  // Returns the account as it was before, so the caller can clean up the previous logo file.
+  async setLogo(
+    id: string,
+    logo: { url: string; publicId: string; storage: 'cloudinary' | 'local' } | null,
+  ): Promise<AdvertiserDocument | null> {
+    const update = logo
+      ? { $set: { 'profile.logoUrl': logo.url, 'profile.logoPublicId': logo.publicId, 'profile.logoStorage': logo.storage } }
+      : { $unset: { 'profile.logoUrl': '', 'profile.logoPublicId': '', 'profile.logoStorage': '' } }
+    return Advertiser.findByIdAndUpdate(id, update, { new: false })
+  },
+
+  async updateNotifications(id: string, notifications: UpdateNotificationsInput): Promise<AdvertiserDocument | null> {
+    return Advertiser.findByIdAndUpdate(id, { $set: { notifications } }, { new: true, runValidators: true })
+  },
+
+  // Stamps passwordChangedAt, which ends every session issued before now.
+  async setPassword(id: string, passwordHash: string, changedAt: Date): Promise<void> {
+    await Advertiser.updateOne({ _id: id }, { $set: { passwordHash, passwordChangedAt: changedAt } })
   },
 }

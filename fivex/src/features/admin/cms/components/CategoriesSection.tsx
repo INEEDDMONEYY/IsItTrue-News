@@ -5,7 +5,7 @@ import { EmptyStateCard } from '@/components/cards'
 import { PageLoader } from '@/components/loaders/PageLoader'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 
-export function CategoriesPage() {
+export function CategoriesSection() {
   const { categories, isLoading, error, createCategory, deleteCategory } = useCategories()
   const [newCategory, setNewCategory] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
@@ -29,15 +29,15 @@ export function CategoriesPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-heading mb-1">Article Categories</h1>
-      <p className="text-sm text-text-muted mb-6">
+    <section className="mb-10">
+      <h2 className="text-lg font-semibold text-heading mb-1">Article categories</h2>
+      <p className="text-sm text-text-muted mb-4">
         Categories available to authors when publishing an article — and shown as topics in
         the site navigation.
       </p>
 
       <div className="rounded-2xl border border-card-border bg-card p-5 mb-6">
-        <h2 className="text-sm font-semibold text-card-heading mb-3">New category</h2>
+        <h3 className="text-sm font-semibold text-card-heading mb-3">New category</h3>
         <div className="flex gap-3">
           <input
             type="text"
@@ -89,7 +89,6 @@ export function CategoriesPage() {
           description="Add a category above so authors can assign it to their articles."
         />
       )}
-    </div>
+    </section>
   )
 }
-

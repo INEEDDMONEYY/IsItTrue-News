@@ -8,8 +8,6 @@ import {
   BarChart3,
   Clock3,
   CheckCircle2,
-  XCircle,
-  CircleDot,
   FileText,
   Eye,
   MousePointerClick,
@@ -20,7 +18,7 @@ import { PageLoader } from '@/components/loaders/PageLoader'
 import { AdvertiserPageHeader } from '../components/AdvertiserPageHeader'
 import { AdvertiserStatCard } from '../components/AdvertiserStatCard'
 import { useAdvertiserOverview } from '../hooks/useAdvertiserOverview'
-import type { AdvertiserActivityType, CampaignStatus } from '../types/advertiser.types'
+import type { AdvertiserActivityType } from '../types/advertiser.types'
 import {
   PLACEMENT_LABELS,
   STATUS_LABELS,
@@ -29,20 +27,7 @@ import {
   formatMoney,
   timeAgo,
 } from '../utils/format'
-
-const statusStyles: Record<CampaignStatus, string> = {
-  active: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-  pending_review: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-  rejected: 'bg-red-500/10 text-red-600 dark:text-red-400',
-  completed: 'bg-muted text-muted-foreground',
-}
-
-const statusIcons = {
-  active: CheckCircle2,
-  pending_review: Clock3,
-  rejected: XCircle,
-  completed: CircleDot,
-}
+import { STATUS_ICONS as statusIcons, STATUS_STYLES as statusStyles, hasNoDelivery } from '../utils/statusStyles'
 
 const activityIcons: Record<AdvertiserActivityType, typeof Megaphone> = {
   campaign: Megaphone,
@@ -199,7 +184,7 @@ export function AdvertiserDashboardPage() {
         <div className={`space-y-3 md:hidden ${campaigns.length === 0 ? 'hidden' : ''}`}>
           {campaigns.map((campaign) => {
             const StatusIcon = statusIcons[campaign.status]
-            const noDelivery = campaign.status === 'pending_review'
+            const noDelivery = hasNoDelivery(campaign.status)
 
             return (
               <div
@@ -299,7 +284,7 @@ export function AdvertiserDashboardPage() {
               <tbody className="divide-y divide-border">
                 {campaigns.map((campaign) => {
                   const StatusIcon = statusIcons[campaign.status]
-                  const noDelivery = campaign.status === 'pending_review'
+                  const noDelivery = hasNoDelivery(campaign.status)
 
                   return (
                     <tr

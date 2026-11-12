@@ -1,6 +1,7 @@
 import { CAMPAIGN_STATUSES, type CampaignStatus } from '../constants/advertiser.js'
 import type { CampaignDocument } from '../models/Campaign.js'
 import { campaignRepository } from '../repositories/campaign.repository.js'
+import { advertiserCampaignService } from './advertiserCampaign.service.js'
 
 const RECENT_CAMPAIGNS = 4
 const ACTIVITY_ITEMS = 6
@@ -18,6 +19,16 @@ interface ActivityItem {
 // Activity is read off the campaigns' current state, so what is shown can never disagree with the campaigns.
 function describe(campaign: CampaignDocument): Pick<ActivityItem, 'type' | 'title' | 'description'> {
   const byStatus: Record<CampaignStatus, Pick<ActivityItem, 'type' | 'title' | 'description'>> = {
+    [CAMPAIGN_STATUSES.DRAFT]: {
+      type: 'campaign',
+      title: 'Draft saved',
+      description: `${campaign.name} was saved as a draft.`,
+    },
+    [CAMPAIGN_STATUSES.PAUSED]: {
+      type: 'campaign',
+      title: 'Campaign paused',
+      description: `${campaign.name} is paused.`,
+    },
     [CAMPAIGN_STATUSES.PENDING_REVIEW]: {
       type: 'campaign',
       title: 'Campaign submitted',
@@ -44,6 +55,7 @@ function describe(campaign: CampaignDocument): Pick<ActivityItem, 'type' | 'titl
 
 export const advertiserOverviewService = {
   async getOverview(advertiserId: string) {
+    await advertiserCampaignService.completeEnded(advertiserId)
     const [stats, recent] = await Promise.all([
       campaignRepository.totalsFor(advertiserId),
       campaignRepository.findRecentFor(advertiserId, Math.max(RECENT_CAMPAIGNS, ACTIVITY_ITEMS)),

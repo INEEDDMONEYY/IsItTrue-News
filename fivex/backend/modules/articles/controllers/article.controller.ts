@@ -120,6 +120,14 @@ export const articleController = {
     res.status(200).json({ articles })
   }),
 
+  // Public: most-viewed published articles for the homepage "Trending" grid.
+  listTrending: asyncHandler(async (req: Request, res: Response) => {
+    const requested = Number.parseInt(String(req.query.limit ?? ''), 10)
+    const limit = Number.isFinite(requested) ? Math.min(Math.max(requested, 1), 20) : 6
+    const articles = await articleService.listTrendingPublished(limit)
+    res.status(200).json({ articles })
+  }),
+
   getBySlug: asyncHandler(async (req: Request, res: Response) => {
     const { article, locked } = await articleService.getArticleBySlug(req.params.slug, req.user)
     const liked = req.user ? article.likedBy.some((id) => id.toString() === req.user!.id) : false

@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { adminArticlesApi } from '../api/articles.api'
-import type { AdminArticleListParams, ChangeStatusInput } from '../types/adminArticle.types'
+import type { AdminArticleListParams, AdminEngagementInput, ChangeStatusInput } from '../types/adminArticle.types'
 
 export const ADMIN_ARTICLES_KEY = ['admin', 'articles'] as const
 
@@ -35,6 +35,14 @@ export function useChangeArticleStatus(id: string) {
   return useMutation({
     mutationFn: (input: ChangeStatusInput) => adminArticlesApi.changeStatus(id, input),
     // The list, the detail and the history all change with a status, so refresh every admin article query.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ADMIN_ARTICLES_KEY }),
+  })
+}
+
+export function useSetArticleEngagement(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: AdminEngagementInput) => adminArticlesApi.setEngagement(id, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ADMIN_ARTICLES_KEY }),
   })
 }

@@ -14,7 +14,7 @@ import { useArticleFactCheck } from '@/features/fact-checks/hooks/usePublicFactC
 import { NOT_FACT_CHECKED } from '@/features/fact-checks/utils/notFactChecked'
 import { CommentSection } from '../components/CommentSection'
 import { ArticleHeader } from '../components/ArticleHeader'
-import { ArticleCover } from '../components/ArticleCover'
+import { ArticleMediaCarousel } from '../components/ArticleMediaCarousel'
 import { ArticleBodyHtml } from '../components/ArticleBody'
 import { LockedArticleRest } from '../components/LockedArticleRest'
 import { sanitizeArticleHtml } from '../utils/articleBody'
@@ -117,7 +117,12 @@ export function ArticlePage() {
         readTimeMinutes={article.readTimeMinutes}
       />
 
-      <ArticleCover src={article.thumbnailUrl} alt={article.title} />
+      <ArticleMediaCarousel
+        coverSrc={article.thumbnailUrl}
+        coverAlt={article.title}
+        videoUrl={article.videoUrl}
+        videoPoster={article.videoThumbnailUrl}
+      />
 
       <EngagementBar
         likes={article.likes}

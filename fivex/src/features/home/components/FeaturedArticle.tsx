@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Eye, MessageSquare, Share2 } from 'lucide-react'
+import { ThumbsDown, ThumbsUp } from 'lucide-react'
 import type { Article } from '@/shared/types/article.types'
 
 function formatCount(n: number) {
@@ -33,14 +33,10 @@ export function FeaturedArticle({ article }: { article: Article }) {
         </h2>
         <div className="flex items-center gap-4 text-xs text-white/90">
           <span className="flex items-center gap-1 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
-            <Eye className="w-3.5 h-3.5" /> {formatCount(article.stats.views)}
+            <ThumbsUp className="w-3.5 h-3.5" /> {formatCount(article.stats.likes ?? 0)}
           </span>
           <span className="flex items-center gap-1 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
-            <MessageSquare className="w-3.5 h-3.5" />{' '}
-            {formatCount(article.stats.comments)}
-          </span>
-          <span className="flex items-center gap-1 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
-            <Share2 className="w-3.5 h-3.5" /> {formatCount(article.stats.shares)}
+            <ThumbsDown className="w-3.5 h-3.5" /> {formatCount(article.stats.dislikes ?? 0)}
           </span>
         </div>
       </div>

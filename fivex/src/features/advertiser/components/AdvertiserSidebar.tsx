@@ -27,6 +27,7 @@ const workspaceLinks = [
     label: 'Campaigns',
     path: '/advertiser/campaigns',
     icon: Megaphone,
+    end: true,
   },
   {
     label: 'Create Advertisement',

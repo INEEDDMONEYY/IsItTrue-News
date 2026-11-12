@@ -30,6 +30,9 @@ export interface RenderedEmail {
 }
 
 const BRAND_NAME = 'IsItTrue News'
+// Fixed public address for every email's brand link. It is not derived from APP_URL, which points at
+// localhost in development and must never be a code host.
+export const SITE_URL = 'https://www.isittruenews.com/'
 const ACCENT = '#2563eb'
 const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
 
@@ -55,7 +58,7 @@ export function renderEmail(input: EmailLayoutInput): RenderedEmail {
     ...input.paragraphs,
     action ? `${action.label}: ${action.url}` : undefined,
     input.footnote,
-    `— ${BRAND_NAME}`,
+    `— ${BRAND_NAME} (${SITE_URL})`,
   ].filter((part): part is string => Boolean(part))
   const text = textParts.join('\n\n')
 
@@ -83,8 +86,10 @@ export function renderEmail(input: EmailLayoutInput): RenderedEmail {
           <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;background-color:#ffffff;border-radius:16px;border:1px solid #e2e2e5;">
             <tr>
               <td style="padding:28px 32px 0;font-family:${FONT};">
-                <span style="font-size:18px;font-weight:700;color:${ACCENT};">?</span>
-                <span style="font-size:16px;font-weight:700;color:#0a0a0d;margin-left:4px;">${BRAND_NAME}</span>
+                <a href="${SITE_URL}" style="text-decoration:none;">
+                  <span style="font-size:18px;font-weight:700;color:${ACCENT};">?</span>
+                  <span style="font-size:16px;font-weight:700;color:#0a0a0d;margin-left:4px;">${BRAND_NAME}</span>
+                </a>
               </td>
             </tr>
             <tr>
@@ -109,7 +114,7 @@ export function renderEmail(input: EmailLayoutInput): RenderedEmail {
             </tr>
             <tr>
               <td style="padding:16px 32px 28px;font-family:${FONT};font-size:12px;color:#8b8b96;border-top:1px solid #e2e2e5;">
-                © ${year} ${BRAND_NAME}
+                © ${year} <a href="${SITE_URL}" style="color:#8b8b96;">IsItTrueNews</a>
               </td>
             </tr>
           </table>

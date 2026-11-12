@@ -1,5 +1,11 @@
 import { apiClient } from '@/api/client'
-import type { AdvertiserAccount, AdvertiserCredentials, AdvertiserRegistration } from '../types/advertiser.types'
+import type {
+  AdvertiserAccount,
+  AdvertiserCredentials,
+  AdvertiserNotifications,
+  AdvertiserRegistration,
+  UpdateProfileInput,
+} from '../types/advertiser.types'
 
 // Advertisers have their own accounts and session (a separate cookie), served by /api/advertiser/auth.
 // Nothing here touches the reader/author/editor/admin sign-in.
@@ -42,6 +48,41 @@ export const advertiserApi = {
 
   resetPassword: async (token: string, password: string): Promise<string> => {
     const { data } = await apiClient.post<{ message: string }>(`${BASE}/reset-password`, { token, password })
+    return data.message
+  },
+
+  updateProfile: async (input: UpdateProfileInput): Promise<AdvertiserAccount> => {
+    const { data } = await apiClient.put<{ advertiser: AdvertiserAccount }>('/api/advertiser/profile', input)
+    return data.advertiser
+  },
+
+  uploadLogo: async (file: File): Promise<AdvertiserAccount> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const { data } = await apiClient.post<{ advertiser: AdvertiserAccount }>('/api/advertiser/profile/logo', formData, {
+      headers: { 'Content-Type': undefined },
+    })
+    return data.advertiser
+  },
+
+  removeLogo: async (): Promise<AdvertiserAccount> => {
+    const { data } = await apiClient.delete<{ advertiser: AdvertiserAccount }>('/api/advertiser/profile/logo')
+    return data.advertiser
+  },
+
+  updateNotifications: async (notifications: AdvertiserNotifications): Promise<AdvertiserAccount> => {
+    const { data } = await apiClient.put<{ advertiser: AdvertiserAccount }>(
+      '/api/advertiser/settings/notifications',
+      notifications,
+    )
+    return data.advertiser
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string): Promise<string> => {
+    const { data } = await apiClient.post<{ message: string }>('/api/advertiser/settings/password', {
+      currentPassword,
+      newPassword,
+    })
     return data.message
   },
 }

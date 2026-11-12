@@ -44,3 +44,13 @@ export const adminArticleStatusSchema = z
   })
 
 export type AdminArticleStatusInput = z.infer<typeof adminArticleStatusSchema>
+
+const MAX_ENGAGEMENT_COUNT = 1_000_000_000
+
+// Admins set the displayed totals directly. Both are required so the request states the full intended values.
+export const adminArticleEngagementSchema = z.object({
+  likes: z.number().int().min(0).max(MAX_ENGAGEMENT_COUNT),
+  dislikes: z.number().int().min(0).max(MAX_ENGAGEMENT_COUNT),
+})
+
+export type AdminArticleEngagementInput = z.infer<typeof adminArticleEngagementSchema>

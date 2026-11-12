@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Play } from "lucide-react";
+import { AdSlot } from "@/features/ads/components/AdSlot";
 
 type Video = {
   id: string;
@@ -177,7 +178,10 @@ export default function VideosPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+      <div className="mx-auto grid max-w-7xl items-start gap-10 px-6 py-12 lg:grid-cols-[1fr_300px] lg:px-8">
+        <div className="min-w-0">
+        <AdSlot placement="header" page="videos" />
+
         {/* Featured Videos */}
         {featuredVideos.length > 0 && (
           <section>
@@ -200,6 +204,10 @@ export default function VideosPage() {
             </div>
           </section>
         )}
+
+        <div className="mt-16">
+          <AdSlot placement="selected_page" page="videos" />
+        </div>
 
         {/* Short Videos (<= 3 min) */}
         {shortVideos.length > 0 && (
@@ -285,6 +293,11 @@ export default function VideosPage() {
             );
           })}
         </div>
+        </div>
+
+        <aside className="lg:sticky lg:top-6">
+          <AdSlot placement="sidepage" />
+        </aside>
       </div>
     </main>
   );

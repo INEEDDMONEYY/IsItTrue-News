@@ -26,7 +26,7 @@ export const advertiserController = {
   register: asyncHandler(async (req: Request, res: Response) => {
     const advertiser = await advertiserAuthService.register(req.body as RegisterAdvertiserInput)
     res.status(201).json({
-      message: 'Account created. Please check your email to verify your address before signing in.',
+      message: 'Please check your email to verify your address before signing in.',
       advertiser,
     })
   }),

@@ -1,6 +1,7 @@
 import { Sparkles } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { ArticleCard } from '@/features/home/components/ArticleCard'
+import { AdSlot } from '@/features/ads/components/AdSlot'
 import { RECOMMENDED_ARTICLES } from '../data/mockForYou'
 
 export function ForYouPage() {
@@ -20,6 +21,8 @@ export function ForYouPage() {
         </div>
       </div>
 
+      <AdSlot placement="header" page="for_you" />
+
       {!isAuthenticated && (
         <div className="rounded-2xl border border-accent-border bg-accent-bg px-4 py-3 text-sm text-heading">
           Sign in to personalize this feed based on your reading history and followed topics.
@@ -27,13 +30,30 @@ export function ForYouPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {RECOMMENDED_ARTICLES.map(({ article, reason }) => (
-          <div key={article.id} className="flex flex-col gap-2">
-            <span className="text-xs text-text-dim px-1">{reason}</span>
-            <ArticleCard article={article} />
-          </div>
-        ))}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+        <div className="grid min-w-0 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {RECOMMENDED_ARTICLES.slice(0, 3).map(({ article, reason }) => (
+            <div key={article.id} className="flex flex-col gap-2">
+              <span className="text-xs text-text-dim px-1">{reason}</span>
+              <ArticleCard article={article} />
+            </div>
+          ))}
+          {RECOMMENDED_ARTICLES.length > 3 && (
+            <div className="sm:col-span-2 xl:col-span-3">
+              <AdSlot placement="selected_page" page="for_you" />
+            </div>
+          )}
+          {RECOMMENDED_ARTICLES.slice(3).map(({ article, reason }) => (
+            <div key={article.id} className="flex flex-col gap-2">
+              <span className="text-xs text-text-dim px-1">{reason}</span>
+              <ArticleCard article={article} />
+            </div>
+          ))}
+        </div>
+
+        <aside className="lg:sticky lg:top-6">
+          <AdSlot placement="sidepage" />
+        </aside>
       </div>
     </div>
   )

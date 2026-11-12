@@ -35,6 +35,9 @@ export interface ArticleDetail extends Article {
   lockedPreview?: string[]
   /** Citation links the author attached when creating the article. */
   sourceLinks?: string[]
+  /** Video the author attached to the article, with its optional cover image. */
+  videoUrl?: string
+  videoThumbnailUrl?: string
   /** Topic tags the author gave the story. Mock stories have none. */
   tags?: ArticleTag[]
   /** Published correction notices, numbered per article. */

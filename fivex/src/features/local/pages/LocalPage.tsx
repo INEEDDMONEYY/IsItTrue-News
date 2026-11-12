@@ -1,6 +1,7 @@
 import { MapPin } from 'lucide-react'
 import { ArticleCard } from '@/features/home/components/ArticleCard'
 import { CategorySidebar } from '@/features/home/components/CategorySidebar'
+import { AdSlot } from '@/features/ads/components/AdSlot'
 import { LOCAL_ARTICLES, LOCAL_CATEGORIES, MOCK_LOCATION } from '../data/mockLocal'
 
 export function LocalPage() {
@@ -23,13 +24,29 @@ export function LocalPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
+      <AdSlot placement="header" page="local" />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
         <CategorySidebar categories={LOCAL_CATEGORIES} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {LOCAL_ARTICLES.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
+        <div className="grid min-w-0 gap-6 xl:grid-cols-[1fr_300px] items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-4">
+            {LOCAL_ARTICLES.slice(0, 3).map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+            {LOCAL_ARTICLES.length > 3 && (
+              <div className="sm:col-span-2 xl:col-span-full 2xl:col-span-2">
+                <AdSlot placement="selected_page" page="local" />
+              </div>
+            )}
+            {LOCAL_ARTICLES.slice(3).map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+
+          <aside className="xl:sticky xl:top-6">
+            <AdSlot placement="sidepage" />
+          </aside>
         </div>
       </div>
     </div>

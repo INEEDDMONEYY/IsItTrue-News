@@ -42,6 +42,17 @@ export const prelaunchRateLimiter = rateLimit({
 })
 
 /**
+ * Per-IP cap on ad impression and click beacons, so a script can't inflate an advertiser's counts.
+ */
+export const adTrackingRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many ad requests. Please try again later.' },
+})
+
+/**
  * Same window for team access attempts, but only failed guesses count, so a correct code
  * never locks a developer out while repeated wrong guesses do.
  */

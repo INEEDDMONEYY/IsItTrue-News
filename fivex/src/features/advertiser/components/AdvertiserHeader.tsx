@@ -1,13 +1,15 @@
 
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Menu,
   Bell,
   CircleHelp,
+  Globe,
   LogOut,
 } from 'lucide-react'
 import { useAdvertiserAuth } from '@/app/providers/AdvertiserAuthProvider'
+import { resolveAssetUrl } from '../utils/assetUrl'
 
 interface AdvertiserHeaderProps {
   onOpenMenu: () => void
@@ -31,9 +33,15 @@ export function AdvertiserHeader({
   const [isSigningOut, setIsSigningOut] = useState(false)
 
   const handleSignOut = async () => {
+    if (isSigningOut) return
     setIsSigningOut(true)
-    await logout()
-    navigate('/advertiser/login', { replace: true })
+    try {
+      await logout()
+    } catch {
+      // logout() clears the local session even when the request fails; still leave the workspace.
+    } finally {
+      navigate('/advertiser/login', { replace: true })
+    }
   }
 
   return (
@@ -59,6 +67,16 @@ export function AdvertiserHeader({
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
+        <Link
+          to="/"
+          title="View site (you stay signed in)"
+          className="inline-flex items-center gap-2 rounded-xl border border-border px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <Globe className="h-4 w-4" />
+          <span className="hidden sm:inline">View Site</span>
+          <span className="sr-only sm:hidden">View Site</span>
+        </Link>
+
         <button
           type="button"
           aria-label="Advertising support"
@@ -79,12 +97,20 @@ export function AdvertiserHeader({
         <div className="hidden h-8 w-px bg-border sm:block" />
 
         <div className="flex items-center gap-2 rounded-xl p-1.5">
-          <div
-            aria-hidden="true"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
-          >
-            {initialsOf(advertiser?.businessName ?? '')}
-          </div>
+          {advertiser?.profile?.logoUrl ? (
+            <img
+              src={resolveAssetUrl(advertiser.profile.logoUrl)}
+              alt=""
+              className="h-8 w-8 rounded-full border border-border bg-white object-contain"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
+            >
+              {initialsOf(advertiser?.businessName ?? '')}
+            </div>
+          )}
 
           <div className="hidden min-w-0 text-left sm:block">
             <p className="max-w-[160px] truncate text-xs font-semibold text-foreground">

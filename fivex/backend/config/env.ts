@@ -37,6 +37,13 @@ const envSchema = z.object({
     z.string().min(32, 'JWT_ADVERTISER_SECRET must be at least 32 characters').optional(),
   ),
 
+  // When on, a submitted advertiser campaign skips the admin review queue and goes live straight away. Meant for
+  // testing until an admin approval screen exists; set to "false" to hold submissions in "pending review".
+  ADVERTISER_CAMPAIGN_AUTO_APPROVE: z
+    .enum(['true', 'false', ''])
+    .default('true')
+    .transform((value) => value !== 'false'),
+
   EMAIL_VERIFICATION_EXPIRES_IN_MINUTES: z.coerce.number().int().positive().default(60),
   // How long a "reset your password" link stays valid. Short on purpose: it grants access to the account.
   PASSWORD_RESET_EXPIRES_IN_MINUTES: z.coerce.number().int().positive().max(1440).default(30),

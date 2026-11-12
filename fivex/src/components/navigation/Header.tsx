@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Search, Menu, X, MapPin, ChevronDown, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { Search, Menu, X, MapPin, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
+import { useAdvertiserAuth } from '@/app/providers/AdvertiserAuthProvider'
 import { useTheme } from '@/app/providers/ThemeProvider'
-import { useCategories } from '@/features/categories/hooks/useCategories'
 import { SearchBar } from '@/features/search/components/SearchBar'
+import { CategoryChipBar } from './CategoryChipBar'
 import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 import animatedLogo from '@/assets/isittrue-profile-animation.svg'
 
@@ -20,18 +21,10 @@ const NAV_LINKS = [
 
 export function Header() {
   const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated: isAdvertiserAuthenticated } = useAdvertiserAuth()
   const { theme, setTheme } = useTheme()
-  const { categories } = useCategories()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const topicsScrollRef = useRef<HTMLDivElement>(null)
-
-  const scrollTopics = (direction: 'left' | 'right') => {
-    topicsScrollRef.current?.scrollBy({
-      left: direction === 'left' ? -240 : 240,
-      behavior: 'smooth',
-    })
-  }
 
   return (
     <header className="sticky top-0 z-50 bg-bg">
@@ -134,12 +127,21 @@ export function Header() {
             {mobileSearchOpen ? <X className="w-[18px] h-[18px]" /> : <Search className="w-[18px] h-[18px]" />}
           </button>
 
-          <Link
-            to="/subscribe"
-            className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-lg bg-heading text-bg hover:opacity-90 transition-opacity"
-          >
-            Subscribe
-          </Link>
+          {isAdvertiserAuthenticated ? (
+            <Link
+              to="/advertiser"
+              className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-lg bg-heading text-bg hover:opacity-90 transition-opacity"
+            >
+              Advertiser Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/subscribe"
+              className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-lg bg-heading text-bg hover:opacity-90 transition-opacity"
+            >
+              Subscribe
+            </Link>
+          )}
 
           {isAuthenticated ? (
             <Link
@@ -192,41 +194,7 @@ export function Header() {
 
       {/* Trending topics */}
       <div className="hidden md:block bg-bg">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-11 flex items-center gap-2">
-          <button
-            type="button"
-            aria-label="Scroll categories left"
-            onClick={() => scrollTopics('left')}
-            className="shrink-0 p-1 rounded-full text-text-muted hover:text-text hover:bg-surface transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          <div
-            ref={topicsScrollRef}
-            className="flex items-center gap-2 overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-          >
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                to={`/category/${category.slug}`}
-                className="gradient-border-chip shrink-0 flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full text-xs text-text-muted hover:text-text transition-colors whitespace-nowrap"
-              >
-                {category.name}
-                <Plus className="w-3 h-3" />
-              </Link>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            aria-label="Scroll categories right"
-            onClick={() => scrollTopics('right')}
-            className="shrink-0 p-1 rounded-full text-text-muted hover:text-text hover:bg-surface transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+        <CategoryChipBar />
       </div>
     </header>
   )

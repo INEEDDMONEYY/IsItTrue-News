@@ -9,6 +9,7 @@ export const ARTICLE_AUDIT_ACTIONS = [
   'unpublished',
   'status_changed',
   'deleted',
+  'engagement_adjusted',
 ] as const
 
 export type ArticleAuditAction = (typeof ARTICLE_AUDIT_ACTIONS)[number]

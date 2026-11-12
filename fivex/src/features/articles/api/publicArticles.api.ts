@@ -15,6 +15,18 @@ export const publicArticlesApi = {
     return data.articles
   },
 
+  getFeatured: async (): Promise<PublicArticle | null> => {
+    const { data } = await apiClient.get<{ article: PublicArticle | null }>('/api/articles/featured')
+    return data.article
+  },
+
+  listTrending: async (limit = 6): Promise<PublicArticle[]> => {
+    const { data } = await apiClient.get<{ articles: PublicArticle[] }>('/api/articles/trending', {
+      params: { limit },
+    })
+    return data.articles
+  },
+
   listByCategory: async (slug: string): Promise<PublicArticle[]> => {
     const { data } = await apiClient.get<{ articles: PublicArticle[] }>(
       `/api/articles/category/${encodeURIComponent(slug)}`,

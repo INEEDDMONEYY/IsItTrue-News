@@ -91,6 +91,10 @@ export const adminArticleRepository = {
       .populate('factCheckReviewedBy', 'name')
   },
 
+  async setEngagementCounts(id: string, likesCount: number, dislikesCount: number): Promise<void> {
+    await Article.updateOne({ _id: id }, { $set: { likesCount, dislikesCount } })
+  },
+
   async listCategories(): Promise<string[]> {
     const categories = await Article.distinct('category')
     return categories.filter(Boolean).sort((a, b) => a.localeCompare(b))

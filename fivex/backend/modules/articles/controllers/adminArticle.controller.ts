@@ -5,6 +5,7 @@ import { adminArticleService } from '../services/adminArticle.service.js'
 import {
   adminArticleIdSchema,
   adminArticleListQuerySchema,
+  type AdminArticleEngagementInput,
   type AdminArticleStatusInput,
 } from '../validations/adminArticle.validation.js'
 
@@ -54,5 +55,11 @@ export const adminArticleController = {
     const admin = requireAdmin(req)
     await adminArticleService.remove(parseId(req.params.id), admin)
     res.status(200).json({ message: 'Article deleted.' })
+  }),
+
+  setEngagement: asyncHandler(async (req: Request, res: Response) => {
+    const admin = requireAdmin(req)
+    const article = await adminArticleService.setEngagement(parseId(req.params.id), admin, req.body as AdminArticleEngagementInput)
+    res.status(200).json({ message: 'Engagement updated.', article })
   }),
 }

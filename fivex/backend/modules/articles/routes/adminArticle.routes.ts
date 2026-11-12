@@ -4,7 +4,7 @@ import { authorize } from '../../../middleware/authorize.js'
 import { validate } from '../../../middleware/validate.js'
 import { ROLES } from '../../../shared/constants/roles.js'
 import { adminArticleController } from '../controllers/adminArticle.controller.js'
-import { adminArticleStatusSchema } from '../validations/adminArticle.validation.js'
+import { adminArticleEngagementSchema, adminArticleStatusSchema } from '../validations/adminArticle.validation.js'
 
 const router = Router()
 
@@ -15,6 +15,7 @@ router.get('/', adminArticleController.list)
 router.get('/:id', adminArticleController.get)
 router.get('/:id/audit', adminArticleController.audit)
 router.patch('/:id/status', validate(adminArticleStatusSchema), adminArticleController.changeStatus)
+router.patch('/:id/engagement', validate(adminArticleEngagementSchema), adminArticleController.setEngagement)
 router.delete('/:id', adminArticleController.remove)
 
 export const adminArticleRoutes = router

@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react'
+import { Fragment, useState, type FormEvent } from 'react'
 import { Mail } from 'lucide-react'
 import dayjs from '@/lib/dayjs'
+import { AdSlot } from '@/features/ads/components/AdSlot'
 import { mockNewsletters } from '../data/mockNewsletters'
 
 export function NewslettersPage() {
@@ -48,12 +49,17 @@ export function NewslettersPage() {
         )}
       </div>
 
-      <div>
+      <AdSlot placement="newsletter" />
+      <AdSlot placement="header" page="newsletter" />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+      <div className="min-w-0">
         <h2 className="text-lg font-semibold text-heading mb-4">Past editions</h2>
         <div className="flex flex-col gap-3">
-          {mockNewsletters.map((edition) => (
+          {mockNewsletters.map((edition, index) => (
+            <Fragment key={edition.id}>
+            {index === 2 && <AdSlot placement="selected_page" page="newsletter" />}
             <div
-              key={edition.id}
               className="rounded-xl border border-card-border bg-card p-4 flex flex-col gap-1"
             >
               <div className="flex items-center justify-between gap-2">
@@ -67,8 +73,13 @@ export function NewslettersPage() {
                 {dayjs(edition.publishedAt).format('MMM D, YYYY')} · {edition.readTime} min read
               </p>
             </div>
+            </Fragment>
           ))}
         </div>
+      </div>
+      <aside className="lg:sticky lg:top-6">
+        <AdSlot placement="sidepage" />
+      </aside>
       </div>
     </div>
   )

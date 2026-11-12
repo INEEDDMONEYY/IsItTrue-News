@@ -33,3 +33,18 @@ export const profilePhotoUpload = multer({
     callback(new AppError('Only image files are allowed.', 400))
   },
 })
+
+// Advertiser creatives and logos. Raster formats only: SVG can carry script and is never accepted from advertisers.
+const AD_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+
+export const adImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter(_req, file, callback) {
+    if (AD_IMAGE_TYPES.has(file.mimetype)) {
+      callback(null, true)
+      return
+    }
+    callback(new AppError('Please upload a JPG, PNG, WebP or GIF image.', 400))
+  },
+})

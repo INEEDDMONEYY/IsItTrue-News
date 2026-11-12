@@ -7,7 +7,7 @@ import { ARTICLE_STATUSES, ALL_ARTICLE_STATUSES, type ArticleStatus } from '../c
 import type { ArticleDocument } from '../models/Article.js'
 import type { ArticleAuditLogDocument } from '../models/ArticleAuditLog.js'
 import { adminArticleRepository, type AdminArticleFilter } from '../repositories/adminArticle.repository.js'
-import type { AdminArticleListQuery, AdminArticleStatusInput } from '../validations/adminArticle.validation.js'
+import type { AdminArticleEngagementInput, AdminArticleListQuery, AdminArticleStatusInput } from '../validations/adminArticle.validation.js'
 import { articleAuditService } from './articleAudit.service.js'
 import { articleService } from './article.service.js'
 
@@ -57,6 +57,7 @@ function toListRow(article: ArticleDocument) {
     author: toPerson(article.author),
     views: article.views,
     likes: article.likesCount,
+    dislikes: article.dislikesCount,
     editorialStage: article.editorialStage ?? null,
     editorialDeadline: toIso(article.editorialDeadline),
     createdAt: article.createdAt.toISOString(),
@@ -218,5 +219,26 @@ export const adminArticleService = {
 
   async remove(id: string, admin: Admin) {
     await articleService.deleteArticle(id, admin)
+  },
+
+  async setEngagement(id: string, admin: Admin, input: AdminArticleEngagementInput) {
+    const article = await adminArticleRepository.findDetailById(id)
+    if (!article) throw new AppError('Article not found.', 404)
+
+    const changedFields = [
+      ...(input.likes !== article.likesCount ? ['likes'] : []),
+      ...(input.dislikes !== article.dislikesCount ? ['dislikes'] : []),
+    ]
+    if (changedFields.length) {
+      await adminArticleRepository.setEngagementCounts(id, input.likes, input.dislikes)
+      await articleAuditService.record({
+        article,
+        actor: admin,
+        action: 'engagement_adjusted',
+        changedFields,
+      })
+    }
+
+    return this.getDetail(id)
   },
 }

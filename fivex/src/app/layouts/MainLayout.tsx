@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Header } from '@/components/navigation/Header'
 import { Footer } from '@/components/navigation/Footer'
 import { BannerBar } from '@/components/banners/BannerBar'
+import { AdSlot } from '@/features/ads/components/AdSlot'
 
 export function MainLayout() {
   return (
@@ -11,6 +12,9 @@ export function MainLayout() {
       <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 md:px-8 [&_h1]:text-brand-gradient">
         <Outlet />
       </main>
+      <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8">
+        <AdSlot placement="footer" className="mt-10" />
+      </div>
       <Footer />
     </div>
   )

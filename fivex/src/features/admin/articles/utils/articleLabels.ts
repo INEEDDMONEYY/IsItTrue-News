@@ -30,6 +30,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   unpublished: 'unpublished it',
   status_changed: 'changed its status',
   deleted: 'deleted the article',
+  engagement_adjusted: 'adjusted its likes and dislikes',
 }
 
 export const FIELD_LABELS: Record<string, string> = {
@@ -38,6 +39,8 @@ export const FIELD_LABELS: Record<string, string> = {
   body: 'Text',
   category: 'Category',
   tags: 'Tags',
+  likes: 'Likes',
+  dislikes: 'Dislikes',
   articleImageUrl: 'Cover image',
   articleVideoUrl: 'Video',
   videoThumbnailUrl: 'Video thumbnail',

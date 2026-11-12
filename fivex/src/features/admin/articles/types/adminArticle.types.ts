@@ -19,6 +19,7 @@ export interface AdminArticleRow {
   author: AdminPersonRef | null
   views: number
   likes: number
+  dislikes: number
   editorialStage: string | null
   editorialDeadline: string | null
   createdAt: string
@@ -85,6 +86,7 @@ export type AuditAction =
   | 'unpublished'
   | 'status_changed'
   | 'deleted'
+  | 'engagement_adjusted'
 
 export interface AdminAuditEntry {
   id: string
@@ -100,6 +102,11 @@ export interface AdminAuditEntry {
 export interface AdminAuditTrail {
   entries: AdminAuditEntry[]
   total: number
+}
+
+export interface AdminEngagementInput {
+  likes: number
+  dislikes: number
 }
 
 export interface ChangeStatusInput {

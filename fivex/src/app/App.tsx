@@ -3,6 +3,7 @@ import { router } from './routes'
 import { preLaunchRouter } from './routes/preLaunchRouter'
 import { QueryProvider } from './providers/QueryProvider'
 import { AuthProvider } from './providers/AuthProvider'
+import { AdvertiserAuthProvider } from './providers/AdvertiserAuthProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { isSiteLocked } from '@/features/prelaunch/utils/access'
 
@@ -22,9 +23,11 @@ function App() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <ThemeProvider>
-          <RouterProvider router={router} />
-        </ThemeProvider>
+        <AdvertiserAuthProvider>
+          <ThemeProvider>
+            <RouterProvider router={router} />
+          </ThemeProvider>
+        </AdvertiserAuthProvider>
       </AuthProvider>
     </QueryProvider>
   )

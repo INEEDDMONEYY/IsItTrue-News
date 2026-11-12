@@ -8,7 +8,6 @@ import {
   Megaphone,
   Code2,
   Globe,
-  Tags,
   Ticket,
   BadgeCheck,
   FolderSearch,
@@ -160,11 +159,6 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'SEO',
     to: '/admin/seo',
     icon: Globe,
-  },
-  {
-    label: 'Article Categories',
-    to: '/admin/categories',
-    icon: Tags,
   },
   {
     label: 'Tickets',

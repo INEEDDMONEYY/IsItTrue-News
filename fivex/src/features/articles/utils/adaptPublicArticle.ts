@@ -50,7 +50,13 @@ export function adaptPublicArticle(article: PublicArticle): Article {
     author: { id: article.author?.id ?? 'unknown', name: article.author?.name ?? 'Staff Writer' },
     publishedAt: article.publishedAt ?? article.createdAt,
     readTimeMinutes: article.readTimeMinutes ?? estimateReadTimeMinutes(article.body ?? article.excerpt),
-    stats: { views: article.views, comments: 0, shares: 0 },
+    stats: {
+      views: article.views,
+      comments: 0,
+      shares: 0,
+      likes: article.likes,
+      dislikes: article.dislikes,
+    },
     verificationStatus: VERIFICATION_STATUS_MAP[article.factCheckStatus ?? 'none'],
   }
 }
@@ -78,6 +84,8 @@ export function adaptPublicArticleDetail(article: PublicArticle): ArticleDetail 
     locked: article.locked,
     lockedPreview: article.lockedPreview,
     sourceLinks: article.sourceLinks ?? [],
+    videoUrl: article.articleVideoUrl,
+    videoThumbnailUrl: article.videoThumbnailUrl,
     tags: toArticleTags(article.tags),
     corrections: article.corrections ?? [],
     likes: article.likes,

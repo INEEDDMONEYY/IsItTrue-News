@@ -33,6 +33,7 @@ import { correctionRoutes } from './modules/corrections/routes/correction.routes
 import { prelaunchRoutes } from './modules/prelaunch/routes/prelaunch.routes.js'
 import { analyticsRoutes } from './modules/analytics/routes/analytics.routes.js'
 import { advertiserRoutes } from './modules/advertisers/routes/advertiser.routes.js'
+import { publicAdRoutes } from './modules/advertisers/routes/publicAd.routes.js'
 
 export function createApp(): Express {
   const app = express()
@@ -97,6 +98,7 @@ export function createApp(): Express {
   app.use('/api/prelaunch', prelaunchRoutes)
   app.use('/api/analytics', analyticsRoutes)
   app.use('/api/advertiser', advertiserRoutes)
+  app.use('/api/ads', publicAdRoutes)
 
   app.use(notFound)
   app.use(errorHandler)

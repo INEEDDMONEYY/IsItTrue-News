@@ -1,17 +1,9 @@
 import { Play } from 'lucide-react'
+import type { HomeVideo } from '../hooks/useHomeVideos'
 
-interface VideoItem {
-  id: string
-  title: string
-  durationLabel: string
-}
+export function VideoSection({ videos }: { videos: HomeVideo[] }) {
+  if (videos.length === 0) return null
 
-const MOCK_VIDEOS: VideoItem[] = [
-  { id: 'v1', title: 'Inside the Committee Vote: What Happened', durationLabel: '4:12' },
-  { id: 'v2', title: 'On the Ground: Reactions From the Public', durationLabel: '2:47' },
-]
-
-export function VideoSection({ videos = MOCK_VIDEOS }: { videos?: VideoItem[] }) {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">

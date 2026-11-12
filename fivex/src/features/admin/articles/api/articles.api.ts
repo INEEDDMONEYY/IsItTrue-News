@@ -4,6 +4,7 @@ import type {
   AdminArticleList,
   AdminArticleListParams,
   AdminAuditTrail,
+  AdminEngagementInput,
   ChangeStatusInput,
 } from '../types/adminArticle.types'
 
@@ -32,5 +33,10 @@ export const adminArticlesApi = {
 
   remove: async (id: string): Promise<void> => {
     await apiClient.delete(`${BASE}/${id}`)
+  },
+
+  setEngagement: async (id: string, input: AdminEngagementInput): Promise<AdminArticleDetail> => {
+    const { data } = await apiClient.patch<{ article: AdminArticleDetail }>(`${BASE}/${id}/engagement`, input)
+    return data.article
   },
 }

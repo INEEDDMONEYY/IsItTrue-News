@@ -9,6 +9,7 @@ import {
   Send,
   Trash2,
   Undo2,
+  ThumbsUp,
   type LucideIcon,
 } from 'lucide-react'
 import dayjs from '@/lib/dayjs'
@@ -27,6 +28,7 @@ const ICONS: Record<AuditAction, LucideIcon> = {
   unpublished: EyeOff,
   status_changed: ArrowRight,
   deleted: Trash2,
+  engagement_adjusted: ThumbsUp,
 }
 
 const TONE: Partial<Record<AuditAction, string>> = {

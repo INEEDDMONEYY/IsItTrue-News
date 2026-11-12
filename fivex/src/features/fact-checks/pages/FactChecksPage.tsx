@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, ShieldCheck } from 'lucide-react'
 import { PageLoader } from '@/components/loaders/PageLoader'
 import { LoaderState } from '@/components/loaders/LoaderState'
 import { Pagination } from '@/components/ui/Pagination'
 import { getErrorMessage } from '@/lib/getErrorMessage'
+import { AdSlot } from '@/features/ads/components/AdSlot'
 import { FactCheckCard } from '../components/FactCheckCard'
 import { usePublicFactChecks } from '../hooks/usePublicFactChecks'
 import { CLAIM_VERDICTS, type ClaimVerdict } from '../types/publicFactCheck.types'
@@ -84,6 +85,8 @@ export function FactChecksPage() {
           </p>
         </div>
       </div>
+
+      <AdSlot placement="header" page="fact_checks" />
 
       <div className="relative max-w-md">
         <label htmlFor="fact-check-search" className="sr-only">
@@ -169,17 +172,29 @@ export function FactChecksPage() {
       )}
 
       {data && data.factChecks.length > 0 && (
-        <>
-          <div
-            className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 transition-opacity ${isPlaceholderData || isFetching ? 'opacity-60' : ''}`}
-            aria-busy={isPlaceholderData || isFetching}
-          >
-            {data.factChecks.map((factCheck) => (
-              <FactCheckCard key={factCheck.id} factCheck={factCheck} />
-            ))}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+          <div className="flex min-w-0 flex-col gap-6">
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 transition-opacity ${isPlaceholderData || isFetching ? 'opacity-60' : ''}`}
+              aria-busy={isPlaceholderData || isFetching}
+            >
+              {data.factChecks.map((factCheck, index) => (
+                <Fragment key={factCheck.id}>
+                  {index === 3 && (
+                    <div className="sm:col-span-2 xl:col-span-3">
+                      <AdSlot placement="selected_page" page="fact_checks" />
+                    </div>
+                  )}
+                  <FactCheckCard factCheck={factCheck} />
+                </Fragment>
+              ))}
+            </div>
+            <Pagination page={data.page} totalPages={data.totalPages} onPageChange={(next) => update({ page: next })} />
           </div>
-          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={(next) => update({ page: next })} />
-        </>
+          <aside className="lg:sticky lg:top-6">
+            <AdSlot placement="sidepage" />
+          </aside>
+        </div>
       )}
 
       {error && data && (

@@ -4,7 +4,6 @@ import { AuthLayout } from '../layouts/AuthLayout'
 import { AdminLayout } from '../layouts/AdminLayout'
 import { AdvertiserLayout } from '../layouts/AdvertiserLayout'
 import { AdvertiserAuthLayout } from '../layouts/AdvertiserAuthLayout'
-import { AdvertiserAuthProvider } from '../providers/AdvertiserAuthProvider'
 import { AdvertiserRoute } from './AdvertiserRoute'
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { NotFoundPage } from '../pages/NotFoundPage'
@@ -32,6 +31,13 @@ import { AdvertiserRegisterPage } from '@/features/advertiser/pages/AdvertiserRe
 import { AdvertiserForgotPasswordPage } from '@/features/advertiser/pages/AdvertiserForgotPasswordPage'
 import { AdvertiserResetPasswordPage } from '@/features/advertiser/pages/AdvertiserResetPasswordPage'
 import { AdvertiserVerifyEmailPage } from '@/features/advertiser/pages/AdvertiserVerifyEmailPage'
+import { CampaignsPage as AdvertiserCampaignsPage } from '@/features/advertiser/pages/CampaignsPage'
+import { CreateCampaignPage as AdvertiserCreateCampaignPage } from '@/features/advertiser/pages/CreateCampaignPage'
+import { AdLibraryPage as AdvertiserAdLibraryPage } from '@/features/advertiser/pages/AdLibraryPage'
+import { AnalyticsPage as AdvertiserAnalyticsPage } from '@/features/advertiser/pages/AnalyticsPage'
+import { BillingPage as AdvertiserBillingPage } from '@/features/advertiser/pages/BillingPage'
+import { BusinessProfilePage as AdvertiserBusinessProfilePage } from '@/features/advertiser/pages/BusinessProfilePage'
+import { AdvertiserSettingsPage } from '@/features/advertiser/pages/AdvertiserSettingsPage'
 import { UsersPage } from '@/features/admin/users/pages/UsersPage'
 import { CmsPage } from '@/features/admin/cms/pages/CmsPage'
 import { ModerationPage } from '@/features/admin/moderation/pages/ModerationPage'
@@ -40,7 +46,6 @@ import { SettingsPage } from '@/features/admin/settings/pages/SettingsPage'
 import { BannersPage } from '@/features/admin/banners/pages/BannersPage'
 import { AdvertisementCodesPage } from '@/features/admin/advertisements/pages/AdvertisementCodesPage'
 import { SeoPage } from '@/features/admin/seo/pages/SeoPage'
-import { CategoriesPage } from '@/features/admin/categories/pages/CategoriesPage'
 import { TicketsPage } from '@/features/admin/tickets/pages/TicketsPage'
 import { FactCheckVerificationPage } from '@/features/admin/fact-check-verification/pages/FactCheckVerificationPage'
 import { ArticlesPage as AdminArticlesPage } from '@/features/admin/articles/pages/ArticlesPage'
@@ -169,7 +174,7 @@ export const router = createBrowserRouter([
           { path: 'banners', element: <BannersPage /> },
           { path: 'advertisements', element: <AdvertisementCodesPage /> },
           { path: 'seo', element: <SeoPage /> },
-          { path: 'categories', element: <CategoriesPage /> },
+          { path: 'categories', element: <Navigate to="/admin/cms" replace /> },
           { path: 'tickets', element: <TicketsPage /> },
           { path: 'fact-checks', element: <AdminFactChecksPage /> },
           { path: 'fact-checks/:id', element: <AdminFactCheckDetailsPage /> },
@@ -247,11 +252,8 @@ export const router = createBrowserRouter([
   {
     path: 'advertiser',
     errorElement: <ErrorPage />,
-    element: (
-      <AdvertiserAuthProvider>
-        <Outlet />
-      </AdvertiserAuthProvider>
-    ),
+    // The advertiser session provider wraps the whole app (App.tsx) so the session survives visits to the site.
+    element: <Outlet />,
     children: [
       {
         element: <AdvertiserAuthLayout />,
@@ -268,7 +270,17 @@ export const router = createBrowserRouter([
         children: [
           {
             element: <AdvertiserLayout />,
-            children: [{ index: true, element: <AdvertiserDashboardPage /> }],
+            children: [
+              { index: true, element: <AdvertiserDashboardPage /> },
+              { path: 'campaigns', element: <AdvertiserCampaignsPage /> },
+              { path: 'campaigns/new', element: <AdvertiserCreateCampaignPage /> },
+              { path: 'campaigns/:id/edit', element: <AdvertiserCreateCampaignPage /> },
+              { path: 'library', element: <AdvertiserAdLibraryPage /> },
+              { path: 'analytics', element: <AdvertiserAnalyticsPage /> },
+              { path: 'billing', element: <AdvertiserBillingPage /> },
+              { path: 'profile', element: <AdvertiserBusinessProfilePage /> },
+              { path: 'settings', element: <AdvertiserSettingsPage /> },
+            ],
           },
         ],
       },
