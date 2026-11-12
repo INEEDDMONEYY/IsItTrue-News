@@ -32,7 +32,7 @@ const FOOTER_COLUMNS = [
   {
     title: 'Company',
     links: [
-      { label: 'Ads', to: '/ads' },
+      { label: 'Advertisement', to: '/ads' },
       { label: 'About Us', to: '/about' },
       { label: 'Become an Contributor', to: '/become-a-contributor' },
       { label: 'Become an Author', to: '/become-author' },

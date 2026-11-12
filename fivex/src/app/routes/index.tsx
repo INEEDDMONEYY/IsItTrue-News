@@ -1,7 +1,11 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { MainLayout } from '../layouts/MainLayout'
 import { AuthLayout } from '../layouts/AuthLayout'
 import { AdminLayout } from '../layouts/AdminLayout'
+import { AdvertiserLayout } from '../layouts/AdvertiserLayout'
+import { AdvertiserAuthLayout } from '../layouts/AdvertiserAuthLayout'
+import { AdvertiserAuthProvider } from '../providers/AdvertiserAuthProvider'
+import { AdvertiserRoute } from './AdvertiserRoute'
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ErrorPage } from '../pages/ErrorPage'
@@ -22,6 +26,12 @@ import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { OrganizationSignUpPage } from '@/features/auth/pages/OrganizationSignUpPage'
 import { ProfilePage } from '@/features/auth/pages/ProfilePage'
 import { AdminDashboardPage } from '@/features/admin/pages/AdminDashboardPage'
+import { AdvertiserDashboardPage } from '@/features/advertiser/pages/AdvertiserDashboardPage'
+import { AdvertiserLoginPage } from '@/features/advertiser/pages/AdvertiserLoginPage'
+import { AdvertiserRegisterPage } from '@/features/advertiser/pages/AdvertiserRegisterPage'
+import { AdvertiserForgotPasswordPage } from '@/features/advertiser/pages/AdvertiserForgotPasswordPage'
+import { AdvertiserResetPasswordPage } from '@/features/advertiser/pages/AdvertiserResetPasswordPage'
+import { AdvertiserVerifyEmailPage } from '@/features/advertiser/pages/AdvertiserVerifyEmailPage'
 import { UsersPage } from '@/features/admin/users/pages/UsersPage'
 import { CmsPage } from '@/features/admin/cms/pages/CmsPage'
 import { ModerationPage } from '@/features/admin/moderation/pages/ModerationPage'
@@ -230,6 +240,36 @@ export const router = createBrowserRouter([
           { path: 'investigations/review-queue', element: <InvestigationReviewPage /> },
           { path: 'investigations/:id', element: <InvestigationPage /> },
           { path: 'evidence', element: <EvidenceVaultPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: 'advertiser',
+    errorElement: <ErrorPage />,
+    element: (
+      <AdvertiserAuthProvider>
+        <Outlet />
+      </AdvertiserAuthProvider>
+    ),
+    children: [
+      {
+        element: <AdvertiserAuthLayout />,
+        children: [
+          { path: 'login', element: <AdvertiserLoginPage /> },
+          { path: 'register', element: <AdvertiserRegisterPage /> },
+          { path: 'forgot-password', element: <AdvertiserForgotPasswordPage /> },
+          { path: 'reset-password', element: <AdvertiserResetPasswordPage /> },
+          { path: 'verify-email', element: <AdvertiserVerifyEmailPage /> },
+        ],
+      },
+      {
+        element: <AdvertiserRoute />,
+        children: [
+          {
+            element: <AdvertiserLayout />,
+            children: [{ index: true, element: <AdvertiserDashboardPage /> }],
+          },
         ],
       },
     ],

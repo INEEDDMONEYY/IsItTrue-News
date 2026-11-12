@@ -6,7 +6,7 @@ export const adsContent = {
       "IITNews provides advertising opportunities for businesses and organizations that want to reach readers through a journalism-focused platform.",
     primaryAction: {
       label: "Advertise With IITNews",
-      href: "/advertise",
+      href: "/advertiser/login",
     },
     secondaryAction: {
       label: "Explore IITNews",
@@ -251,7 +251,7 @@ export const adsContent = {
       "Explore advertising opportunities with IITNews and learn how your organization can reach readers while supporting an independent journalism platform.",
     primaryAction: {
       label: "Advertise With IITNews",
-      href: "/advertise",
+      href: "/advertiser/login",
     },
     secondaryAction: {
       label: "Contact IITNews",

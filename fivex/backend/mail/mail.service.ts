@@ -10,6 +10,11 @@ import { verificationEmailTemplate } from './templates/verificationEmail.js'
 import { waitlistWelcomeTemplate } from './templates/waitlistWelcome.js'
 import { passwordResetTemplate } from './templates/passwordReset.js'
 import { passwordChangedTemplate } from './templates/passwordChanged.js'
+import {
+  advertiserPasswordChangedTemplate,
+  advertiserPasswordResetTemplate,
+  advertiserVerificationTemplate,
+} from './templates/advertiserEmails.js'
 
 export type EmailTemplate = Pick<MailMessage, 'subject' | 'html' | 'text'>
 
@@ -63,6 +68,44 @@ export const mailService = {
       name: params.name,
       signInUrl: `${env.APP_URL}/login`,
       resetUrl: `${env.APP_URL}/forgot-password`,
+    })
+
+    return this.sendTemplated(params.email, template, { priority: 'high' })
+  },
+
+  async sendAdvertiserVerificationEmail(params: {
+    businessName: string
+    email: string
+    token: string
+  }): Promise<MailReceipt | null> {
+    const template = advertiserVerificationTemplate({
+      businessName: params.businessName,
+      verificationUrl: `${env.APP_URL}/advertiser/verify-email?token=${encodeURIComponent(params.token)}`,
+      expiresInMinutes: env.EMAIL_VERIFICATION_EXPIRES_IN_MINUTES,
+    })
+
+    return this.sendTemplated(params.email, template, { priority: 'high' })
+  },
+
+  async sendAdvertiserPasswordResetEmail(params: {
+    businessName: string
+    email: string
+    token: string
+  }): Promise<MailReceipt | null> {
+    const template = advertiserPasswordResetTemplate({
+      businessName: params.businessName,
+      resetUrl: `${env.APP_URL}/advertiser/reset-password?token=${encodeURIComponent(params.token)}`,
+      expiresInMinutes: env.PASSWORD_RESET_EXPIRES_IN_MINUTES,
+    })
+
+    return this.sendTemplated(params.email, template, { priority: 'high' })
+  },
+
+  async sendAdvertiserPasswordChangedEmail(params: { businessName: string; email: string }): Promise<MailReceipt | null> {
+    const template = advertiserPasswordChangedTemplate({
+      businessName: params.businessName,
+      signInUrl: `${env.APP_URL}/advertiser/login`,
+      resetUrl: `${env.APP_URL}/advertiser/forgot-password`,
     })
 
     return this.sendTemplated(params.email, template, { priority: 'high' })

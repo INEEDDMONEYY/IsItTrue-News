@@ -30,6 +30,12 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
+  // Signs advertiser sessions. Optional: when blank, a distinct key is derived from JWT_ACCESS_SECRET, so
+  // advertiser and user tokens are never interchangeable either way. Set it to rotate them independently.
+  JWT_ADVERTISER_SECRET: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().min(32, 'JWT_ADVERTISER_SECRET must be at least 32 characters').optional(),
+  ),
 
   EMAIL_VERIFICATION_EXPIRES_IN_MINUTES: z.coerce.number().int().positive().default(60),
   // How long a "reset your password" link stays valid. Short on purpose: it grants access to the account.
