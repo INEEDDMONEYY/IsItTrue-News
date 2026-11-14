@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight, Search, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { authorContent } from "../../data/authorContent";
@@ -10,10 +9,7 @@ export default function AuthorHero() {
     <section className="relative overflow-hidden border-b border-border bg-bg">
       <div className="mx-auto grid max-w-7xl gap-16 px-6 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-8 lg:py-28">
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+        <div
           className="max-w-3xl"
         >
           <span className="mb-5 inline-flex items-center rounded-full border border-accent-border bg-accent-bg px-3 py-1 text-sm font-medium text-accent">
@@ -44,13 +40,10 @@ export default function AuthorHero() {
               {hero.secondaryAction.label}
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Editorial Visual */}
-        <motion.div
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
+        <div
           className="relative mx-auto w-full max-w-xl"
         >
           <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-sm">
@@ -123,7 +116,7 @@ export default function AuthorHero() {
           {/* Decorative elements */}
           <div className="absolute -right-10 -top-10 -z-10 h-32 w-32 rounded-full bg-accent-bg blur-2xl" />
           <div className="absolute -bottom-10 -left-10 -z-10 h-32 w-32 rounded-full bg-surface-2 blur-2xl" />
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -17,7 +17,7 @@ import { ArticleHeader } from '../components/ArticleHeader'
 import { ArticleMediaCarousel } from '../components/ArticleMediaCarousel'
 import { ArticleBodyHtml } from '../components/ArticleBody'
 import { LockedArticleRest } from '../components/LockedArticleRest'
-import { sanitizeArticleHtml } from '../utils/articleBody'
+import { sanitizeArticleHtml, scrambleText } from '../utils/articleBody'
 import { ArticleSources } from '../components/ArticleSources'
 import { getArticleDetailBySlug } from '../data/mockArticleDetails'
 import { publicArticlesApi } from '../api/publicArticles.api'
@@ -73,6 +73,11 @@ export function ArticlePage() {
   // get the separate "upgrade" card further down instead.
   const isAnonLocked = Boolean(article?.locked) && !isAuthenticated
   const isPlanLocked = Boolean(article?.locked) && isAuthenticated
+
+  // Mock stories come straight from the frontend, so they never get the server's lock flag. Mask them the same way
+  // for signed-out readers: first 3 paragraphs visible, the rest scrambled and blurred.
+  const isMockAnonLocked = Boolean(mockArticle) && !isAuthenticated
+  const MOCK_VISIBLE_PARAGRAPHS = 3
 
   const handleReturnToFeed = () => {
     if (window.history.length > 1) {
@@ -210,11 +215,18 @@ export function ArticlePage() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {article.content.map((paragraph, i) => (
-            <p key={i} className="text-[15px] text-text leading-relaxed">
-              {paragraph}
-            </p>
-          ))}
+          {(isMockAnonLocked ? article.content.slice(0, MOCK_VISIBLE_PARAGRAPHS) : article.content).map(
+            (paragraph, i) => (
+              <p key={i} className="text-[15px] text-text leading-relaxed">
+                {paragraph}
+              </p>
+            ),
+          )}
+          {isMockAnonLocked && (
+            <LockedArticleRest
+              paragraphs={article.content.slice(MOCK_VISIBLE_PARAGRAPHS).map(scrambleText)}
+            />
+          )}
         </div>
       )}
 

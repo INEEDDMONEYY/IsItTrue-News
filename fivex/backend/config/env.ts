@@ -29,7 +29,6 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
-  JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
   // Signs advertiser sessions. Optional: when blank, a distinct key is derived from JWT_ACCESS_SECRET, so
   // advertiser and user tokens are never interchangeable either way. Set it to rotate them independently.
   JWT_ADVERTISER_SECRET: z.preprocess(

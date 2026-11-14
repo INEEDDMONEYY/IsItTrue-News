@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import {
   ArrowDown,
   CheckCircle2,
@@ -21,11 +20,7 @@ export default function AdsHowItWorks() {
   return (
     <section className="border-b border-border ">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="mx-auto max-w-3xl text-center"
         >
           <span className="text-sm font-semibold uppercase tracking-[0.16em] text-sky-400">
@@ -39,7 +34,7 @@ export default function AdsHowItWorks() {
           <p className="mt-5 text-base leading-7 text-text-muted sm:text-lg">
             {howItWorks.description}
           </p>
-        </motion.div>
+        </div>
 
         <div className="relative mx-auto mt-14 max-w-5xl">
           <div className="absolute bottom-10 left-1/2 top-10 hidden w-px -translate-x-1/2 bg-border lg:block" />
@@ -54,21 +49,8 @@ export default function AdsHowItWorks() {
               const isEven = index % 2 === 0;
 
               return (
-                <motion.div
+                <div
                   key={step.number}
-                  initial={{
-                    opacity: 0,
-                    x: isEven ? -20 : 20,
-                  }}
-                  whileInView={{
-                    opacity: 1,
-                    x: 0,
-                  }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{
-                    duration: 0.5,
-                    delay: index * 0.08,
-                  }}
                   className="relative lg:grid lg:grid-cols-2 lg:gap-16"
                 >
                   <div
@@ -120,7 +102,7 @@ export default function AdsHowItWorks() {
                       <ArrowDown className="h-5 w-5 text-text-dim" />
                     </div>
                   )}
-                </motion.div>
+                </div>
               );
             })}
           </div>

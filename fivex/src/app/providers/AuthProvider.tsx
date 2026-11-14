@@ -1,7 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { renewSession, SESSION_EXPIRED_EVENT } from '@/api/axios'
 import { authService } from '@/features/auth/services/auth.service'
 import type { AuthUser } from '@/features/auth/types/auth.types'
+
+const SESSION_IDLE_TIMEOUT_MS = 60 * 60 * 1000
+const SESSION_RENEW_INTERVAL_MS = 5 * 60 * 1000
+const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'scroll'] as const
 
 interface AuthContextValue {
   user: AuthUser | null
@@ -44,6 +49,49 @@ export function AuthProvider({ children }: AuthProviderProps) {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    const handleSessionExpired = () => setUser(null)
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired)
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired)
+  }, [])
+
+  // Signs the user out after an hour without interaction, and keeps the session
+  // alive while they are active by renewing it (throttled).
+  const isAuthenticated = user !== null
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    let idleTimer: number | undefined
+    let lastRenewedAt = 0
+
+    const signOutForInactivity = () => {
+      authService.logout().catch(() => undefined).finally(() => setUser(null))
+    }
+
+    const resetIdleTimer = () => {
+      window.clearTimeout(idleTimer)
+      idleTimer = window.setTimeout(signOutForInactivity, SESSION_IDLE_TIMEOUT_MS)
+    }
+
+    const handleActivity = () => {
+      resetIdleTimer()
+      const now = Date.now()
+      if (now - lastRenewedAt >= SESSION_RENEW_INTERVAL_MS) {
+        lastRenewedAt = now
+        renewSession().catch(() => undefined)
+      }
+    }
+
+    const listenerOptions = { capture: true, passive: true }
+    ACTIVITY_EVENTS.forEach((eventName) => window.addEventListener(eventName, handleActivity, listenerOptions))
+    resetIdleTimer()
+
+    return () => {
+      window.clearTimeout(idleTimer)
+      ACTIVITY_EVENTS.forEach((eventName) => window.removeEventListener(eventName, handleActivity, listenerOptions))
+    }
+  }, [isAuthenticated])
 
   const value = useMemo<AuthContextValue>(
     () => ({

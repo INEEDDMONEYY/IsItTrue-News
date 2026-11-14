@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { authorContent } from "../../data/authorContent";
@@ -38,16 +37,9 @@ export default function AuthorHowItWorks() {
             <div className="absolute bottom-6 left-[19px] top-6 hidden w-px bg-border sm:block" />
 
             <div className="space-y-8">
-              {howItWorks.steps.map((step, index) => (
-                <motion.article
+              {howItWorks.steps.map((step) => (
+                <article
                   key={step.number}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{
-                    duration: 0.45,
-                    delay: index * 0.08,
-                  }}
                   className="relative flex gap-5"
                 >
                   <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent-border bg-accent-bg">
@@ -69,7 +61,7 @@ export default function AuthorHowItWorks() {
                       {step.description}
                     </p>
                   </div>
-                </motion.article>
+                </article>
               ))}
             </div>
           </div>

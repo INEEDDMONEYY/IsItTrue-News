@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { organizationContent } from "../../data/organizationContent";
@@ -9,11 +8,7 @@ export default function OrganizationCta() {
   return (
     <section className="bg-bg">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.6 }}
+        <div
           className="relative overflow-hidden rounded-3xl border border-border bg-surface px-6 py-12 text-center shadow-sm sm:px-10 sm:py-16"
         >
           {/* Decorative Elements */}
@@ -52,7 +47,7 @@ export default function OrganizationCta() {
               </Link>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

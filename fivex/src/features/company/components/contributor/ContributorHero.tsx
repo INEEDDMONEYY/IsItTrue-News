@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight, Search } from "lucide-react";
 import { contributorContent } from "../../data/contributorContent";
 
@@ -9,10 +8,7 @@ export default function ContributorHero() {
     <section className="relative overflow-hidden border-b border-border bg-bg">
       <div className="mx-auto max-w-7xl px-6 py-20 sm:px-8 lg:px-12 lg:py-28">
         <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+          <div
             className="max-w-3xl"
           >
             <div className="mb-5 flex items-center gap-2 text-sm font-medium text-purple-700">
@@ -44,12 +40,9 @@ export default function ContributorHero() {
                 {hero.secondaryAction.label}
               </a>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+          <div
             className="relative hidden min-h-[360px] lg:block"
             aria-hidden="true"
           >
@@ -73,7 +66,7 @@ export default function ContributorHero() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

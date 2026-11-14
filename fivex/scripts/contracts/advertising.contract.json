@@ -1,0 +1,62 @@
+
+{
+  "resource": "Advertising",
+  "types": [
+    {
+      "name": "AdvertisingCampaign",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "'draft' | 'active' | 'paused' | 'completed'"
+        },
+        {
+          "name": "createdAt",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "CreateAdvertisingCampaignInput",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "startDate",
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "type": "string",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "name": "getAdvertisingCampaigns",
+      "method": "GET",
+      "path": "/advertising/campaigns",
+      "responseType": "AdvertisingCampaign",
+      "description": "Retrieve advertising campaigns."
+    },
+    {
+      "name": "createAdvertisingCampaign",
+      "method": "POST",
+      "path": "/advertising/campaigns",
+      "requestType": "CreateAdvertisingCampaignInput",
+      "responseType": "AdvertisingCampaign",
+      "description": "Create an advertising campaign."
+    }
+  ]
+}

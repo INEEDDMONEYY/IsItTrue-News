@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import {
   CircleCheck,
   Eye,
@@ -21,11 +20,7 @@ export default function ContributorStandards() {
     <section className="border-b border-border bg-surface">
       <div className="mx-auto max-w-7xl px-6 py-20 sm:px-8 lg:px-12 lg:py-24">
         <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-20">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+          <div
             className="max-w-xl"
           >
             <p className="text-sm font-semibold uppercase tracking-wider text-accent">
@@ -46,24 +41,16 @@ export default function ContributorStandards() {
             >
               {standards.action.label}
             </a>
-          </motion.div>
+          </div>
 
           <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
-            {standards.principles.map((principle, index) => {
+            {standards.principles.map((principle) => {
               const Icon =
                 iconMap[principle.icon as keyof typeof iconMap];
 
               return (
-                <motion.article
+                <article
                   key={principle.title}
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{
-                    duration: 0.4,
-                    delay: index * 0.07,
-                    ease: "easeOut",
-                  }}
                   className="bg-bg p-7"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-bg text-accent">
@@ -77,7 +64,7 @@ export default function ContributorStandards() {
                   <p className="mt-3 text-sm leading-6 text-text-muted">
                     {principle.description}
                   </p>
-                </motion.article>
+                </article>
               );
             })}
           </div>

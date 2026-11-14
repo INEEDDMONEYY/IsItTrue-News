@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import {
   Archive,
   GitCompare,
@@ -23,11 +22,7 @@ export default function EditorialGuidelinesVerification() {
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
         <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           {/* Introduction */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5 }}
+          <div
             className="lg:sticky lg:top-24"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-bg">
@@ -45,7 +40,7 @@ export default function EditorialGuidelinesVerification() {
             <p className="mt-5 max-w-xl text-base leading-7 text-text-muted sm:text-lg">
               {verification.description}
             </p>
-          </motion.div>
+          </div>
 
           {/* Verification Steps */}
           <div className="relative">
@@ -58,15 +53,8 @@ export default function EditorialGuidelinesVerification() {
                   iconMap[item.icon as keyof typeof iconMap] ?? ShieldCheck;
 
                 return (
-                  <motion.article
+                  <article
                     key={item.title}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.15 }}
-                    transition={{
-                      duration: 0.45,
-                      delay: index * 0.08,
-                    }}
                     className="relative rounded-2xl border border-border bg-bg p-6 shadow-sm sm:ml-14 sm:p-7"
                   >
                     {/* Step Marker */}
@@ -94,7 +82,7 @@ export default function EditorialGuidelinesVerification() {
                         {item.description}
                       </p>
                     </div>
-                  </motion.article>
+                  </article>
                 );
               })}
             </div>

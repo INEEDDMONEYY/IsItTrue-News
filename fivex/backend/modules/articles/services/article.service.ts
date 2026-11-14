@@ -160,7 +160,7 @@ async function resolveArticleLock(
 }
 
 // Public list shape: the body is never sent, only a read-time estimate derived from it.
-function toPublicTeaser(article: ArticleDocument) {
+export function toPublicTeaser(article: ArticleDocument) {
   const words = article.body.trim().split(/\s+/).filter(Boolean).length
   const json = article.toJSON() as Record<string, unknown>
   delete json.body

@@ -1,6 +1,8 @@
     
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAdvertiserAuth } from '../providers/AdvertiserAuthProvider'
+import { PageTransition } from '@/components/animate-ui/components/page-transition'
+import { PageScrollEffects } from '@/components/navigation/PageScrollEffects'
 
 // Pages an emailed link lands on: they must work even if the advertiser happens to be signed in already.
 const OPEN_TO_SIGNED_IN = ['/advertiser/verify-email', '/advertiser/reset-password']
@@ -23,6 +25,7 @@ export function AdvertiserAuthLayout() {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#09090b] text-white">
+      <PageScrollEffects />
       {/* Background decoration */}
       <div
         aria-hidden="true"
@@ -64,7 +67,9 @@ export function AdvertiserAuthLayout() {
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-12 sm:px-6 sm:py-16">
         <div className="w-full max-w-[440px]">
           <div className="rounded-2xl border border-white/[0.09] bg-[#111113] p-5 shadow-2xl shadow-black/30 sm:rounded-3xl sm:p-9">
-            <Outlet />
+            <PageTransition effect="bands">
+              <Outlet />
+            </PageTransition>
           </div>
 
           <p className="mt-7 text-center text-xs leading-relaxed text-zinc-600">

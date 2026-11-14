@@ -40,6 +40,16 @@ import { BusinessProfilePage as AdvertiserBusinessProfilePage } from '@/features
 import { AdvertiserSettingsPage } from '@/features/advertiser/pages/AdvertiserSettingsPage'
 import { UsersPage } from '@/features/admin/users/pages/UsersPage'
 import { CmsPage } from '@/features/admin/cms/pages/CmsPage'
+import { PageManagementPage } from '@/features/admin/cms/pages/PageManagementPage'
+import { HomepageManagementPage } from '@/features/admin/cms/pages/HomepageManagementPage'
+import { NavigationManagementPage } from '@/features/admin/cms/pages/NavigationManagementPage'
+import { GlobalContentPage } from '@/features/admin/cms/pages/GlobalContentPage'
+import { MediaAssetsPage } from '@/features/admin/cms/pages/MediaAssetsPage'
+import { ArticlePresentationPage } from '@/features/admin/cms/pages/ArticlePresentationPage'
+import { PlatformConfigurationPage } from '@/features/admin/cms/pages/PlatformConfigurationPage'
+import { TagManagementPage } from '@/features/admin/cms/pages/TagManagementPage'
+import { CategoriesPage } from '@/features/admin/cms/pages/CategoriesPage'
+import { DeveloperToolsPage } from '@/features/admin/cms/pages/DeveloperToolsPage'
 import { ModerationPage } from '@/features/admin/moderation/pages/ModerationPage'
 import { AnalyticsPage } from '@/features/admin/analytics/pages/AnalyticsPage'
 import { SettingsPage } from '@/features/admin/settings/pages/SettingsPage'
@@ -113,6 +123,10 @@ import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage'
 import { DevAccessPage } from '@/features/prelaunch/pages/DevAccessPage'
 import { PRELAUNCH_ENABLED } from '@/config/prelaunch'
+import { AuditLogsPage } from '@/features/admin/audit-logs/pages/AuditLogsPage'
+import { CaseFilesPage, CaseFilePage } from '@/features/admin/case-files/pages/CaseFilesPage'
+import { CreateCaseFilesPage } from '@/features/admin/case-files/pages/CreateCaseFilesPage'
+import { EditCaseFilesPage } from '@/features/admin/case-files/pages/EditCaseFilesPage'
 
 export const router = createBrowserRouter([
   {
@@ -168,13 +182,28 @@ export const router = createBrowserRouter([
           { path: 'users', element: <UsersPage /> },
           { path: 'articles', element: <AdminArticlesPage /> },
           { path: 'articles/:id', element: <AdminArticleDetailsPage /> },
+          { path: 'audit-logs', element: <AuditLogsPage /> },
           { path: 'cms', element: <CmsPage /> },
+          { path: 'cms/page-management', element: <PageManagementPage /> },
+          { path: 'cms/homepage', element: <HomepageManagementPage /> },
+          { path: 'cms/navigation', element: <NavigationManagementPage /> },
+          { path: 'cms/global-content', element: <GlobalContentPage /> },
+          { path: 'cms/media', element: <MediaAssetsPage /> },
+          { path: 'cms/article-presentation', element: <ArticlePresentationPage /> },
+          { path: 'cms/configuration', element: <PlatformConfigurationPage /> },
+          { path: 'cms/tags', element: <TagManagementPage /> },
+          { path: 'cms/categories', element: <CategoriesPage /> },
+          { path: 'cms/developer-tools', element: <DeveloperToolsPage /> },
+          { path: 'case-files', element: <CaseFilesPage /> },
+          { path: 'case-files/:id', element: <CaseFilePage /> },
+          { path: 'case-files/create', element: <CreateCaseFilesPage /> },
+          { path: 'case-files/:id/edit', element: <EditCaseFilesPage /> },
           { path: 'moderation', element: <ModerationPage /> },
           { path: 'analytics', element: <AnalyticsPage /> },
           { path: 'banners', element: <BannersPage /> },
           { path: 'advertisements', element: <AdvertisementCodesPage /> },
           { path: 'seo', element: <SeoPage /> },
-          { path: 'categories', element: <Navigate to="/admin/cms" replace /> },
+          { path: 'categories', element: <Navigate to="/admin/cms/categories" replace /> },
           { path: 'tickets', element: <TicketsPage /> },
           { path: 'fact-checks', element: <AdminFactChecksPage /> },
           { path: 'fact-checks/:id', element: <AdminFactCheckDetailsPage /> },

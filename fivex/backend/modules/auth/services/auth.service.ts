@@ -1,5 +1,5 @@
 import { assertDeliverableEmail } from '../../../security/emailValidator.js'
-import { signAccessToken, signRefreshToken } from '../../../security/tokens.js'
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../../security/tokens.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { ROLES } from '../../../shared/constants/roles.js'
 import { comparePassword, hashPassword } from '../../../utils/password.js'
@@ -89,5 +89,26 @@ export const authService = {
     const refreshToken = signRefreshToken({ sub: String(user._id) })
 
     return { user, accessToken, refreshToken }
+  },
+
+  async refreshSession(refreshToken: string) {
+    const invalidSession = () => new AppError('Your session has expired. Please sign in again.', 401)
+
+    let payload: { sub: string }
+    try {
+      payload = verifyRefreshToken(refreshToken)
+    } catch {
+      throw invalidSession()
+    }
+
+    const user = await userRepository.findById(payload.sub)
+    if (!user || !user.isEmailVerified) {
+      throw invalidSession()
+    }
+
+    return {
+      accessToken: signAccessToken({ sub: String(user._id), email: user.email, role: user.role }),
+      refreshToken: signRefreshToken({ sub: String(user._id) }),
+    }
   },
 }

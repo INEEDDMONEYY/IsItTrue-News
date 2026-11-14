@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { contributorContent } from "../../data/contributorContent";
 
@@ -8,11 +7,7 @@ export default function ContributorHowItWorks() {
   return (
     <section className="border-b border-border bg-bg">
       <div className="mx-auto max-w-7xl px-6 py-20 sm:px-8 lg:px-12 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+        <div
           className="max-w-3xl"
         >
           <p className="text-sm font-semibold uppercase tracking-wider text-brand-gradient">
@@ -26,7 +21,7 @@ export default function ContributorHowItWorks() {
           <p className="mt-5 max-w-2xl text-base leading-7 text-text-muted sm:text-lg">
             {howItWorks.description}
           </p>
-        </motion.div>
+        </div>
 
         <div className="mt-14">
           <div className="relative">
@@ -36,17 +31,9 @@ export default function ContributorHowItWorks() {
             />
 
             <div className="space-y-10">
-              {howItWorks.steps.map((step, index) => (
-                <motion.div
+              {howItWorks.steps.map((step) => (
+                <div
                   key={step.number}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{
-                    duration: 0.45,
-                    delay: index * 0.07,
-                    ease: "easeOut",
-                  }}
                   className="relative flex gap-6"
                 >
                   <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-xs font-semibold text-on-brand">
@@ -62,16 +49,12 @@ export default function ContributorHowItWorks() {
                       {step.description}
                     </p>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.45, delay: 0.15 }}
+          <div
             className="mt-12"
           >
             <a
@@ -81,7 +64,7 @@ export default function ContributorHowItWorks() {
               {howItWorks.action.label}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import {
   BadgeCheck,
   Quote,
@@ -21,11 +20,7 @@ export default function EditorialGuidelinesSources() {
     <section className="border-b border-border bg-bg">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="max-w-3xl"
         >
           <span className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">
@@ -39,24 +34,17 @@ export default function EditorialGuidelinesSources() {
           <p className="mt-5 max-w-2xl text-base leading-7 text-text-muted sm:text-lg">
             {sources.description}
           </p>
-        </motion.div>
+        </div>
 
         {/* Source Principles */}
         <div className="mt-14 grid gap-5 sm:grid-cols-2">
-          {sources.items.map((item, index) => {
+          {sources.items.map((item) => {
             const Icon =
               iconMap[item.icon as keyof typeof iconMap] ?? BadgeCheck;
 
             return (
-              <motion.article
+              <article
                 key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{
-                  duration: 0.45,
-                  delay: index * 0.08,
-                }}
                 className="rounded-2xl border border-border bg-surface p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
               >
                 <div className="flex items-start gap-5">
@@ -74,17 +62,13 @@ export default function EditorialGuidelinesSources() {
                     </p>
                   </div>
                 </div>
-              </motion.article>
+              </article>
             );
           })}
         </div>
 
         {/* Source Reminder */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+        <div
           className="mt-8 rounded-2xl border border-accent-border bg-accent-bg p-6 sm:p-7"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
@@ -105,7 +89,7 @@ export default function EditorialGuidelinesSources() {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

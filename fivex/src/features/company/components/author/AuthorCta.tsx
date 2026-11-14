@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { authorContent } from "../../data/authorContent";
@@ -9,11 +8,7 @@ export default function AuthorCta() {
   return (
     <section className="bg-surface px-6 py-20 lg:px-8 lg:py-24">
       <div className="mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="relative overflow-hidden rounded-3xl border border-border bg-bg px-6 py-14 text-center sm:px-10 lg:px-16 lg:py-20"
         >
           {/* Decorative Elements */}
@@ -41,7 +36,7 @@ export default function AuthorCta() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

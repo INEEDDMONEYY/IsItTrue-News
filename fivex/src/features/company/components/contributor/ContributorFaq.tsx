@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { contributorContent } from "../../data/contributorContent";
@@ -14,11 +13,7 @@ export default function ContributorFaq() {
   return (
     <section className="border-b border-border bg-bg">
       <div className="mx-auto max-w-4xl px-6 py-20 sm:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+        <div
           className="text-center"
         >
           <p className="text-sm font-semibold uppercase tracking-wider text-accent">
@@ -32,7 +27,7 @@ export default function ContributorFaq() {
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-text-muted sm:text-lg">
             {faq.description}
           </p>
-        </motion.div>
+        </div>
 
         <div className="mt-12 overflow-hidden rounded-xl border border-border">
           {faq.items.map((item, index) => {
@@ -53,33 +48,21 @@ export default function ContributorFaq() {
                     {item.question}
                   </span>
 
-                  <motion.span
-                    animate={{ rotate: isOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="shrink-0 text-text-muted"
-                  >
+                  <span className="shrink-0 text-text-muted">
                     <ChevronDown
-                      className="h-5 w-5"
+                      className={`h-5 w-5 ${isOpen ? "rotate-180" : ""}`}
                       aria-hidden="true"
                     />
-                  </motion.span>
+                  </span>
                 </button>
 
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-6 pb-6 pr-14 text-sm leading-6 text-text-muted">
-                        {item.answer}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {isOpen && (
+                  <div className="overflow-hidden">
+                    <div className="px-6 pb-6 pr-14 text-sm leading-6 text-text-muted">
+                      {item.answer}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

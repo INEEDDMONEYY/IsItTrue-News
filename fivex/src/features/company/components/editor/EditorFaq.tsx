@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { editorContent } from "../../data/editorContent";
@@ -15,11 +14,7 @@ export default function EditorFaq() {
     <section className="border-b border-border bg-bg">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
         <div className="grid gap-14 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5 }}
+          <div
             className="lg:sticky lg:top-24"
           >
             <span className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">
@@ -33,13 +28,9 @@ export default function EditorFaq() {
             <p className="mt-5 max-w-xl text-base leading-7 text-text-muted sm:text-lg">
               {faq.description}
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.5 }}
+          <div
             className="overflow-hidden rounded-2xl border border-border bg-surface"
           >
             {faq.items.map((item, index) => {
@@ -73,27 +64,19 @@ export default function EditorFaq() {
                     />
                   </button>
 
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-6 pb-6 pl-[4.5rem] pr-12 sm:px-7 sm:pb-7 sm:pl-[5.25rem]">
-                          <p className="max-w-2xl text-sm leading-6 text-text-muted">
-                            {item.answer}
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {isOpen && (
+                    <div className="overflow-hidden">
+                      <div className="px-6 pb-6 pl-[4.5rem] pr-12 sm:px-7 sm:pb-7 sm:pl-[5.25rem]">
+                        <p className="max-w-2xl text-sm leading-6 text-text-muted">
+                          {item.answer}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

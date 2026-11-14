@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { editorialGuidelinesContent } from "../../data/editorialGuidelinesContent";
@@ -9,11 +8,7 @@ export default function EditorialGuidelinesCta() {
   return (
     <section className="bg-surface">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6 }}
+        <div
           className="relative overflow-hidden rounded-3xl border border-border bg-bg px-6 py-12 text-center shadow-sm sm:px-10 sm:py-16 lg:px-16"
         >
           <div className="relative mx-auto max-w-3xl">
@@ -53,7 +48,7 @@ export default function EditorialGuidelinesCta() {
 
           <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-accent-bg blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-16 h-40 w-40 rounded-full bg-surface-2 blur-3xl" />
-        </motion.div>
+        </div>
       </div>
     </section>
   );

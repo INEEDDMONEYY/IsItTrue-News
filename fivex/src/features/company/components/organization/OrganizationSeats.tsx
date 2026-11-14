@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Infinity as InfinityIcon, Users } from "lucide-react";
 import { organizationContent } from "../../data/organizationContent";
 
@@ -9,11 +8,7 @@ export default function OrganizationSeats() {
     <section className="border-b border-border bg-bg">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="mx-auto max-w-3xl text-center"
         >
           <span className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">
@@ -27,23 +22,16 @@ export default function OrganizationSeats() {
           <p className="mt-5 text-base leading-7 text-text-muted sm:text-lg">
             {seats.description}
           </p>
-        </motion.div>
+        </div>
 
         {/* Seat Options */}
         <div className="mx-auto mt-14 grid max-w-5xl gap-6 md:grid-cols-3">
-          {seats.items.map((item, index) => {
+          {seats.items.map((item) => {
             const isUnlimited = item.value === "∞";
 
             return (
-              <motion.article
+              <article
                 key={item.label}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.1,
-                }}
                 className="rounded-2xl border border-border bg-surface p-7 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
               >
                 {/* Seat Icon */}
@@ -71,17 +59,13 @@ export default function OrganizationSeats() {
                 <p className="mt-3 text-sm leading-6 text-text-muted">
                   {item.description}
                 </p>
-              </motion.article>
+              </article>
             );
           })}
         </div>
 
         {/* Seat Explanation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+        <div
           className="mx-auto mt-8 max-w-5xl rounded-2xl border border-border bg-surface-2 p-6 sm:p-7"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -101,7 +85,7 @@ export default function OrganizationSeats() {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

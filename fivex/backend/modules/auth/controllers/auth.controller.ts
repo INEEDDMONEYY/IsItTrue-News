@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import { asyncHandler } from '../../../utils/asyncHandler.js'
-import { clearAuthCookies, setAuthCookies } from '../../../utils/cookies.js'
+import { clearAuthCookies, REFRESH_TOKEN_COOKIE, setAuthCookies } from '../../../utils/cookies.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
 import { authService } from '../services/auth.service.js'
@@ -69,6 +69,23 @@ export const authController = {
   logout: asyncHandler(async (_req: Request, res: Response) => {
     clearAuthCookies(res)
     res.status(200).json({ message: 'Signed out successfully.' })
+  }),
+
+  refresh: asyncHandler(async (req: Request, res: Response) => {
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE] as string | undefined
+    if (!refreshToken) {
+      clearAuthCookies(res)
+      throw new AppError('Your session has expired. Please sign in again.', 401)
+    }
+
+    try {
+      const tokens = await authService.refreshSession(refreshToken)
+      setAuthCookies(res, tokens)
+      res.status(200).json({ message: 'Session renewed.' })
+    } catch (error) {
+      clearAuthCookies(res)
+      throw error
+    }
   }),
 
   me: asyncHandler(async (req: Request, res: Response) => {

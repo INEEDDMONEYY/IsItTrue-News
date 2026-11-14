@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Check, Infinity as InfinityIcon, Users } from "lucide-react";
 import { organizationContent } from "../../data/organizationContent";
 
@@ -9,11 +8,7 @@ export default function OrganizationPlans() {
     <section id="plans" className="border-b border-border bg-surface">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="mx-auto max-w-3xl text-center"
         >
           <span className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">
@@ -27,23 +22,16 @@ export default function OrganizationPlans() {
           <p className="mt-5 text-base leading-7 text-text-muted sm:text-lg">
             {plans.description}
           </p>
-        </motion.div>
+        </div>
 
         {/* Plans */}
         <div className="mt-14 grid gap-6 lg:grid-cols-3">
-          {plans.items.map((plan, index) => {
+          {plans.items.map((plan) => {
             const isUnlimited = plan.seats.toLowerCase().includes("unlimited");
 
             return (
-              <motion.article
+              <article
                 key={plan.name}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.1,
-                }}
                 className={`relative flex flex-col rounded-2xl border bg-bg p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-7 ${
                   plan.featured
                     ? "border-accent shadow-md"
@@ -127,7 +115,7 @@ export default function OrganizationPlans() {
                     ))}
                   </ul>
                 </div>
-              </motion.article>
+              </article>
             );
           })}
         </div>

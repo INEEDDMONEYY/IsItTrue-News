@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 import { asyncHandler } from '../../../utils/asyncHandler.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { scrambledRemainder, truncateToParagraphs } from '../../../utils/htmlPreview.js'
-import { articleService } from '../services/article.service.js'
+import { articleService, toPublicTeaser } from '../services/article.service.js'
 import type {
   CreateArticleInput,
   RequestChangesInput,
@@ -21,27 +21,28 @@ function requireUser(req: Request) {
 }
 
 // Locked readers (anonymous viewers, or free-plan readers past their monthly
-// unlock cap) get the first paragraph of the body plus a scrambled stand-in for
-// the rest, which the page shows blurred — never the real remaining text.
+// unlock cap) get the first few paragraphs of the body plus a scrambled stand-in
+// for the rest, which the page shows blurred — never the real remaining text.
 // Headline/excerpt/author/comments stay unlimited (see articleService's
 // resolveArticleLock for the actual gating decision).
+const LOCKED_VISIBLE_PARAGRAPHS = 3
+
 function serializeArticle(article: Awaited<ReturnType<typeof articleService.getArticleById>>['article'], locked: boolean) {
   const json = article.toJSON() as Record<string, unknown>
   delete json.editorialStage
   delete json.editorialDeadline
   if (locked) {
     const body = json.body as string
-    json.body = truncateToParagraphs(body, 1)
-    json.lockedPreview = scrambledRemainder(body, 1)
+    json.body = truncateToParagraphs(body, LOCKED_VISIBLE_PARAGRAPHS)
+    json.lockedPreview = scrambledRemainder(body, LOCKED_VISIBLE_PARAGRAPHS)
   }
   return { ...json, locked }
 }
 
+// List endpoints are teasers only: they never carry the body, so no reader can
+// bypass the paywall/masking by reading a list response.
 function serializePublicArticle(article: ArticleDocument) {
-  const json = article.toJSON() as Record<string, unknown>
-  delete json.editorialStage
-  delete json.editorialDeadline
-  return json
+  return toPublicTeaser(article)
 }
 
 export const articleController = {

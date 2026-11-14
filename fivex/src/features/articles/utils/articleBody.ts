@@ -11,3 +11,12 @@ export function sanitizeArticleHtml(html: string | undefined | null): string | n
   if (!html) return null
   return DOMPurify.sanitize(html).trim() || null
 }
+
+// Same shape as the original text, with every letter and digit replaced, so the blurred stand-in for locked
+// paragraphs never reveals the real words.
+export function scrambleText(text: string): string {
+  const pick = (chars: string) => chars[Math.floor(Math.random() * chars.length)]
+  return text.replace(/[a-z]/g, () => pick('abcdefghijklmnopqrstuvwxyz'))
+    .replace(/[A-Z]/g, () => pick('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
+    .replace(/[0-9]/g, () => pick('0123456789'))
+}

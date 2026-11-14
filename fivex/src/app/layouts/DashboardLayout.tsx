@@ -4,6 +4,8 @@ import { DashboardSidebar } from '@/features/dashboard/components/DashboardSideb
 import { DashboardHeader } from '@/features/dashboard/components/DashboardHeader'
 import { MobileNavDrawer } from '@/features/dashboard/components/MobileNavDrawer'
 import { BannerBar } from '@/components/banners/BannerBar'
+import { PageTransition } from '@/components/animate-ui/components/page-transition'
+import { PageScrollEffects } from '@/components/navigation/PageScrollEffects'
 
 export function DashboardLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -11,13 +13,16 @@ export function DashboardLayout() {
 
   return (
     <div className="min-h-screen flex bg-bg">
+      <PageScrollEffects />
       <DashboardSidebar />
       <MobileNavDrawer open={mobileNavOpen} onClose={closeMobileNav} />
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onOpenMenu={() => setMobileNavOpen(true)} />
         <BannerBar />
         <main className="flex-1 px-4 sm:px-6 md:px-8 py-6 md:py-8 overflow-x-auto [&_h1]:text-brand-gradient">
-          <Outlet />
+          <PageTransition effect="bands">
+            <Outlet />
+          </PageTransition>
         </main>
       </div>
     </div>

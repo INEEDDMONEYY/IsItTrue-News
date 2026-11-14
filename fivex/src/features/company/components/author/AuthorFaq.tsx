@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { authorContent } from "../../data/authorContent";
@@ -53,21 +52,13 @@ export default function AuthorFaq() {
                   />
                 </button>
 
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="pb-5 pr-10 text-sm leading-7 text-text-muted">
-                        {item.answer}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {isOpen && (
+                  <div className="overflow-hidden">
+                    <p className="pb-5 pr-10 text-sm leading-7 text-text-muted">
+                      {item.answer}
+                    </p>
+                  </div>
+                )}
               </div>
             );
           })}

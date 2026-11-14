@@ -22,7 +22,7 @@ export interface AdminArticleSort {
 
 // What the table needs: no body, no engagement arrays, so a page of 100 stays small.
 const LIST_FIELDS =
-  'title slug category status factCheckStatus author views likesCount editorialStage editorialDeadline createdAt updatedAt publishedAt submittedAt'
+  'title slug category status factCheckStatus author views likesCount dislikesCount editorialStage editorialDeadline createdAt updatedAt publishedAt submittedAt'
 
 function buildMatch(filter: AdminArticleFilter, options: { ignoreStatus?: boolean } = {}): FilterQuery<IArticle> {
   const and: FilterQuery<IArticle>[] = []

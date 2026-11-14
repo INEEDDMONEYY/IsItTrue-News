@@ -2,14 +2,19 @@ import { Outlet } from 'react-router-dom'
 import { ShieldCheck, ArrowLeft, ArrowRight } from 'lucide-react'
 import authImage from '@/assets/images/speak-up.jpg'
 import { BannerBar } from '@/components/banners/BannerBar'
+import { PageTransition } from '@/components/animate-ui/components/page-transition'
+import { PageScrollEffects } from '@/components/navigation/PageScrollEffects'
 
 export function AuthLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-bg">
+      <PageScrollEffects />
       <BannerBar />
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2">
         <div className="flex items-center justify-center px-6 py-12">
-          <Outlet />
+          <PageTransition effect="bands">
+            <Outlet />
+          </PageTransition>
         </div>
 
       <div className="hidden lg:block relative m-3 rounded-3xl overflow-hidden">

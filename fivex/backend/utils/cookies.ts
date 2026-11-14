@@ -1,11 +1,12 @@
 import type { Response } from 'express'
 import { isProduction } from '../config/env.js'
+import { REFRESH_TOKEN_IDLE_TIMEOUT_MS } from '../security/tokens.js'
 
 export const ACCESS_TOKEN_COOKIE = 'access_token'
 export const REFRESH_TOKEN_COOKIE = 'refresh_token'
 
 const ACCESS_TOKEN_MAX_AGE_MS = 15 * 60 * 1000
-const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
+const REFRESH_TOKEN_MAX_AGE_MS = REFRESH_TOKEN_IDLE_TIMEOUT_MS
 
 /**
  * Cross-site cookies (frontend/backend on different domains, e.g. in production

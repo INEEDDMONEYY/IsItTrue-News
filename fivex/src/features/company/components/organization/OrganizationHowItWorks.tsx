@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { organizationContent } from "../../data/organizationContent";
 
@@ -9,11 +8,7 @@ export default function OrganizationHowItWorks() {
     <section className="border-b border-border bg-bg">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="mx-auto max-w-3xl text-center"
         >
           <span className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">
@@ -27,7 +22,7 @@ export default function OrganizationHowItWorks() {
           <p className="mt-5 text-base leading-7 text-text-muted sm:text-lg">
             {howItWorks.description}
           </p>
-        </motion.div>
+        </div>
 
         {/* Steps */}
         <div className="relative mx-auto mt-14 max-w-5xl">
@@ -36,15 +31,8 @@ export default function OrganizationHowItWorks() {
 
           <div className="grid gap-8 md:grid-cols-4">
             {howItWorks.steps.map((step, index) => (
-              <motion.article
+              <article
                 key={step.number}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.1,
-                }}
                 className="relative text-center"
               >
                 {/* Step Number */}
@@ -66,17 +54,13 @@ export default function OrganizationHowItWorks() {
                     <div className="h-8 w-px bg-border" />
                   </div>
                 )}
-              </motion.article>
+              </article>
             ))}
           </div>
         </div>
 
         {/* Bottom Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+        <div
           className="mx-auto mt-14 max-w-3xl rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-7"
         >
           <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
@@ -97,7 +81,7 @@ export default function OrganizationHowItWorks() {
 
             <ArrowRight className="hidden h-5 w-5 shrink-0 text-text-dim sm:block" />
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

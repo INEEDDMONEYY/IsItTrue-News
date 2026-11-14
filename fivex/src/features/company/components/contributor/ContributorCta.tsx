@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { contributorContent } from "../../data/contributorContent";
 
@@ -8,11 +7,7 @@ export default function ContributorCta() {
   return (
     <section className="bg-surface">
       <div className="mx-auto max-w-5xl px-6 py-20 sm:px-8 lg:py-28">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
+        <div
           className="overflow-hidden rounded-2xl border border-border bg-bg px-6 py-12 text-center sm:px-10 sm:py-16"
         >
           <p className="text-sm font-semibold uppercase tracking-wider text-accent">
@@ -34,7 +29,7 @@ export default function ContributorCta() {
             {cta.action.label}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </a>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
