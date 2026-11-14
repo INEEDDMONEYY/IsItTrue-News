@@ -954,7 +954,7 @@ export const updateCaseFile = async (
     closedAt:
       input.status === 'closed'
         ? new Date().toISOString()
-        : input.status && input.status !== 'closed'
+        : input.status
           ? undefined
           : existing.closedAt,
   }

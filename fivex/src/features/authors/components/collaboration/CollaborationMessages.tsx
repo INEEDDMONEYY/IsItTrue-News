@@ -4,10 +4,8 @@ import {
   ArrowLeft,
   Check,
   CheckCheck,
-  Circle,
   MessageCircle,
   MoreHorizontal,
-  Paperclip,
   Search,
   Send,
   Users,
@@ -416,9 +414,10 @@ export function CollaborationMessages() {
         )
 
         const participantNames = conversation.participantIds
-          .map(getAuthor)
-          .filter(Boolean)
-          .map((author) => author.name)
+          .flatMap((participantId) => {
+            const author = getAuthor(participantId)
+            return author ? [author.name] : []
+          })
           .join(' ')
 
         return (

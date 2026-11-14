@@ -8,7 +8,6 @@ import {
   Mail,
   MessageSquare,
   Send,
-  UserRound,
   X,
 } from 'lucide-react'
 

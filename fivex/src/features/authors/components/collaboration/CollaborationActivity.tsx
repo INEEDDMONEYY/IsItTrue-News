@@ -12,7 +12,6 @@ import {
   Search,
   ShieldCheck,
   UserPlus,
-  Users,
 } from 'lucide-react'
 
 import {

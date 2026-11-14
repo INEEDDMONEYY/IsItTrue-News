@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  CheckCircle2,
   Clock3,
   FileText,
   FolderOpen,
