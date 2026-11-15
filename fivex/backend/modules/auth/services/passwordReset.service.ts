@@ -35,7 +35,7 @@ export const passwordResetService = {
       .catch((error: unknown) => logger.error(`Failed to send password reset email to ${user.email}`, error))
   },
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
+  async resetPassword(token: string, newPassword: string): Promise<string> {
     const tokenHash = hashToken(token)
 
     // Cheap lookup first, so a bad link never pays for a password hash.
@@ -55,5 +55,7 @@ export const passwordResetService = {
     void mailService
       .sendPasswordChangedEmail({ name: user.name, email: user.email })
       .catch((error: unknown) => logger.error(`Failed to send password-changed notice to ${user.email}`, error))
+
+    return String(user._id)
   },
 }

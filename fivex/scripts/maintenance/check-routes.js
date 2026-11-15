@@ -1,4 +1,3 @@
-
 #!/usr/bin/env node
 
 /**
@@ -13,8 +12,9 @@
  * node scripts/maintenance/check-routes.js --write-report
  */
 
-const fs = require('node:fs')
-const path = require('node:path')
+import fs from 'node:fs'
+import path from 'node:path'
+import { PROJECT_ROOT } from '../utils/file-system.js'
 
 const args = process.argv.slice(2)
 
@@ -43,9 +43,9 @@ This script does not modify source files or router configuration.
   process.exit(0)
 }
 
-const srcRoot = path.resolve(process.cwd(), getOption('src-root', 'src'))
+const srcRoot = path.resolve(PROJECT_ROOT, getOption('src-root', 'src'))
 const reportPath = path.resolve(
-  process.cwd(),
+  PROJECT_ROOT,
   getOption('report', 'reports/route-check.md'),
 )
 
@@ -98,7 +98,7 @@ function normalizePath(value) {
 }
 
 function getRelative(filePath) {
-  return path.relative(process.cwd(), filePath).replace(/\\/g, '/')
+  return path.relative(PROJECT_ROOT, filePath).replace(/\\/g, '/')
 }
 
 function stripComments(source) {

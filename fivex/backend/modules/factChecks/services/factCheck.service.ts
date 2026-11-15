@@ -3,6 +3,7 @@ import { ROLES, type Role } from '../../../shared/constants/roles.js'
 import { factCheckRepository } from '../repositories/factCheck.repository.js'
 import { articleRepository } from '../../articles/repositories/article.repository.js'
 import { notificationService } from '../../notifications/services/notification.service.js'
+import { auditLogService } from '../../auditLogs/services/auditLog.service.js'
 import type { CreateFactCheckRequestInput } from '../validations/factCheck.validation.js'
 
 export const factCheckService = {
@@ -26,6 +27,11 @@ export const factCheckService = {
     })
 
     await articleRepository.setFactCheckPending(input.articleId)
+    await auditLogService.record({
+      eventType: 'fact_check.request_submitted',
+      actor: { id: requestedBy },
+      resource: { type: 'fact_check', id: String(factCheck._id), title: article.title },
+    })
 
     return factCheck
   },
@@ -50,6 +56,11 @@ export const factCheckService = {
 
     await factCheckRepository.setApproved(id, actingUser)
     const article = await articleRepository.setFactCheckApproved(factCheck.article.toString(), actingUser)
+    await auditLogService.record({
+      eventType: 'fact_check.request_approved',
+      actor: { id: actingUser },
+      resource: { type: 'fact_check', id, title: article?.title ?? factCheck.article.toString() },
+    })
     if (article) {
       await notificationService.notify({
         recipient: article.author.toString(),
@@ -74,6 +85,12 @@ export const factCheckService = {
 
     await factCheckRepository.setRejected(id, actingUser, reason)
     const article = await articleRepository.setFactCheckRejected(factCheck.article.toString(), reason, actingUser)
+    await auditLogService.record({
+      eventType: 'fact_check.request_rejected',
+      actor: { id: actingUser },
+      resource: { type: 'fact_check', id, title: article?.title ?? factCheck.article.toString() },
+      metadata: { reason },
+    })
     if (article) {
       await notificationService.notify({
         recipient: article.author.toString(),

@@ -9,7 +9,7 @@ import type {
 } from '../types/auditLog.types'
 
 // Set to false when connecting the real backend.
-const USE_MOCK_DATA = true
+const USE_MOCK_DATA = false
 
 const API_BASE_URL = '/api/admin/audit-logs'
 
@@ -906,9 +906,20 @@ export async function getAuditLogById(
     return log ? cloneLogs([log])[0] : null
   }
 
-  return request<AuditLogEvent>(
-    `${API_BASE_URL}/${encodeURIComponent(id)}`,
-  )
+  const response = await fetch(`${API_BASE_URL}/${encodeURIComponent(id)}`, {
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  })
+
+  if (response.status === 404) {
+    return null
+  }
+
+  if (!response.ok) {
+    throw new Error(`Audit logs request failed (${response.status}).`)
+  }
+
+  return response.json() as Promise<AuditLogEvent>
 }
 
 export async function getAuditLogSummary(): Promise<AuditLogSummary> {

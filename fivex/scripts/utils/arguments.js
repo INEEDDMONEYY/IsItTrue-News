@@ -1,5 +1,5 @@
 
-const args = process.argv.slice(2)
+export const args = process.argv.slice(2)
 
 function getOption(name, fallback = '') {
   const prefix = `--${name}=`
@@ -42,11 +42,4 @@ function printHelp(title, lines = []) {
   console.log('')
 }
 
-module.exports = {
-  args,
-  getOption,
-  hasFlag,
-  getListOption,
-  requireOption,
-  printHelp,
-}
+export { getOption, hasFlag, getListOption, requireOption, printHelp }

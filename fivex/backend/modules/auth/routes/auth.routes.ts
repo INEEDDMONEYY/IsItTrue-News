@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { authController } from '../controllers/auth.controller.js'
-import { authenticate } from '../../../middleware/authenticate.js'
+import { authenticate, optionalAuthenticate } from '../../../middleware/authenticate.js'
 import { authRateLimiter, emailRateLimiter } from '../../../middleware/rateLimiter.js'
 import { validate } from '../../../middleware/validate.js'
 import {
@@ -34,7 +34,7 @@ router.post(
 )
 router.post('/reset-password', authRateLimiter, validate(resetPasswordSchema), authController.resetPassword)
 router.post('/login', authRateLimiter, validate(loginSchema), authController.login)
-router.post('/logout', authController.logout)
+router.post('/logout', optionalAuthenticate, authController.logout)
 router.post('/refresh', authController.refresh)
 router.get('/me', authenticate, authController.me)
 

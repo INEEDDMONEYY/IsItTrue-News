@@ -1,5 +1,9 @@
-
 #!/usr/bin/env node
+
+import path from 'node:path'
+import { getOption, hasFlag } from '../utils/arguments.js'
+import { resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../utils/file-system.js'
+import { isValidIdentifier, validateFeatureName, validateName } from '../utils/templates.js'
 
 /**
  * IITNews Component Generator
@@ -27,40 +31,6 @@
  * - Does not invent API integrations.
  * - Generates typed React components.
  */
-
-const fs = require('node:fs')
-const path = require('node:path')
-
-const args = process.argv.slice(2)
-
-const hasFlag = (flag) => args.includes(flag)
-
-function getOption(name, fallback = '') {
-  const argument = args.find((item) => item.startsWith(`--${name}=`))
-  return argument ? argument.slice(name.length + 3) : fallback
-}
-
-function toKebabCase(value) {
-  return value
-    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    .replace(/[\s_]+/g, '-')
-    .replace(/[^a-zA-Z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase()
-}
-
-function toPascalCase(value) {
-  return value
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')
-}
-
-function isValidIdentifier(value) {
-  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(value)
-}
 
 const featureInput = getOption('feature')
 const nameInput = getOption('name')
@@ -115,18 +85,18 @@ if (!validTypes.includes(componentType)) {
   process.exit(1)
 }
 
-const featureName = toKebabCase(featureInput)
-const componentName = toPascalCase(nameInput)
+let featureName
+let componentName
+let root
 
-if (!featureName || !isValidIdentifier(componentName)) {
-  console.error('Invalid feature or component name.')
+try {
+  featureName = validateFeatureName(featureInput)
+  componentName = validateName(nameInput, 'name')
+  root = resolveSourceRoot(getOption('root', 'src/features/admin'))
+} catch (error) {
+  console.error(error.message)
   process.exit(1)
 }
-
-const root = path.resolve(
-  process.cwd(),
-  getOption('root', 'src/features/admin'),
-)
 
 const featureRoot = path.join(root, featureName)
 
@@ -153,11 +123,6 @@ if (
   console.error('Output directory must remain inside the feature directory.')
   process.exit(1)
 }
-
-const outputFile = path.join(
-  outputDirectory,
-  `${componentName}.tsx`,
-)
 
 const dryRun = hasFlag('--dry-run')
 const propsInput = getOption('props')
@@ -512,38 +477,30 @@ console.log('===========================')
 console.log(`Feature: ${featureName}`)
 console.log(`Component: ${componentName}`)
 console.log(`Type: ${componentType}`)
-console.log(`Directory: ${path.relative(process.cwd(), outputDirectory)}`)
-console.log(`Output: ${path.relative(process.cwd(), outputFile)}`)
+console.log(`Directory: ${toProjectRelative(outputDirectory)}`)
+console.log(`Output: ${toProjectRelative(outputFile)}`)
 console.log(`Mode: ${dryRun ? 'DRY RUN' : 'WRITE'}`)
 console.log('')
 
-if (fs.existsSync(outputFile)) {
-  console.log('[SKIP] Existing component preserved.')
+let writeResult
+
+try {
+  writeResult = writeFileIfMissing(outputFile, templates[componentType](), { dryRun })
+} catch (error) {
+  console.error('\nComponent generation failed:')
+  console.error(error.message)
+  process.exit(1)
+}
+
+if (writeResult.status === 'skipped') {
+  console.log('[SKIP] Existing component preserved. No changes made.')
   process.exit(0)
 }
 
-console.log(`[CREATE] ${path.relative(process.cwd(), outputFile)}`)
+console.log(`[CREATE] ${toProjectRelative(outputFile)}`)
 
 if (dryRun) {
   console.log('\nPreview complete. No files were written.')
-  process.exit(0)
-}
-
-try {
-  fs.mkdirSync(outputDirectory, { recursive: true })
-
-  fs.writeFileSync(outputFile, templates[componentType](), {
-    encoding: 'utf8',
-    flag: 'wx',
-  })
-
+} else {
   console.log('\nComponent created successfully.')
-} catch (error) {
-  if (error.code === 'EEXIST') {
-    console.log('\nComponent already exists. No changes made.')
-  } else {
-    console.error('\nComponent generation failed:')
-    console.error(error.message)
-    process.exitCode = 1
-  }
 }

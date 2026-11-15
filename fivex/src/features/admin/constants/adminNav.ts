@@ -1,28 +1,4 @@
-import {
-  LayoutDashboard,
-  Users,
-  FileText,
-  ShieldAlert,
-  BarChart3,
-  Settings,
-  Megaphone,
-  Code2,
-  Globe,
-  Ticket,
-  BadgeCheck,
-  FolderSearch,
-  SearchCheck,
-  Archive,
-  BriefcaseBusiness,
-  ClipboardList,
-  FileWarning,
-  Database,
-  Video,
-  Mail,
-  ScrollText,
-  ServerCog,
-  type LucideIcon,
-} from 'lucide-react'
+import { LayoutDashboard, Users, FileText, ShieldAlert, BarChart3, Settings, Megaphone, Globe, Ticket, BadgeCheck, FolderSearch, Archive, BriefcaseBusiness, ClipboardList, FileWarning, Database, Video, Mail, ScrollText, ServerCog, type LucideIcon } from 'lucide-react'
 
 export interface AdminNavItem {
   label: string
@@ -78,11 +54,6 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     icon: BadgeCheck,
   },
   {
-    label: 'Fact Check Verification',
-    to: '/admin/fact-check-verification',
-    icon: SearchCheck,
-  },
-  {
     label: 'Evidence',
     to: '/admin/evidence',
     icon: Archive,
@@ -129,14 +100,9 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     icon: Mail,
   },
   {
-    label: 'Banners',
-    to: '/admin/banners',
+    label: 'Advertisement',
+    to: '/admin/advertisement',
     icon: Megaphone,
-  },
-  {
-    label: 'Advertisement Codes',
-    to: '/admin/advertisements',
-    icon: Code2,
   },
 
   // Platform

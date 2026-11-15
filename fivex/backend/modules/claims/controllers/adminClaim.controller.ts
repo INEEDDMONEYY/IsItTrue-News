@@ -2,6 +2,8 @@ import type { Request, Response } from 'express'
 import { asyncHandler } from '../../../utils/asyncHandler.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { adminClaimService } from '../services/adminClaim.service.js'
+import { auditLogService } from '../../auditLogs/services/auditLog.service.js'
+import type { AuditEventType } from '../../auditLogs/constants/auditCatalog.js'
 import {
   adminClaimIdSchema,
   adminClaimListQuerySchema,
@@ -35,7 +37,21 @@ function noStore(res: Response) {
   res.setHeader('Cache-Control', 'no-store')
 }
 
-function done(res: Response, message: string, record: unknown): void {
+// Every decision is written to the audit log with the acting admin, the claim, and the time it was made.
+async function done(
+  req: Request,
+  res: Response,
+  message: string,
+  eventType: AuditEventType,
+  record: { id: string; claim: { text: string } },
+  metadata?: Record<string, unknown>,
+): Promise<void> {
+  await auditLogService.record({
+    eventType,
+    actor: admin(req),
+    resource: { type: 'claim', id: record.id, title: record.claim.text },
+    metadata,
+  })
   res.status(200).json({ message, record })
 }
 
@@ -76,43 +92,52 @@ export const adminClaimController = {
   }),
 
   assign: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Reviewer assigned.', await adminClaimService.assign(parseId(req.params.id), admin(req), req.body as AssignInput)),
+    done(req, res, 'Reviewer assigned.', 'fact_check.reviewer_assigned', await adminClaimService.assign(parseId(req.params.id), admin(req), req.body as AssignInput)),
   ),
   unassign: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Reviewer removed.', await adminClaimService.unassign(parseId(req.params.id), admin(req), req.body as UnassignInput)),
+    done(req, res, 'Reviewer removed.', 'fact_check.reviewer_removed', await adminClaimService.unassign(parseId(req.params.id), admin(req), req.body as UnassignInput)),
   ),
   returnForReview: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Returned for further review.', await adminClaimService.returnForReview(parseId(req.params.id), admin(req), req.body as ReturnInput)),
+    done(req, res, 'Returned for further review.', 'fact_check.returned_for_review', await adminClaimService.returnForReview(parseId(req.params.id), admin(req), req.body as ReturnInput)),
   ),
   escalate: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Escalated.', await adminClaimService.escalate(parseId(req.params.id), admin(req), req.body as EscalateInput)),
+    done(req, res, 'Escalated.', 'fact_check.escalated', await adminClaimService.escalate(parseId(req.params.id), admin(req), req.body as EscalateInput)),
   ),
   resolveEscalation: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Escalation resolved.', await adminClaimService.resolveEscalation(parseId(req.params.id), admin(req), req.body as ResolveEscalationInput)),
+    done(req, res, 'Escalation resolved.', 'fact_check.escalation_resolved', await adminClaimService.resolveEscalation(parseId(req.params.id), admin(req), req.body as ResolveEscalationInput)),
   ),
   flagEvidence: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Evidence flagged.', await adminClaimService.flagEvidence(parseId(req.params.id), admin(req), req.body as FlagEvidenceInput)),
+    done(req, res, 'Evidence flagged.', 'evidence.flagged', await adminClaimService.flagEvidence(parseId(req.params.id), admin(req), req.body as FlagEvidenceInput)),
   ),
   clearEvidenceFlag: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Evidence flag cleared.', await adminClaimService.clearEvidenceFlag(parseId(req.params.id), admin(req), req.body as ClearFlagInput)),
+    done(req, res, 'Evidence flag cleared.', 'evidence.flag_cleared', await adminClaimService.clearEvidenceFlag(parseId(req.params.id), admin(req), req.body as ClearFlagInput)),
   ),
   setEvidenceRestriction: asyncHandler(async (req: Request, res: Response) =>
     done(
+      req,
       res,
       'Evidence access updated.',
+      'evidence.restriction_changed',
       await adminClaimService.setEvidenceRestriction(parseId(req.params.id), parseId(req.params.itemId), admin(req), req.body as RestrictionInput),
     ),
   ),
   reviseAssessment: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Conclusion revised.', await adminClaimService.reviseAssessment(parseId(req.params.id), admin(req), req.body as RevisionInput)),
+    done(
+      req,
+      res,
+      'Conclusion revised.',
+      'fact_check.verdict_revised',
+      await adminClaimService.reviseAssessment(parseId(req.params.id), admin(req), req.body as RevisionInput),
+      { assessmentStatus: (req.body as RevisionInput).assessmentStatus },
+    ),
   ),
   correctMetadata: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Record updated.', await adminClaimService.correctMetadata(parseId(req.params.id), admin(req), req.body as MetadataInput)),
+    done(req, res, 'Record updated.', 'fact_check.metadata_updated', await adminClaimService.correctMetadata(parseId(req.params.id), admin(req), req.body as MetadataInput)),
   ),
   comment: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Comment added.', await adminClaimService.comment(parseId(req.params.id), admin(req), req.body as CommentInput)),
+    done(req, res, 'Comment added.', 'fact_check.comment_added', await adminClaimService.comment(parseId(req.params.id), admin(req), req.body as CommentInput)),
   ),
   linkInvestigation: asyncHandler(async (req: Request, res: Response) =>
-    done(res, 'Investigation link updated.', await adminClaimService.linkInvestigation(parseId(req.params.id), admin(req), req.body as InvestigationLinkInput)),
+    done(req, res, 'Investigation link updated.', 'fact_check.investigation_linked', await adminClaimService.linkInvestigation(parseId(req.params.id), admin(req), req.body as InvestigationLinkInput)),
   ),
 }

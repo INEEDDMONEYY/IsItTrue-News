@@ -2,6 +2,8 @@ import type { Request, Response } from 'express'
 import { asyncHandler } from '../../../utils/asyncHandler.js'
 import { clearAuthCookies } from '../../../utils/cookies.js'
 import { AppError } from '../../../shared/errors/AppError.js'
+import { ROLES } from '../../../shared/constants/roles.js'
+import { auditActor, auditLogService } from '../../auditLogs/services/auditLog.service.js'
 import { userService } from '../services/user.service.js'
 import type {
   BecomeAuthorInput,
@@ -29,6 +31,12 @@ export const userController = {
   create: asyncHandler(async (req: Request, res: Response) => {
     const input = req.body as CreateUserInput
     const user = await userService.createUser(input)
+    await auditLogService.record({
+      eventType: 'user.created',
+      actor: auditActor(req.user),
+      resource: { type: 'user', id: String(user._id), title: user.name },
+      metadata: { role: user.role },
+    })
     res.status(201).json({ message: 'User created successfully.', user })
   }),
 
@@ -38,7 +46,21 @@ export const userController = {
       throw new AppError('You must be signed in to access this resource.', 401)
     }
     const { role } = req.body as UpdateRoleInput
-    await userService.updateRole(req.params.id, role, req.user.id)
+    const { previousRole, name } = await userService.updateRole(req.params.id, role, req.user.id)
+
+    if (previousRole !== role) {
+      const actor = auditActor(req.user)
+      const resource = { type: 'user', id: req.params.id, title: name }
+      const metadata = { from: previousRole, to: role }
+      await auditLogService.record({ eventType: 'role.changed', actor, resource, metadata })
+      if (role === ROLES.ADMIN) {
+        await auditLogService.record({ eventType: 'role.admin_granted', actor, resource, metadata })
+      }
+      if (previousRole === ROLES.ADMIN) {
+        await auditLogService.record({ eventType: 'role.admin_revoked', actor, resource, metadata })
+      }
+    }
+
     res.status(200).json({ message: 'Role updated successfully.' })
   }),
 
@@ -47,7 +69,13 @@ export const userController = {
     if (!req.user) {
       throw new AppError('You must be signed in to access this resource.', 401)
     }
-    await userService.deleteUser(req.params.id, req.user.id)
+    const deleted = await userService.deleteUser(req.params.id, req.user.id)
+    await auditLogService.record({
+      eventType: 'user.deleted',
+      actor: auditActor(req.user),
+      resource: { type: 'user', id: req.params.id, title: deleted.name },
+      metadata: { role: deleted.role },
+    })
     res.status(200).json({ message: 'User deleted successfully.' })
   }),
 
@@ -124,6 +152,10 @@ export const userController = {
     }
     const { currentPassword, newPassword } = req.body as ChangePasswordInput
     await userService.changeOwnPassword(req.user.id, currentPassword, newPassword)
+    await auditLogService.record({
+      eventType: 'auth.password_changed',
+      actor: auditActor(req.user),
+    })
     res.status(200).json({ message: 'Password updated successfully.' })
   }),
 
@@ -135,6 +167,11 @@ export const userController = {
     }
     const { newEmail, currentPassword } = req.body as ChangeEmailInput
     const user = await userService.changeOwnEmail(req.user.id, newEmail, currentPassword)
+    await auditLogService.record({
+      eventType: 'auth.email_changed',
+      actor: auditActor(req.user),
+      resource: { type: 'user', id: req.user.id, title: user.name },
+    })
     res.status(200).json({
       message: 'Email updated. Please check your new inbox to verify it.',
       user,
@@ -147,6 +184,11 @@ export const userController = {
       throw new AppError('You must be signed in to access this resource.', 401)
     }
     await userService.deleteOwnAccount(req.user.id)
+    await auditLogService.record({
+      eventType: 'user.self_deleted',
+      actor: auditActor(req.user),
+      resource: { type: 'user', id: req.user.id },
+    })
     clearAuthCookies(res)
     res.status(200).json({ message: 'Account deleted successfully.' })
   }),

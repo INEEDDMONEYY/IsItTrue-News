@@ -10,6 +10,7 @@ import { adminArticleRepository, type AdminArticleFilter } from '../repositories
 import type { AdminArticleEngagementInput, AdminArticleListQuery, AdminArticleStatusInput } from '../validations/adminArticle.validation.js'
 import { articleAuditService } from './articleAudit.service.js'
 import { articleService } from './article.service.js'
+import { auditLogService } from '../../auditLogs/services/auditLog.service.js'
 
 interface Admin {
   id: string
@@ -214,11 +215,32 @@ export const adminArticleService = {
       await articleService.updateStatus(id, target, admin, { note: input.note })
     }
 
+    const from = article.status
+    const eventType =
+      target === ARTICLE_STATUSES.PUBLISHED
+        ? 'article.published'
+        : from === ARTICLE_STATUSES.PUBLISHED && target === ARTICLE_STATUSES.DRAFT
+          ? 'article.unpublished'
+          : 'article.status_changed'
+    await auditLogService.record({
+      eventType,
+      actor: { id: admin.id, role: admin.role },
+      resource: { type: 'article', id, title: article.title },
+      metadata: { from, to: target },
+    })
+
     return this.getDetail(id)
   },
 
   async remove(id: string, admin: Admin) {
+    const article = await adminArticleRepository.findDetailById(id)
+    if (!article) throw new AppError('Article not found.', 404)
     await articleService.deleteArticle(id, admin)
+    await auditLogService.record({
+      eventType: 'article.deleted',
+      actor: { id: admin.id, role: admin.role },
+      resource: { type: 'article', id, title: article.title },
+    })
   },
 
   async setEngagement(id: string, admin: Admin, input: AdminArticleEngagementInput) {

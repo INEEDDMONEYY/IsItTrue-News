@@ -9,7 +9,7 @@ import { campaignRepository } from '../repositories/campaign.repository.js'
 import { advertiserCampaignService } from './advertiserCampaign.service.js'
 
 // Click-through rate as a percentage with two decimals; 0 when nothing has been shown yet.
-function ctr(clicks: number, impressions: number): number {
+export function ctr(clicks: number, impressions: number): number {
   return impressions > 0 ? Math.round((clicks / impressions) * 10000) / 100 : 0
 }
 

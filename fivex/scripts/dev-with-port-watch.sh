@@ -16,4 +16,6 @@ if [ -n "${CODESPACE_NAME:-}" ] && command -v gh >/dev/null 2>&1; then
   trap 'kill "$watcher_pid" 2>/dev/null' EXIT INT TERM
 fi
 
-"$@"
+# Run the dev command at lower CPU priority so compiles/watchers don't starve the
+# VS Code remote server (shell env resolution and extension host time out otherwise).
+nice -n 10 "$@"

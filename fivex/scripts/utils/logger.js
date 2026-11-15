@@ -50,7 +50,4 @@ function createSummary() {
   }
 }
 
-module.exports = {
-  log,
-  createSummary,
-}
+export { log, createSummary }

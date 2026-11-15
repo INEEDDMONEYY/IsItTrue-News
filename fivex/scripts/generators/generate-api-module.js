@@ -1,4 +1,3 @@
-
 #!/usr/bin/env node
 
 /**
@@ -24,38 +23,24 @@
  * - Does not implement authentication or request handling.
  */
 
-const fs = require('node:fs')
-const path = require('node:path')
+import fs from 'node:fs'
+import path from 'node:path'
+import { getOption, hasFlag } from '../utils/arguments.js'
+import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../utils/file-system.js'
+import { escapeComment, isValidIdentifier, toCamelCase, toKebabCase, toPascalCase, validateApiPath, validateFeatureName } from '../utils/templates.js'
 
-const args = process.argv.slice(2)
 
-const hasFlag = (flag) => args.includes(flag)
+const RESERVED_WORDS = new Set([
+  'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default',
+  'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for',
+  'function', 'if', 'import', 'in', 'instanceof', 'new', 'null', 'return', 'super',
+  'switch', 'this', 'throw', 'true', 'try', 'typeof', 'var', 'void', 'while', 'with',
+  'yield', 'let', 'static', 'await', 'implements', 'interface', 'package', 'private',
+  'protected', 'public',
+])
 
-function getOption(name, fallback = '') {
-  const argument = args.find((item) => item.startsWith(`--${name}=`))
-  return argument ? argument.slice(name.length + 3) : fallback
-}
-
-function toKebabCase(value) {
-  return value
-    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    .replace(/[\s_]+/g, '-')
-    .replace(/[^a-zA-Z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase()
-}
-
-function toPascalCase(value) {
-  return value
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')
-}
-
-function isValidIdentifier(value) {
-  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(value)
+function isSafeIdentifier(value) {
+  return isValidIdentifier(value) && !RESERVED_WORDS.has(value)
 }
 
 if (hasFlag('--help')) {
@@ -75,11 +60,14 @@ Options:
 The contract defines:
   - Resource name
   - TypeScript data types
-  - API operations
+  - API operations (paths under /api/, {param} for path arguments)
   - HTTP method and route documentation
   - Request and response types
 
-The generator does not implement HTTP requests.
+Generated operations are exported as an object namespace (for example
+advertiserPricingApi.getAdvertiserPricing), call the shared apiClient from
+@/api/client, and return the unwrapped response data. Existing files are
+never overwritten.
 `)
   process.exit(0)
 }
@@ -92,14 +80,16 @@ if (!featureInput || !contractInput) {
   process.exit(1)
 }
 
-const featureName = toKebabCase(featureInput)
+let featureName
 
-if (!featureName) {
-  console.error('Invalid feature name.')
+try {
+  featureName = validateFeatureName(featureInput)
+} catch (error) {
+  console.error(error.message)
   process.exit(1)
 }
 
-const contractPath = path.resolve(process.cwd(), contractInput)
+const contractPath = path.resolve(PROJECT_ROOT, contractInput)
 
 if (!fs.existsSync(contractPath)) {
   console.error(`Contract file not found: ${contractInput}`)
@@ -122,10 +112,14 @@ if (!isValidIdentifier(resourceName)) {
   process.exit(1)
 }
 
-const root = path.resolve(
-  process.cwd(),
-  getOption('root', 'src/features/admin'),
-)
+let root
+
+try {
+  root = resolveSourceRoot(getOption('root', 'src/features/admin'))
+} catch (error) {
+  console.error(error.message)
+  process.exit(1)
+}
 
 const featureRoot = path.join(root, featureName)
 
@@ -196,7 +190,7 @@ function validateContract() {
   const operationNames = new Set()
 
   for (const operation of contract.operations) {
-    if (!isValidIdentifier(operation.name || '')) {
+    if (!isSafeIdentifier(operation.name || '')) {
       throw new Error(`Invalid operation name: ${operation.name}`)
     }
 
@@ -214,18 +208,29 @@ function validateContract() {
       )
     }
 
-    if (
-      typeof operation.path !== 'string' ||
-      !operation.path.startsWith('/')
-    ) {
-      throw new Error(
-        `Operation "${operation.name}" must have a path starting with "/".`,
-      )
+    try {
+      validateApiPath(operation.path)
+    } catch (error) {
+      throw new Error(`Operation "${operation.name}": ${error.message}`)
+    }
+
+    const pathParams = [...operation.path.matchAll(/\{([^}]+)\}/g)].map((match) => match[1])
+
+    if (new Set(pathParams).size !== pathParams.length) {
+      throw new Error(`Operation "${operation.name}" repeats a path parameter.`)
+    }
+
+    if (pathParams.some((param) => !isSafeIdentifier(param))) {
+      throw new Error(`Operation "${operation.name}" has an invalid path parameter name.`)
+    }
+
+    if (operation.requestType && pathParams.includes('input')) {
+      throw new Error(`Operation "${operation.name}" cannot use a path parameter named "input".`)
     }
 
     if (
       operation.requestType &&
-      !typeNames.has(operation.requestType)
+      !typeNames.has(operation.requestType.replace(/\[\]$/, ''))
     ) {
       throw new Error(
         `Unknown request type "${operation.requestType}" in "${operation.name}".`,
@@ -234,7 +239,7 @@ function validateContract() {
 
     if (
       operation.responseType &&
-      !typeNames.has(operation.responseType)
+      !typeNames.has(operation.responseType.replace(/\[\]$/, ''))
     ) {
       throw new Error(
         `Unknown response type "${operation.responseType}" in "${operation.name}".`,
@@ -286,58 +291,72 @@ function createApiSource() {
   const imports = new Set()
 
   for (const operation of contract.operations) {
-    if (operation.requestType) imports.add(operation.requestType)
-    if (operation.responseType) imports.add(operation.responseType)
+    if (operation.requestType) imports.add(operation.requestType.replace(/\[\]$/, ''))
+    if (operation.responseType) imports.add(operation.responseType.replace(/\[\]$/, ''))
   }
 
   const importStatement = imports.size
-    ? `import type { ${[...imports].sort().join(', ')} } from '../types/${toKebabCase(resourceName)}.types'\n\n`
+    ? `import type { ${[...imports].sort().join(', ')} } from '../types/${toKebabCase(resourceName)}.types'\n`
     : ''
 
   const functions = contract.operations.map((operation) => {
-    const requestType = operation.requestType
     const responseType = operation.responseType || 'void'
     const method = operation.method.toUpperCase()
+    const pathParams = [...operation.path.matchAll(/\{([^}]+)\}/g)].map((match) => match[1])
 
-    const params = requestType ? `input: ${requestType}` : ''
-    const returnType = `Promise<${responseType}>`
+    const paramList = pathParams.map((param) => `${param}: string`)
+
+    if (operation.requestType) {
+      paramList.push(`input: ${operation.requestType}`)
+    }
+
+    const urlExpression = pathParams.length
+      ? '`' +
+        operation.path.replace(
+          /\{([^}]+)\}/g,
+          (_, param) => `\${encodeURIComponent(${param})}`,
+        ) +
+        '`'
+      : `'${operation.path}'`
+
+    let requestArgs = ''
+
+    if (operation.requestType) {
+      if (method === 'GET') requestArgs = ', { params: input }'
+      else if (method === 'DELETE') requestArgs = ', { data: input }'
+      else requestArgs = ', input'
+    }
 
     const description = operation.description
-      ? ` * ${operation.description}\n`
+      ? ` * ${escapeComment(operation.description)}\n`
       : ''
 
-    return `/**
- * ${operation.name}
-${description} * HTTP: ${method} ${operation.path}
- *
- * TODO:
- * 1. Connect to the existing IITNews API client.
- * 2. Implement request and response handling.
- * 3. Apply the project's existing authentication behavior.
- * 4. Reuse established error handling.
- * 5. Verify the response against the backend contract.
- */
-export async function ${operation.name}(${params}): ${returnType} {
-  void ${requestType ? 'input' : '0'}
+    return `  /**
+   * ${escapeComment(operation.name)}
+${description}   * HTTP: ${method} ${operation.path}
+   */
+  ${operation.name}: async (${paramList.join(', ')}): Promise<${responseType}> => {
+    const { data } = await apiClient.${method.toLowerCase()}<${responseType}>(${urlExpression}${requestArgs})
 
-  throw new Error(
-    '${operation.name} has not been connected to the IITNews API client.',
-  )
-}`
+    return data
+  },`
   })
+
+  const namespaceName = `${toCamelCase(resourceName)}Api`
 
   return `/**
  * ${resourceName} API module.
  *
  * Generated from: ${path.basename(contractInput)}
  *
- * IMPORTANT:
- * These are typed API operation scaffolds, not working HTTP requests.
- * No API client, authentication behavior, or endpoint implementation
- * has been assumed.
+ * Uses the shared apiClient, which sends credentials with each request.
+ * Verify the paths and types against the backend before production use.
  */
-
-${importStatement}${functions.join('\n\n')}
+import { apiClient } from '@/api/client'
+${importStatement}
+export const ${namespaceName} = {
+${functions.join('\n\n')}
+}
 `
 }
 
@@ -356,7 +375,7 @@ console.log('\nIITNews API Module Generator')
 console.log('===========================')
 console.log(`Feature: ${featureName}`)
 console.log(`Resource: ${resourceName}`)
-console.log(`Contract: ${path.relative(process.cwd(), contractPath)}`)
+console.log(`Contract: ${toProjectRelative(contractPath)}`)
 console.log(`Operations: ${contract.operations.length}`)
 console.log(`Types: ${contract.types.length}`)
 console.log(`Mode: ${dryRun ? 'DRY RUN' : 'WRITE'}`)
@@ -366,36 +385,21 @@ let created = 0
 let skipped = 0
 
 for (const file of outputFiles) {
-  const relativePath = path.relative(process.cwd(), file.path)
+  const relativePath = toProjectRelative(file.path)
 
-  if (fs.existsSync(file.path)) {
-    console.log(`[SKIP] ${relativePath}`)
-    skipped += 1
-    continue
-  }
+  try {
+    const result = writeFileIfMissing(file.path, file.content, { dryRun })
 
-  console.log(`[CREATE] ${relativePath}`)
-
-  if (!dryRun) {
-    fs.mkdirSync(path.dirname(file.path), { recursive: true })
-
-    try {
-      fs.writeFileSync(file.path, file.content, {
-        encoding: 'utf8',
-        flag: 'wx',
-      })
-
+    if (result.status === 'skipped') {
+      console.log(`[SKIP] ${relativePath} (already exists)`)
+      skipped += 1
+    } else {
+      console.log(`[${dryRun ? 'PREVIEW' : 'CREATE'}] ${relativePath}`)
       created += 1
-    } catch (error) {
-      if (error.code === 'EEXIST') {
-        console.log(`[SKIP] ${relativePath} (already exists)`)
-        skipped += 1
-      } else {
-        throw error
-      }
     }
-  } else {
-    created += 1
+  } catch (error) {
+    console.error(`[FAILED] ${relativePath}: ${error.message}`)
+    process.exit(1)
   }
 }
 
@@ -407,6 +411,7 @@ console.log(`Existing files preserved: ${skipped}`)
 if (dryRun) {
   console.log('\nDry run complete. No files were written.')
 } else {
-  console.log('\nAPI scaffolding generated.')
-  console.log('Connect the generated functions to your existing API client.')
+  console.log('\nAPI module generated and connected to apiClient.')
+  console.log('Review the generated types against the backend contract.')
 }
+

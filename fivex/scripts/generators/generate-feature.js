@@ -20,9 +20,8 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../utils/file-system.js'
+import { toCamelCase, toPascalCase, validateFeatureName } from '../utils/templates.js'
 
 const args = process.argv.slice(2)
 
@@ -33,29 +32,6 @@ function getOption(name, fallback = '') {
   return argument ? argument.slice(name.length + 3) : fallback
 }
 
-function toKebabCase(value) {
-  return value
-    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    .replace(/[\s_]+/g, '-')
-    .replace(/[^a-zA-Z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase()
-}
-
-function toPascalCase(value) {
-  return value
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')
-}
-
-function toCamelCase(value) {
-  const pascal = toPascalCase(value)
-  return pascal.charAt(0).toLowerCase() + pascal.slice(1)
-}
-
 function toDisplayName(value) {
   return value
     .split('-')
@@ -64,29 +40,33 @@ function toDisplayName(value) {
     .join(' ')
 }
 
+const forceHelp = hasFlag('--help')
 const featureInput = getOption('feature')
-const featureName = toKebabCase(featureInput)
+let featureName = ''
+let root = ''
 
-if (!featureInput || !featureName) {
-  console.error(
-    'Missing feature name. Example: --feature=advertising',
-  )
-  process.exit(1)
+if (!forceHelp) {
+  if (!featureInput) {
+    console.error('Missing feature name. Example: --feature=advertising')
+    process.exit(1)
+  }
+
+  try {
+    featureName = validateFeatureName(featureInput)
+    root = resolveSourceRoot(getOption('root', 'src/features/admin'))
+  } catch (error) {
+    console.error(error.message)
+    process.exit(1)
+  }
 }
 
 const featurePascal = toPascalCase(featureName)
 const featureCamel = toCamelCase(featureName)
 const featureDisplay = toDisplayName(featureName)
 
-const root = path.resolve(
-  PROJECT_ROOT,
-  getOption('root', 'src/features/admin'),
-)
-
 const featureRoot = path.join(root, featureName)
 
 const dryRun = hasFlag('--dry-run')
-const forceHelp = hasFlag('--help')
 
 const availableLayers = [
   'api',
@@ -351,7 +331,7 @@ const existingFeature = fs.existsSync(featureRoot)
 console.log('\nIITNews Feature Generator')
 console.log('=========================')
 console.log(`Feature: ${featureDisplay}`)
-console.log(`Target: ${path.relative(process.cwd(), featureRoot)}`)
+console.log(`Target: ${toProjectRelative(featureRoot)}`)
 console.log(`Mode: ${dryRun ? 'DRY RUN' : 'WRITE'}`)
 console.log(`Feature exists: ${existingFeature ? 'Yes' : 'No'}`)
 console.log(`Layers: ${selectedLayers.join(', ')}`)
@@ -364,7 +344,7 @@ for (const layer of selectedLayers) {
   const directory = path.join(featureRoot, layer)
 
   if (!fs.existsSync(directory)) {
-    console.log(`[CREATE DIR] ${path.relative(process.cwd(), directory)}`)
+    console.log(`[CREATE DIR] ${toProjectRelative(directory)}`)
 
     if (!dryRun) {
       fs.mkdirSync(directory, { recursive: true })
@@ -374,35 +354,21 @@ for (const layer of selectedLayers) {
 
 for (const [relativePath, content] of files) {
   const absolutePath = path.join(featureRoot, relativePath)
-  const displayPath = path.relative(process.cwd(), absolutePath)
+  const displayPath = toProjectRelative(absolutePath)
 
-  if (fs.existsSync(absolutePath)) {
-    console.log(`[SKIP] ${displayPath}`)
-    skipped += 1
-    continue
-  }
+  try {
+    const result = writeFileIfMissing(absolutePath, content, { dryRun })
 
-  console.log(`[CREATE] ${displayPath}`)
-
-  if (!dryRun) {
-    fs.mkdirSync(path.dirname(absolutePath), { recursive: true })
-
-    try {
-      fs.writeFileSync(absolutePath, content, {
-        encoding: 'utf8',
-        flag: 'wx',
-      })
+    if (result.status === 'skipped') {
+      console.log(`[SKIP] ${displayPath} (already exists)`)
+      skipped += 1
+    } else {
+      console.log(`[${dryRun ? 'PREVIEW' : 'CREATE'}] ${displayPath}`)
       created += 1
-    } catch (error) {
-      if (error.code === 'EEXIST') {
-        console.log(`[SKIP] ${displayPath} (already exists)`)
-        skipped += 1
-      } else {
-        throw error
-      }
     }
-  } else {
-    created += 1
+  } catch (error) {
+    console.error(`[FAILED] ${displayPath}: ${error.message}`)
+    process.exit(1)
   }
 }
 

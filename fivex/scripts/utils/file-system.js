@@ -1,6 +1,13 @@
 
-const fs = require('node:fs')
-const path = require('node:path')
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+/** The fivex project root (scripts/utils -> fivex). */
+export const PROJECT_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../..',
+)
 
 const DEFAULT_IGNORED_DIRECTORIES = [
   'node_modules',
@@ -126,11 +133,32 @@ function resolveProjectPath(projectRoot, inputPath) {
   return resolvedPath
 }
 
-module.exports = {
+/**
+ * Resolves a --root option against the project root and requires the
+ * result to stay inside src/, so generators cannot write elsewhere.
+ */
+function resolveSourceRoot(inputRoot) {
+  const resolved = resolveProjectPath(PROJECT_ROOT, inputRoot)
+  const sourceRoot = path.join(PROJECT_ROOT, 'src')
+
+  if (resolved !== sourceRoot && !resolved.startsWith(sourceRoot + path.sep)) {
+    throw new Error(`Output root must be inside src/: ${inputRoot}`)
+  }
+
+  return resolved
+}
+
+function toProjectRelative(absolutePath) {
+  return path.relative(PROJECT_ROOT, absolutePath).split(path.sep).join('/')
+}
+
+export {
   DEFAULT_IGNORED_DIRECTORIES,
   ensureDirectory,
   writeFileIfMissing,
   readTextFile,
   listFiles,
   resolveProjectPath,
+  resolveSourceRoot,
+  toProjectRelative,
 }

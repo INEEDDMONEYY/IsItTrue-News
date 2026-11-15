@@ -20,6 +20,9 @@ import { ticketRoutes } from './modules/tickets/routes/ticket.routes.js'
 import { factCheckRoutes } from './modules/factChecks/routes/factCheck.routes.js'
 import { claimRoutes } from './modules/claims/routes/claim.routes.js'
 import { adminClaimRoutes } from './modules/claims/routes/adminClaim.routes.js'
+import { auditLogRoutes } from './modules/auditLogs/routes/auditLog.routes.js'
+import { monitoringRoutes } from './modules/monitoring/routes/monitoring.routes.js'
+import { requestMetricsMiddleware } from './modules/monitoring/monitoring.metrics.js'
 import { publicClaimRoutes } from './modules/claims/routes/publicClaim.routes.js'
 import { mediaRoutes } from './modules/media/routes/media.routes.js'
 import { commentRoutes } from './modules/comments/routes/comment.routes.js'
@@ -33,6 +36,8 @@ import { correctionRoutes } from './modules/corrections/routes/correction.routes
 import { prelaunchRoutes } from './modules/prelaunch/routes/prelaunch.routes.js'
 import { analyticsRoutes } from './modules/analytics/routes/analytics.routes.js'
 import { advertiserRoutes } from './modules/advertisers/routes/advertiser.routes.js'
+import { promotionalCodeRoutes } from './modules/promotionalCodes/routes/promotionalCode.routes.js'
+import { advertisementRoutes } from './modules/advertisement/routes/advertisement.routes.js'
 import { publicAdRoutes } from './modules/advertisers/routes/publicAd.routes.js'
 
 export function createApp(): Express {
@@ -59,6 +64,7 @@ export function createApp(): Express {
   app.use(express.json({ limit: '10kb' }))
   app.use(cookieParser())
   app.use(morgan(isProduction ? 'combined' : 'dev'))
+  app.use(requestMetricsMiddleware)
 
   app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok' })
@@ -85,6 +91,10 @@ export function createApp(): Express {
   app.use('/api/fact-checks', factCheckRoutes)
   app.use('/api/claims', claimRoutes)
   app.use('/api/admin/fact-checks', adminClaimRoutes)
+  app.use('/api/admin/audit-logs', auditLogRoutes)
+  app.use('/api/admin/monitoring', monitoringRoutes)
+  app.use('/api/admin/promotional-codes', promotionalCodeRoutes)
+  app.use('/api/admin/advertisement', advertisementRoutes)
   app.use('/api/public/fact-checks', publicClaimRoutes)
   app.use('/api/comments', commentRoutes)
   app.use('/api/media', mediaRoutes)

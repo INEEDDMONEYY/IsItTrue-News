@@ -3,6 +3,7 @@ import { MulterError } from 'multer'
 import { isProduction } from '../config/env.js'
 import { logger } from '../config/logger.js'
 import { AppError } from '../shared/errors/AppError.js'
+import { recordUnhandledError } from '../modules/monitoring/monitoring.metrics.js'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
@@ -10,6 +11,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     res.status(err.statusCode).json({ message: err.message })
     return
   }
+  recordUnhandledError(req, err)
 
   if (err instanceof MulterError) {
     const message =

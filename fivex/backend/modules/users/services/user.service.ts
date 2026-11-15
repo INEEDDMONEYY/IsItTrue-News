@@ -78,6 +78,7 @@ export const userService = {
     }
 
     await userRepository.updateRole(targetUserId, role)
+    return { previousRole: user.role, name: user.name, email: user.email }
   },
 
   async deleteUser(targetUserId: string, actingUserId: string) {
@@ -101,6 +102,7 @@ export const userService = {
     }
 
     await userRepository.deleteById(targetUserId)
+    return { name: user.name, email: user.email, role: user.role }
   },
 
   async updateOwnName(userId: string, name: string) {

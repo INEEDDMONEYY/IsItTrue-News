@@ -1,62 +1,29 @@
-
 {
-  "resource": "Advertising",
+  "resource": "AdvertiserPricing",
   "types": [
     {
-      "name": "AdvertisingCampaign",
+      "name": "AdvertiserPricingPlacement",
       "fields": [
-        {
-          "name": "id",
-          "type": "string"
-        },
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "status",
-          "type": "'draft' | 'active' | 'paused' | 'completed'"
-        },
-        {
-          "name": "createdAt",
-          "type": "string"
-        }
+        { "name": "placement", "type": "string" },
+        { "name": "label", "type": "string" },
+        { "name": "unit", "type": "string" },
+        { "name": "prices", "type": "Record<string, number>" }
       ]
     },
     {
-      "name": "CreateAdvertisingCampaignInput",
+      "name": "AdvertiserPricingCatalog",
       "fields": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "startDate",
-          "type": "string"
-        },
-        {
-          "name": "endDate",
-          "type": "string",
-          "optional": true
-        }
+        { "name": "placements", "type": "AdvertiserPricingPlacement[]" }
       ]
     }
   ],
   "operations": [
     {
-      "name": "getAdvertisingCampaigns",
+      "name": "getAdvertiserPricing",
       "method": "GET",
-      "path": "/advertising/campaigns",
-      "responseType": "AdvertisingCampaign",
-      "description": "Retrieve advertising campaigns."
-    },
-    {
-      "name": "createAdvertisingCampaign",
-      "method": "POST",
-      "path": "/advertising/campaigns",
-      "requestType": "CreateAdvertisingCampaignInput",
-      "responseType": "AdvertisingCampaign",
-      "description": "Create an advertising campaign."
+      "path": "/api/advertiser/pricing",
+      "responseType": "AdvertiserPricingCatalog",
+      "description": "Retrieve the public advertiser pricing catalog."
     }
   ]
 }

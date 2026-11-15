@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react'
 import { EmptyStateCard } from '@/components/cards'
 import { PageLoader } from '@/components/loaders/PageLoader'
@@ -35,6 +35,9 @@ export function FactChecksPage() {
         Oversee every claim being verified: who is responsible, what evidence backs it, and what was concluded. Open a record to see its
         full decision history, reassign it, or send it back for another look.
       </p>
+      <Link to="/admin/fact-checks/verification" className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline mb-6">
+        Review author fact-check requests
+      </Link>
 
       <FactCheckOverview activeView={params.view} />
 

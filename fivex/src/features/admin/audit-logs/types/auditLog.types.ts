@@ -18,7 +18,7 @@ export type AuditLogSeverity = 'info' | 'warning' | 'critical'
 
 export type AuditLogOutcome = 'success' | 'failure' | 'blocked'
 
-export type AuditLogActorType = 'admin' | 'editor' | 'author' | 'system'
+export type AuditLogActorType = 'admin' | 'editor' | 'author' | 'user' | 'anonymous' | 'system'
 
 export interface AuditLogActor {
   id: string

@@ -53,11 +53,9 @@ import { DeveloperToolsPage } from '@/features/admin/cms/pages/DeveloperToolsPag
 import { ModerationPage } from '@/features/admin/moderation/pages/ModerationPage'
 import { AnalyticsPage } from '@/features/admin/analytics/pages/AnalyticsPage'
 import { SettingsPage } from '@/features/admin/settings/pages/SettingsPage'
-import { BannersPage } from '@/features/admin/banners/pages/BannersPage'
-import { AdvertisementCodesPage } from '@/features/admin/advertisements/pages/AdvertisementCodesPage'
 import { SeoPage } from '@/features/admin/seo/pages/SeoPage'
 import { TicketsPage } from '@/features/admin/tickets/pages/TicketsPage'
-import { FactCheckVerificationPage } from '@/features/admin/fact-check-verification/pages/FactCheckVerificationPage'
+import { FactCheckVerificationPage } from '@/features/admin/fact-checks/pages/FactCheckVerificationPage'
 import { ArticlesPage as AdminArticlesPage } from '@/features/admin/articles/pages/ArticlesPage'
 import { FactChecksPage as AdminFactChecksPage } from '@/features/admin/fact-checks/pages/FactChecksPage'
 import { FactCheckDetailsPage as AdminFactCheckDetailsPage } from '@/features/admin/fact-checks/pages/FactCheckDetailsPage'
@@ -127,7 +125,15 @@ import { AuditLogsPage } from '@/features/admin/audit-logs/pages/AuditLogsPage'
 import { CaseFilesPage, CaseFilePage } from '@/features/admin/case-files/pages/CaseFilesPage'
 import { CreateCaseFilesPage } from '@/features/admin/case-files/pages/CreateCaseFilesPage'
 import { EditCaseFilesPage } from '@/features/admin/case-files/pages/EditCaseFilesPage'
+import { EvidencePage } from '@/features/admin/evidence/pages/EvidencePage'
+import { CreateEvidencePage } from '@/features/admin/evidence/pages/CreateEvidencePage'
+import { EvidenceDetailPage } from '@/features/admin/evidence/pages/EvidenceDetailPage'
+import { EditEvidencePage } from '@/features/admin/evidence/pages/EditEvidencePage'
+import { EvidenceCollectionsPage } from '@/features/admin/evidence/pages/EvidenceCollectionsPage'
+import { EvidenceCollectionDetailPage } from '@/features/admin/evidence/pages/EvidenceCollectionDetailPage'
 
+import { systemRoutes } from '@/features/admin/system/routes'
+import { advertisementRoutes } from '@/features/admin/advertisement/routes'
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -183,6 +189,7 @@ export const router = createBrowserRouter([
           { path: 'articles', element: <AdminArticlesPage /> },
           { path: 'articles/:id', element: <AdminArticleDetailsPage /> },
           { path: 'audit-logs', element: <AuditLogsPage /> },
+          systemRoutes,
           { path: 'cms', element: <CmsPage /> },
           { path: 'cms/page-management', element: <PageManagementPage /> },
           { path: 'cms/homepage', element: <HomepageManagementPage /> },
@@ -198,16 +205,23 @@ export const router = createBrowserRouter([
           { path: 'case-files/:id', element: <CaseFilePage /> },
           { path: 'case-files/create', element: <CreateCaseFilesPage /> },
           { path: 'case-files/:id/edit', element: <EditCaseFilesPage /> },
+          { path: 'evidence', element: <EvidencePage /> },
+          { path: 'evidence/upload', element: <CreateEvidencePage /> },
+          { path: 'evidence/collections', element: <EvidenceCollectionsPage /> },
+          { path: 'evidence/collections/:id', element: <EvidenceCollectionDetailPage /> },
+          { path: 'evidence/:id', element: <EvidenceDetailPage /> },
+          { path: 'evidence/:id/edit', element: <EditEvidencePage /> },
           { path: 'moderation', element: <ModerationPage /> },
           { path: 'analytics', element: <AnalyticsPage /> },
-          { path: 'banners', element: <BannersPage /> },
-          { path: 'advertisements', element: <AdvertisementCodesPage /> },
+          { path: 'banners', element: <Navigate to="/admin/advertisement/banners" replace /> },
+          { path: 'advertisements', element: <Navigate to="/admin/advertisement/promotional-referral-codes" replace /> },
+          advertisementRoutes,
           { path: 'seo', element: <SeoPage /> },
           { path: 'categories', element: <Navigate to="/admin/cms/categories" replace /> },
           { path: 'tickets', element: <TicketsPage /> },
           { path: 'fact-checks', element: <AdminFactChecksPage /> },
           { path: 'fact-checks/:id', element: <AdminFactCheckDetailsPage /> },
-          { path: 'fact-check-verification', element: <FactCheckVerificationPage /> },
+          { path: 'fact-checks/verification', element: <FactCheckVerificationPage /> },
           { path: 'notifications', element: <AdminNotificationsPage /> },
           { path: 'settings', element: <SettingsPage /> },
         ],

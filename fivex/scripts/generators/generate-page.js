@@ -1,4 +1,3 @@
-
 #!/usr/bin/env node
 
 /**
@@ -25,35 +24,10 @@
  * - Does not assume a specific layout or permission system.
  */
 
-const fs = require('node:fs')
-const path = require('node:path')
-
-const args = process.argv.slice(2)
-
-const hasFlag = (flag) => args.includes(flag)
-
-function getOption(name, fallback = '') {
-  const argument = args.find((item) => item.startsWith(`--${name}=`))
-  return argument ? argument.slice(name.length + 3) : fallback
-}
-
-function toKebabCase(value) {
-  return value
-    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    .replace(/[\s_]+/g, '-')
-    .replace(/[^a-zA-Z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase()
-}
-
-function toPascalCase(value) {
-  return value
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')
-}
+import path from 'node:path'
+import { getOption, hasFlag } from '../utils/arguments.js'
+import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../utils/file-system.js'
+import { toPascalCase, validateFeatureName, validateName } from '../utils/templates.js'
 
 const featureInput = getOption('feature')
 const nameInput = getOption('name')
@@ -97,14 +71,18 @@ if (!validTypes.includes(pageType)) {
   process.exit(1)
 }
 
-const featureName = toKebabCase(featureInput)
-const featureDisplay = toPascalCase(featureName)
-const resourceName = toPascalCase(nameInput.replace(/Page$/i, ''))
+let featureName
+let resourceName
 
-if (!featureName || !resourceName) {
-  console.error('Feature and page names must contain valid characters.')
+try {
+  featureName = validateFeatureName(featureInput)
+  resourceName = validateName(nameInput.replace(/Page$/i, ''), 'name')
+} catch (error) {
+  console.error(error.message)
   process.exit(1)
 }
+
+const featureDisplay = toPascalCase(featureName)
 
 function getPageComponentName() {
   switch (pageType) {
@@ -119,9 +97,7 @@ function getPageComponentName() {
         : `Edit${resourceName}`
 
     case 'list':
-      return resourceName.endsWith('Page')
-        ? resourceName
-        : resourceName
+      return resourceName
 
     case 'detail':
       return resourceName.endsWith('Detail')
@@ -136,10 +112,14 @@ function getPageComponentName() {
 const componentName = getPageComponentName()
 const exportName = `${componentName}Page`
 
-const root = path.resolve(
-  process.cwd(),
-  getOption('root', 'src/features/admin'),
-)
+let root
+
+try {
+  root = resolveSourceRoot(getOption('root', 'src/features/admin'))
+} catch (error) {
+  console.error(error.message)
+  process.exit(1)
+}
 
 const featureRoot = path.join(root, featureName)
 const pagesDirectory = path.join(featureRoot, 'pages')
@@ -149,7 +129,7 @@ const outputFile = path.join(
   `${exportName}.tsx`,
 )
 
-const relativeOutput = path.relative(process.cwd(), outputFile)
+const relativeOutput = toProjectRelative(outputFile)
 const dryRun = hasFlag('--dry-run')
 
 const displayTitle = componentName
@@ -327,9 +307,19 @@ console.log(`Output: ${relativeOutput}`)
 console.log(`Mode: ${dryRun ? 'DRY RUN' : 'WRITE'}`)
 console.log('')
 
-if (fs.existsSync(outputFile)) {
+let writeResult
+
+try {
+  writeResult = writeFileIfMissing(outputFile, content, { dryRun })
+} catch (error) {
+  console.error('\nPage generation failed:')
+  console.error(error.message)
+  process.exit(1)
+}
+
+if (writeResult.status === 'skipped') {
   console.log(`[SKIP] ${relativeOutput}`)
-  console.log('Existing page preserved.')
+  console.log('Existing page preserved. No changes made.')
   process.exit(0)
 }
 
@@ -337,25 +327,22 @@ console.log(`[CREATE] ${relativeOutput}`)
 
 if (dryRun) {
   console.log('\nPreview only. No files were written.')
-  process.exit(0)
-}
-
-try {
-  fs.mkdirSync(pagesDirectory, { recursive: true })
-
-  fs.writeFileSync(outputFile, content, {
-    encoding: 'utf8',
-    flag: 'wx',
-  })
-
+} else {
   console.log('\nPage created successfully.')
   console.log(`Export: ${exportName}`)
-} catch (error) {
-  if (error.code === 'EEXIST') {
-    console.log('\nExisting page detected. No changes made.')
-  } else {
-    console.error('\nPage generation failed:')
-    console.error(error.message)
-    process.exitCode = 1
-  }
+}
+
+printRouteGuidance()
+
+function printRouteGuidance() {
+  const importPath = path
+    .relative(path.join(PROJECT_ROOT, 'src'), outputFile)
+    .split(path.sep)
+    .join('/')
+    .replace(/\.tsx$/, '')
+
+  console.log('\nRoute registration is not automatic. Add:')
+  console.log(`  import { ${exportName} } from '@/${importPath}'`)
+  console.log(`  { path: '<route-path>', element: <${exportName} /> }`)
+  console.log('to the matching children in src/app/routes/index.tsx.')
 }

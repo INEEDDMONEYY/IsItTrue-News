@@ -54,7 +54,7 @@ export const authService = {
     await issueAndSendVerificationEmail(user)
   },
 
-  async verifyEmail(token: string): Promise<void> {
+  async verifyEmail(token: string): Promise<string> {
     const tokenHash = hashToken(token)
     const user = await userRepository.findByVerificationTokenHash(tokenHash)
 
@@ -63,6 +63,7 @@ export const authService = {
     }
 
     await userRepository.markEmailVerified(String(user._id))
+    return String(user._id)
   },
 
   async login(input: LoginInput) {

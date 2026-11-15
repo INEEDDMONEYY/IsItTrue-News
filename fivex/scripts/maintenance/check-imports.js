@@ -1,20 +1,21 @@
-
 #!/usr/bin/env node
 
-const path = require('node:path')
+import fs from 'node:fs'
+import path from 'node:path'
 
-const {
+import {
   args,
   getOption,
   hasFlag,
   printHelp,
-} = require('../utils/arguments')
+} from '../utils/arguments.js'
 
-const { log, createSummary } = require('../utils/logger')
+import { log, createSummary } from '../utils/logger.js'
 
-const {
+import {
   listFiles,
-} = require('../utils/file-system')
+  PROJECT_ROOT,
+} from '../utils/file-system.js'
 
 const EXTENSIONS = [
   '.ts',
@@ -44,7 +45,7 @@ if (hasFlag('--help')) {
   process.exit(0)
 }
 
-const projectRoot = process.cwd()
+const projectRoot = PROJECT_ROOT
 
 const srcRoot = path.resolve(
   projectRoot,
@@ -136,7 +137,7 @@ function resolveImport(reference, importer) {
 
   const resolved = candidates.find((candidate) => {
     try {
-      return require('node:fs').statSync(candidate).isFile()
+      return fs.statSync(candidate).isFile()
     } catch {
       return false
     }
@@ -177,8 +178,6 @@ function createReport(results) {
 }
 
 function main() {
-  const fs = require('node:fs')
-
   if (!fs.existsSync(srcRoot)) {
     throw new Error(`Source directory not found: ${srcRoot}`)
   }

@@ -1,4 +1,3 @@
-
 #!/usr/bin/env node
 
 /**
@@ -21,8 +20,9 @@
  *   - Reports findings for manual review.
  */
 
-const fs = require('node:fs')
-const path = require('node:path')
+import fs from 'node:fs'
+import path from 'node:path'
+import { PROJECT_ROOT } from '../utils/file-system.js'
 
 const args = process.argv.slice(2)
 
@@ -33,7 +33,7 @@ const getOption = (name, fallback) => {
   return argument ? argument.slice(name.length + 3) : fallback
 }
 
-const projectRoot = process.cwd()
+const projectRoot = PROJECT_ROOT
 
 const srcRoot = path.resolve(
   projectRoot,

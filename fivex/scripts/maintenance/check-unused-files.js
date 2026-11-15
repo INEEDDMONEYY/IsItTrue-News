@@ -1,17 +1,16 @@
-
 #!/usr/bin/env node
 
-const fs = require('node:fs')
-const path = require('node:path')
+import fs from 'node:fs'
+import path from 'node:path'
 
-const {
+import {
   getOption,
   hasFlag,
   printHelp,
-} = require('../utils/arguments')
+} from '../utils/arguments.js'
 
-const { log } = require('../utils/logger')
-const { listFiles } = require('../utils/file-system')
+import { log } from '../utils/logger.js'
+import { listFiles, PROJECT_ROOT } from '../utils/file-system.js'
 
 const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx']
 
@@ -48,7 +47,7 @@ if (hasFlag('--help')) {
   process.exit(0)
 }
 
-const projectRoot = process.cwd()
+const projectRoot = PROJECT_ROOT
 
 const srcRoot = path.resolve(
   projectRoot,

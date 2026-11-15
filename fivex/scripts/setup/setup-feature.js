@@ -1,20 +1,14 @@
-
 #!/usr/bin/env node
 
-const fs = require('node:fs')
-const path = require('node:path')
-const { spawnSync } = require('node:child_process')
+import fs from 'node:fs'
+import path from 'node:path'
+import { spawnSync } from 'node:child_process'
+import { getOption, hasFlag, requireOption, printHelp } from '../utils/arguments.js'
+import { PROJECT_ROOT } from '../utils/file-system.js'
+import { log } from '../utils/logger.js'
+import { validateFeatureName } from '../utils/templates.js'
 
-const {
-  getOption,
-  hasFlag,
-  requireOption,
-  printHelp,
-} = require('../utils/arguments')
-
-const { log } = require('../utils/logger')
-
-const projectRoot = process.cwd()
+const projectRoot = PROJECT_ROOT
 
 const generators = {
   feature: path.resolve(
@@ -131,15 +125,17 @@ function runGenerator(name, argumentsList) {
 }
 
 function main() {
-  const feature = requireOption('feature').trim()
+  const feature = validateFeatureName(requireOption('feature').trim())
   const dryRun = hasFlag('--dry-run')
   const withPage = hasFlag('--with-page')
 
-  if (!feature) {
-    throw new Error('Feature name cannot be empty.')
-  }
-
   validateGenerators()
+
+  const layers = getOption('layers')
+  const selectedLayers = layers
+    ? layers.split(',').map((layer) => layer.trim().toLowerCase())
+    : null
+  const includesPagesLayer = !selectedLayers || selectedLayers.includes('pages')
 
   log('info', `Setting up feature: ${feature}`)
 
@@ -152,7 +148,9 @@ function main() {
     buildFeatureArguments(feature),
   )
 
-  if (withPage) {
+  if (withPage && includesPagesLayer) {
+    log('info', 'Feature generator already creates the main page; skipping page generator.')
+  } else if (withPage) {
     runGenerator(
       'page',
       buildPageArguments(feature),

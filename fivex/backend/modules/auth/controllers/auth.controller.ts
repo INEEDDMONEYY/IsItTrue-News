@@ -3,6 +3,7 @@ import { asyncHandler } from '../../../utils/asyncHandler.js'
 import { clearAuthCookies, REFRESH_TOKEN_COOKIE, setAuthCookies } from '../../../utils/cookies.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
+import { auditActor, auditLogService } from '../../auditLogs/services/auditLog.service.js'
 import { authService } from '../services/auth.service.js'
 import { passwordResetService } from '../services/passwordReset.service.js'
 import type {
@@ -36,7 +37,8 @@ export const authController = {
 
   verifyEmail: asyncHandler(async (req: Request, res: Response) => {
     const { token } = req.body as VerifyEmailInput
-    await authService.verifyEmail(token)
+    const userId = await authService.verifyEmail(token)
+    await auditLogService.record({ eventType: 'auth.email_verified', actor: { id: userId }, ipAddress: req.ip })
 
     res.status(200).json({ message: 'Email verified successfully. You can now sign in.' })
   }),
@@ -53,20 +55,44 @@ export const authController = {
 
   resetPassword: asyncHandler(async (req: Request, res: Response) => {
     const { token, password } = req.body as ResetPasswordInput
-    await passwordResetService.resetPassword(token, password)
+    const userId = await passwordResetService.resetPassword(token, password)
+    await auditLogService.record({ eventType: 'auth.password_reset', actor: { id: userId }, ipAddress: req.ip })
 
     res.status(200).json({ message: 'Your password has been updated. You can now sign in.' })
   }),
 
   login: asyncHandler(async (req: Request, res: Response) => {
     const input = req.body as LoginInput
-    const { user, accessToken, refreshToken } = await authService.login(input)
+    let session
+    try {
+      session = await authService.login(input)
+    } catch (error) {
+      if (error instanceof AppError) {
+        const account = await userRepository.findByEmail(input.email)
+        await auditLogService.record({
+          eventType: 'auth.login_failed',
+          outcome: 'failure',
+          actor: { id: account ? String(account._id) : undefined, email: input.email },
+          metadata: { reason: error.statusCode === 403 ? 'email_unverified' : 'invalid_credentials' },
+          ipAddress: req.ip,
+        })
+      }
+      throw error
+    }
+
+    const { user, accessToken, refreshToken } = session
+    await auditLogService.record({
+      eventType: 'auth.login',
+      actor: { id: String(user._id), email: user.email, role: user.role },
+      ipAddress: req.ip,
+    })
 
     setAuthCookies(res, { accessToken, refreshToken })
     res.status(200).json({ message: 'Signed in successfully.', user })
   }),
 
-  logout: asyncHandler(async (_req: Request, res: Response) => {
+  logout: asyncHandler(async (req: Request, res: Response) => {
+    await auditLogService.record({ eventType: 'auth.logout', actor: auditActor(req.user), ipAddress: req.ip })
     clearAuthCookies(res)
     res.status(200).json({ message: 'Signed out successfully.' })
   }),
