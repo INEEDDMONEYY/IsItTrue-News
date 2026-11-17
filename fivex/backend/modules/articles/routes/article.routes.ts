@@ -6,6 +6,7 @@ import { ROLES } from '../../../shared/constants/roles.js'
 import { articleController } from '../controllers/article.controller.js'
 import {
   createArticleSchema,
+  readingTimeSchema,
   requestChangesSchema,
   toggleRequirementSchema,
   updateArticleSchema,
@@ -112,6 +113,8 @@ router.patch(
 )
 
 router.post('/:id/view', optionalAuthenticate, articleController.recordView)
+// Sent by the reader's page when they leave or hide it; no auth so anonymous readers are measured too.
+router.post('/:id/reading-time', validate(readingTimeSchema), articleController.recordReadingTime)
 
 // Editor/admin: the editorial decision on an article awaiting review.
 router.post('/:id/approve', authenticate, authorize(ROLES.EDITOR, ROLES.ADMIN), articleController.approve)

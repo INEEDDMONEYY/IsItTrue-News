@@ -70,6 +70,13 @@ import { PendingApprovalsPage } from '@/features/editor/pages/PendingApprovalsPa
 import { CorrectionsManagementPage } from '@/features/corrections/pages/CorrectionsManagementPage'
 import { ReviewQueuePage } from '@/features/editor/pages/ReviewQueuePage'
 import { EditorialCalendarPage } from '@/features/editor/pages/EditorialCalendarPage'
+import { AuthorPerformancePage } from '@/features/editor/analytics/pages/AuthorPerformancePage'
+import { ContentQualityPage } from '@/features/editor/analytics/pages/ContentQualityPage'
+import { WorkflowPage } from '@/features/editor/analytics/pages/WorkflowPage'
+import { FactCheckPage as FactCheckAnalyticsPage } from '@/features/editor/analytics/pages/FactCheckPage'
+import { InvestigationPage as InvestigationAnalyticsPage } from '@/features/editor/analytics/pages/InvestigationPage'
+import { ArticlePerformancePage } from '@/features/editor/analytics/pages/ArticlePerformancePage'
+import { ReportsPage } from '@/features/editor/analytics/pages/ReportsPage'
 import { FactCheckOversightPage } from '@/features/editor/pages/FactCheckOversightPage'
 import { DashboardAnalyticsPage } from '@/features/dashboard/pages/DashboardAnalyticsPage'
 import { BookmarksPage } from '@/features/bookmarks/pages/BookmarksPage'
@@ -248,6 +255,13 @@ export const router = createBrowserRouter([
           { path: 'approvals', element: <PendingApprovalsPage /> },
           { path: 'corrections', element: <CorrectionsManagementPage /> },
           { path: 'analytics', element: <DashboardAnalyticsPage /> },
+          { path: 'authors/metrics', element: <AuthorPerformancePage /> },
+          { path: 'content-quality', element: <ContentQualityPage /> },
+          { path: 'editorial-workflow', element: <WorkflowPage /> },
+          { path: 'fact-check-analytics', element: <FactCheckAnalyticsPage /> },
+          { path: 'investigation-analytics', element: <InvestigationAnalyticsPage /> },
+          { path: 'article-performance', element: <ArticlePerformancePage /> },
+          { path: 'reports', element: <ReportsPage /> },
           { path: 'bookmarks', element: <BookmarksPage /> },
           { path: 'comments', element: <MyCommentsPage /> },
           { path: 'videos', element: <MyVideosPage /> },

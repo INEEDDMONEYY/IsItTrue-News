@@ -14,11 +14,11 @@ const COMPILE_TSCONFIG = path.join(PROJECT_ROOT, `tsconfig.script-tests-${RUN_ID
 const CONTRACT_ABS = path.join(os.tmpdir(), `script-tests-${RUN_ID}.contract.json`)
 
 const SCRIPTS = {
-  feature: 'scripts/generators/generate-feature.js',
-  page: 'scripts/generators/generate-page.js',
-  component: 'scripts/generators/generate-component.js',
-  api: 'scripts/generators/generate-api-module.js',
-  setup: 'scripts/setup/setup-feature.js',
+  feature: 'scripts/generators/frontend/generate-feature.js',
+  page: 'scripts/generators/frontend/generate-page.js',
+  component: 'scripts/generators/frontend/generate-component.js',
+  api: 'scripts/generators/frontend/generate-api-module.js',
+  setup: 'scripts/generators/fullstack/setup-feature.js',
 }
 
 function run(script, args) {

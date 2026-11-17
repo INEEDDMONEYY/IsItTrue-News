@@ -8,14 +8,14 @@ import {
   getOption,
   hasFlag,
   printHelp,
-} from '../utils/arguments.js'
+} from '../../utils/arguments.js'
 
-import { log, createSummary } from '../utils/logger.js'
+import { log, createSummary } from '../../utils/logger.js'
 
 import {
   listFiles,
   PROJECT_ROOT,
-} from '../utils/file-system.js'
+} from '../../utils/file-system.js'
 
 const EXTENSIONS = [
   '.ts',

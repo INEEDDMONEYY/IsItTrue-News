@@ -4,9 +4,9 @@
  * IITNews CMS Generator
  *
  * Usage:
- *   node scripts/generators/generate-cms.js
- *   node scripts/generators/generate-cms.js --dry-run
- *   node scripts/generators/generate-cms.js --root=src/features/admin/cms
+ *   node scripts/generators/frontend/generate-cms.js
+ *   node scripts/generators/frontend/generate-cms.js --dry-run
+ *   node scripts/generators/frontend/generate-cms.js --root=src/features/admin/cms
  *
  * Paths resolve from the fivex project root, so the script can run from any directory.
  *

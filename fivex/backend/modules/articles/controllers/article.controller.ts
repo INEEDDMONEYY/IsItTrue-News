@@ -204,7 +204,17 @@ export const articleController = {
   }),
 
   recordView: asyncHandler(async (req: Request, res: Response) => {
-    await articleService.recordView(req.params.id, req.user?.id)
+    const viewId = await articleService.recordView(req.params.id, req.user?.id, {
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+      referer: req.get('referer'),
+    })
+    res.status(200).json({ viewId })
+  }),
+
+  recordReadingTime: asyncHandler(async (req: Request, res: Response) => {
+    const { viewId, seconds } = req.body as { viewId: string; seconds: number }
+    await articleService.recordReadingTime(req.params.id, viewId, seconds)
     res.status(204).send()
   }),
 

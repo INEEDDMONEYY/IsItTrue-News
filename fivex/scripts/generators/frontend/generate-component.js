@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
 import path from 'node:path'
-import { getOption, hasFlag } from '../utils/arguments.js'
-import { resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../utils/file-system.js'
-import { isValidIdentifier, validateFeatureName, validateName } from '../utils/templates.js'
+import { getOption, hasFlag } from '../../utils/arguments.js'
+import { resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../../utils/file-system.js'
+import { isValidIdentifier, validateFeatureName, validateName } from '../../utils/templates.js'
 
 /**
  * IITNews Component Generator
  *
  * Examples:
- * node scripts/generators/generate-component.js --feature=articles --name=ArticleCard --type=card
- * node scripts/generators/generate-component.js --feature=articles --name=ArticleFilters --type=filters
- * node scripts/generators/generate-component.js --feature=articles --name=ArticleForm --type=form
- * node scripts/generators/generate-component.js --feature=articles --name=ArticleTable --type=table
- * node scripts/generators/generate-component.js --feature=articles --name=ArticleSection --type=section
- * node scripts/generators/generate-component.js --feature=articles --name=ArticleDialog --type=modal
+ * node scripts/generators/frontend/generate-component.js --feature=articles --name=ArticleCard --type=card
+ * node scripts/generators/frontend/generate-component.js --feature=articles --name=ArticleFilters --type=filters
+ * node scripts/generators/frontend/generate-component.js --feature=articles --name=ArticleForm --type=form
+ * node scripts/generators/frontend/generate-component.js --feature=articles --name=ArticleTable --type=table
+ * node scripts/generators/frontend/generate-component.js --feature=articles --name=ArticleSection --type=section
+ * node scripts/generators/frontend/generate-component.js --feature=articles --name=ArticleDialog --type=modal
  *
  * Options:
  * --feature=NAME
@@ -53,7 +53,7 @@ if (hasFlag('--help')) {
 IITNews Component Generator
 
 Usage:
-  node scripts/generators/generate-component.js --feature=articles --name=ArticleCard --type=card
+  node scripts/generators/frontend/generate-component.js --feature=articles --name=ArticleCard --type=card
 
 Options:
   --feature=NAME       Required feature directory.

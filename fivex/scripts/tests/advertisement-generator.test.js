@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { registerAdvertisementNav, registerAdvertisementRoutes } from '../utils/advertisement-integration.js'
 
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
-const SCRIPT = path.join(PROJECT_ROOT, 'scripts/generators/generate-advertisement.js')
+const SCRIPT = path.join(PROJECT_ROOT, 'scripts/generators/frontend/generate-advertisement.js')
 const RUN_ID = `${process.pid}-${Date.now()}`
 const ROOT = `src/features/_advertisement-tests-${RUN_ID}`
 const ROOT_ABS = path.join(PROJECT_ROOT, ROOT)

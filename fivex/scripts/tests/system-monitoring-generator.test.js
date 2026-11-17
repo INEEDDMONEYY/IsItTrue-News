@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { registerSystemRoutes } from '../utils/route-registration.js'
 
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
-const SCRIPT = path.join(PROJECT_ROOT, 'scripts/generators/generate-system-monitoring.js')
+const SCRIPT = path.join(PROJECT_ROOT, 'scripts/generators/frontend/generate-system-monitoring.js')
 const RUN_ID = `${process.pid}-${Date.now()}`
 const ROOT = `src/features/_system-monitoring-tests-${RUN_ID}`
 const ROOT_ABS = path.join(PROJECT_ROOT, ROOT)

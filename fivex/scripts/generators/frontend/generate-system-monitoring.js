@@ -7,9 +7,9 @@
  * to the verified backend contract at /api/admin/monitoring.
  *
  * Examples:
- * node scripts/generators/generate-system-monitoring.js --dry-run
- * node scripts/generators/generate-system-monitoring.js
- * node scripts/generators/generate-system-monitoring.js --root=src/features/_tmp --no-register
+ * node scripts/generators/frontend/generate-system-monitoring.js --dry-run
+ * node scripts/generators/frontend/generate-system-monitoring.js
+ * node scripts/generators/frontend/generate-system-monitoring.js --root=src/features/_tmp --no-register
  *
  * Options:
  * --root=PATH     Admin feature root inside src/ (default: src/features/admin).
@@ -26,16 +26,16 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { getOption, hasFlag } from '../utils/arguments.js'
-import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative } from '../utils/file-system.js'
-import { registerSystemRoutes } from '../utils/route-registration.js'
+import { getOption, hasFlag } from '../../utils/arguments.js'
+import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative } from '../../utils/file-system.js'
+import { registerSystemRoutes } from '../../utils/route-registration.js'
 
 if (hasFlag('--help')) {
   console.log(`
 IITNews System Monitoring Generator
 
 Usage:
-  node scripts/generators/generate-system-monitoring.js [--dry-run] [--no-register]
+  node scripts/generators/frontend/generate-system-monitoring.js [--dry-run] [--no-register]
 
 Options:
   --root=PATH     Admin feature root inside src/ (default: src/features/admin).

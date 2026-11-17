@@ -8,9 +8,9 @@
  * backend capabilities that still need to be built instead of inventing endpoints.
  *
  * Examples:
- * node scripts/generators/generate-advertisement.js --dry-run
- * node scripts/generators/generate-advertisement.js
- * node scripts/generators/generate-advertisement.js --root=src/features/_tmp --no-register
+ * node scripts/generators/frontend/generate-advertisement.js --dry-run
+ * node scripts/generators/frontend/generate-advertisement.js
+ * node scripts/generators/frontend/generate-advertisement.js --root=src/features/_tmp --no-register
  *
  * Options:
  * --root=PATH     Admin feature root inside src/ (default: src/features/admin).
@@ -26,16 +26,16 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { getOption, hasFlag } from '../utils/arguments.js'
-import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative } from '../utils/file-system.js'
-import { registerAdvertisementNav, registerAdvertisementRoutes } from '../utils/advertisement-integration.js'
+import { getOption, hasFlag } from '../../utils/arguments.js'
+import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative } from '../../utils/file-system.js'
+import { registerAdvertisementNav, registerAdvertisementRoutes } from '../../utils/advertisement-integration.js'
 
 if (hasFlag('--help')) {
   console.log(`
 IITNews Advertisement Generator
 
 Usage:
-  node scripts/generators/generate-advertisement.js [--dry-run] [--no-register]
+  node scripts/generators/frontend/generate-advertisement.js [--dry-run] [--no-register]
 
 Options:
   --root=PATH     Admin feature root inside src/ (default: src/features/admin).

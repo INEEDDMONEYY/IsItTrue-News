@@ -1,5 +1,6 @@
 import { Types } from 'mongoose'
 import { Article, type ArticleDocument } from '../models/Article.js'
+import { ArticleView } from '../models/ArticleView.js'
 import type { ArticleStatus } from '../constants/articleStatus.js'
 import { ARTICLE_STATUSES } from '../constants/articleStatus.js'
 import type { ArticleEditorialStage } from '../constants/editorialWorkflow.js'
@@ -300,6 +301,31 @@ export const articleRepository = {
 
   async incrementViews(id: string): Promise<void> {
     await Article.updateOne({ _id: id }, { $inc: { views: 1 } })
+  },
+
+  async createArticleView(input: {
+    articleId: string
+    visitorHash: string
+    dayKey: string
+    referrerHost?: string
+  }): Promise<string> {
+    const view = await ArticleView.create({
+      article: new Types.ObjectId(input.articleId),
+      visitorHash: input.visitorHash,
+      dayKey: input.dayKey,
+      referrerHost: input.referrerHost,
+    })
+    return String(view._id)
+  },
+
+  // Only ever raises the stored value, so a reader's later beacon can't shrink an earlier one.
+  async setArticleViewReadingSeconds(viewId: string, articleId: string, seconds: number): Promise<boolean> {
+    if (!Types.ObjectId.isValid(viewId)) return false
+    const result = await ArticleView.updateOne(
+      { _id: viewId, article: new Types.ObjectId(articleId), readingSeconds: { $lt: seconds } },
+      { $set: { readingSeconds: seconds } },
+    )
+    return result.matchedCount > 0
   },
 
   // Toggles a single user's like on an article. Liking removes any existing

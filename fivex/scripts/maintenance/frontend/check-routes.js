@@ -6,15 +6,15 @@
  * Read-only route and page-reference audit.
  *
  * Usage:
- * node scripts/maintenance/check-routes.js
- * node scripts/maintenance/check-routes.js --src-root=src
- * node scripts/maintenance/check-routes.js --json
- * node scripts/maintenance/check-routes.js --write-report
+ * node scripts/maintenance/frontend/check-routes.js
+ * node scripts/maintenance/frontend/check-routes.js --src-root=src
+ * node scripts/maintenance/frontend/check-routes.js --json
+ * node scripts/maintenance/frontend/check-routes.js --write-report
  */
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { PROJECT_ROOT } from '../utils/file-system.js'
+import { PROJECT_ROOT } from '../../utils/file-system.js'
 
 const args = process.argv.slice(2)
 
@@ -203,10 +203,19 @@ const routes = []
 const unresolvedImports = []
 const importedPageFiles = new Set()
 
-for (const file of routeFiles) {
+// Walk imports transitively from the route files so that pages reached through
+// wrapper components (e.g. a route -> DashboardAnalyticsPage -> EditorAnalyticsPage
+// chain) count as referenced.
+const visitedFiles = new Set(routeFiles.map((file) => path.resolve(file)))
+const pendingFiles = [...routeFiles]
+
+while (pendingFiles.length > 0) {
+  const file = pendingFiles.shift()
   const source = stripComments(readFile(file))
 
-  routes.push(...extractRoutes(source, file))
+  if (routeFiles.includes(file)) {
+    routes.push(...extractRoutes(source, file))
+  }
 
   for (const item of extractLocalImports(source, file)) {
     const resolved = resolveImport(item.importPath, item.file)
@@ -219,7 +228,13 @@ for (const file of routeFiles) {
       continue
     }
 
-    importedPageFiles.add(path.resolve(resolved))
+    const resolvedPath = path.resolve(resolved)
+    importedPageFiles.add(resolvedPath)
+
+    if (!visitedFiles.has(resolvedPath) && sourceExtensions.has(path.extname(resolvedPath))) {
+      visitedFiles.add(resolvedPath)
+      pendingFiles.push(resolvedPath)
+    }
   }
 }
 

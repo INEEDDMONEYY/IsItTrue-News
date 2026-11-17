@@ -4,11 +4,11 @@
  * IITNews Page Generator
  *
  * Examples:
- * node scripts/generators/generate-page.js --feature=case-files --name=CaseFiles --type=list
- * node scripts/generators/generate-page.js --feature=case-files --name=CaseFiles --type=create
- * node scripts/generators/generate-page.js --feature=case-files --name=CaseFiles --type=edit
- * node scripts/generators/generate-page.js --feature=case-files --name=CaseFiles --type=detail
- * node scripts/generators/generate-page.js --feature=case-files --name=EditorialPolicy --type=custom
+ * node scripts/generators/frontend/generate-page.js --feature=case-files --name=CaseFiles --type=list
+ * node scripts/generators/frontend/generate-page.js --feature=case-files --name=CaseFiles --type=create
+ * node scripts/generators/frontend/generate-page.js --feature=case-files --name=CaseFiles --type=edit
+ * node scripts/generators/frontend/generate-page.js --feature=case-files --name=CaseFiles --type=detail
+ * node scripts/generators/frontend/generate-page.js --feature=case-files --name=EditorialPolicy --type=custom
  *
  * Options:
  * --feature=NAME
@@ -25,9 +25,9 @@
  */
 
 import path from 'node:path'
-import { getOption, hasFlag } from '../utils/arguments.js'
-import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../utils/file-system.js'
-import { toPascalCase, validateFeatureName, validateName } from '../utils/templates.js'
+import { getOption, hasFlag } from '../../utils/arguments.js'
+import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../../utils/file-system.js'
+import { toPascalCase, validateFeatureName, validateName } from '../../utils/templates.js'
 
 const featureInput = getOption('feature')
 const nameInput = getOption('name')
@@ -40,7 +40,7 @@ if (hasFlag('--help')) {
 IITNews Page Generator
 
 Usage:
-  node scripts/generators/generate-page.js --feature=case-files --name=CaseFiles --type=list
+  node scripts/generators/frontend/generate-page.js --feature=case-files --name=CaseFiles --type=list
 
 Options:
   --feature=NAME    Required feature directory.

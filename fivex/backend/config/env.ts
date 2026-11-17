@@ -48,6 +48,13 @@ const envSchema = z.object({
   PASSWORD_RESET_EXPIRES_IN_MINUTES: z.coerce.number().int().positive().max(1440).default(30),
   APP_URL: z.string().url('APP_URL must be a valid URL'),
 
+  // Keys the daily visitor hash used for unique-visitor counts. Optional: when blank, a key is derived from
+  // JWT_ACCESS_SECRET. Set it so the hashes stay stable across secret rotations.
+  ANALYTICS_VISITOR_SECRET: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().min(32, 'ANALYTICS_VISITOR_SECRET must be at least 32 characters').optional(),
+  ),
+
   // Unosend (https://unosend.co) transactional email. Leave the key blank in development to log
   // emails to the console instead of sending them.
   UNOSEND_API_KEY: z.string().optional().default(''),

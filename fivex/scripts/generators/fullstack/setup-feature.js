@@ -3,29 +3,29 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { getOption, hasFlag, requireOption, printHelp } from '../utils/arguments.js'
-import { PROJECT_ROOT } from '../utils/file-system.js'
-import { log } from '../utils/logger.js'
-import { validateFeatureName } from '../utils/templates.js'
+import { getOption, hasFlag, requireOption, printHelp } from '../../utils/arguments.js'
+import { PROJECT_ROOT } from '../../utils/file-system.js'
+import { log } from '../../utils/logger.js'
+import { validateFeatureName } from '../../utils/templates.js'
 
 const projectRoot = PROJECT_ROOT
 
 const generators = {
   feature: path.resolve(
     projectRoot,
-    'scripts/generators/generate-feature.js',
+    'scripts/generators/frontend/generate-feature.js',
   ),
 
   page: path.resolve(
     projectRoot,
-    'scripts/generators/generate-page.js',
+    'scripts/generators/frontend/generate-page.js',
   ),
 }
 
 if (hasFlag('--help')) {
   printHelp('IITNews Feature Setup', [
     'Usage:',
-    '  node scripts/setup/setup-feature.js --feature=NAME [options]',
+    '  node scripts/generators/fullstack/setup-feature.js --feature=NAME [options]',
     '',
     'Options:',
     '  --feature=NAME       Feature name. Required.',
@@ -36,10 +36,10 @@ if (hasFlag('--help')) {
     '  --help               Show help.',
     '',
     'Examples:',
-    '  node scripts/setup/setup-feature.js --feature=advertising',
-    '  node scripts/setup/setup-feature.js --feature=analytics --with-page',
-    '  node scripts/setup/setup-feature.js --feature=case-files --layers=pages,components,types',
-    '  node scripts/setup/setup-feature.js --feature=source-library --with-page --dry-run',
+    '  node scripts/generators/fullstack/setup-feature.js --feature=advertising',
+    '  node scripts/generators/fullstack/setup-feature.js --feature=analytics --with-page',
+    '  node scripts/generators/fullstack/setup-feature.js --feature=case-files --layers=pages,components,types',
+    '  node scripts/generators/fullstack/setup-feature.js --feature=source-library --with-page --dry-run',
   ])
 
   process.exit(0)

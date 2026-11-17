@@ -1,6 +1,7 @@
 {
   "name": "IsItTrue-News",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "postStartCommand": "bash ${containerWorkspaceFolder}/.devcontainer/setup-swap.sh",
   "forwardPorts": [5173, 4000],
   "portsAttributes": {
     "5173": {

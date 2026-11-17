@@ -35,6 +35,7 @@ import { investigationRoutes } from './modules/investigations/routes/investigati
 import { correctionRoutes } from './modules/corrections/routes/correction.routes.js'
 import { prelaunchRoutes } from './modules/prelaunch/routes/prelaunch.routes.js'
 import { analyticsRoutes } from './modules/analytics/routes/analytics.routes.js'
+import { editorialAnalyticsRoutes } from './modules/editorialAnalytics/routes/editorialAnalytics.routes.js'
 import { advertiserRoutes } from './modules/advertisers/routes/advertiser.routes.js'
 import { promotionalCodeRoutes } from './modules/promotionalCodes/routes/promotionalCode.routes.js'
 import { advertisementRoutes } from './modules/advertisement/routes/advertisement.routes.js'
@@ -107,6 +108,7 @@ export function createApp(): Express {
   app.use('/api/corrections', correctionRoutes)
   app.use('/api/prelaunch', prelaunchRoutes)
   app.use('/api/analytics', analyticsRoutes)
+  app.use('/api/editorial-analytics', editorialAnalyticsRoutes)
   app.use('/api/advertiser', advertiserRoutes)
   app.use('/api/ads', publicAdRoutes)
 

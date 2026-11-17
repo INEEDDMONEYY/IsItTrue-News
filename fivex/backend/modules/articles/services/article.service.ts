@@ -13,6 +13,8 @@ import { tagService } from '../../tags/services/tag.service.js'
 import { categoryService } from '../../categories/services/category.service.js'
 import { notificationService } from '../../notifications/services/notification.service.js'
 import { articleAuditService, actionForTransition } from './articleAudit.service.js'
+import { MAX_READING_SECONDS } from '../models/ArticleView.js'
+import { referrerHostFrom, utcDayKey, visitorHash } from '../utils/visitorIdentity.js'
 import { logger } from '../../../config/logger.js'
 import type { RequestChangesInput } from '../validations/article.validation.js'
 
@@ -603,7 +605,11 @@ export const articleService = {
     })
   },
 
-  async recordView(id: string, viewerId?: string) {
+  async recordView(
+    id: string,
+    viewerId?: string,
+    request: { ip?: string; userAgent?: string; referer?: string } = {},
+  ): Promise<string | undefined> {
     const article = await articleRepository.findById(id)
     if (!article || article.status !== ARTICLE_STATUSES.PUBLISHED) {
       throw new AppError('Article not found.', 404)
@@ -613,6 +619,19 @@ export const articleService = {
     if (viewerId) {
       await userRepository.recordArticleRead(viewerId, id)
     }
+
+    const now = new Date()
+    return articleRepository.createArticleView({
+      articleId: id,
+      visitorHash: visitorHash(request.ip, request.userAgent, now),
+      dayKey: utcDayKey(now),
+      referrerHost: referrerHostFrom(request.referer),
+    })
+  },
+
+  async recordReadingTime(id: string, viewId: string, seconds: number): Promise<void> {
+    const bounded = Math.min(Math.max(Math.round(seconds), 0), MAX_READING_SECONDS)
+    await articleRepository.setArticleViewReadingSeconds(viewId, id, bounded)
   },
 
   // Public author-profile page: a reader's liked articles (used in place of

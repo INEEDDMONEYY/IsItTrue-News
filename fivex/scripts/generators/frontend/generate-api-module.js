@@ -4,7 +4,7 @@
  * IITNews API Module Generator
  *
  * Usage:
- * node scripts/generators/generate-api-module.js \
+ * node scripts/generators/frontend/generate-api-module.js \
  *   --feature=advertising \
  *   --contract=scripts/contracts/advertising.contract.json
  *
@@ -25,9 +25,9 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { getOption, hasFlag } from '../utils/arguments.js'
-import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../utils/file-system.js'
-import { escapeComment, isValidIdentifier, toCamelCase, toKebabCase, toPascalCase, validateApiPath, validateFeatureName } from '../utils/templates.js'
+import { getOption, hasFlag } from '../../utils/arguments.js'
+import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../../utils/file-system.js'
+import { escapeComment, isValidIdentifier, toCamelCase, toKebabCase, toPascalCase, validateApiPath, validateFeatureName } from '../../utils/templates.js'
 
 
 const RESERVED_WORDS = new Set([
@@ -48,7 +48,7 @@ if (hasFlag('--help')) {
 IITNews API Module Generator
 
 Usage:
-  node scripts/generators/generate-api-module.js --feature=advertising --contract=scripts/contracts/advertising.contract.json
+  node scripts/generators/frontend/generate-api-module.js --feature=advertising --contract=scripts/contracts/advertising.contract.json
 
 Options:
   --feature=NAME       Required feature directory.

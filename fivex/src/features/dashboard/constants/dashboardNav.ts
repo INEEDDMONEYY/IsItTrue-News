@@ -38,6 +38,7 @@ export interface DashboardNavItem {
   to: string
   icon: LucideIcon
   end?: boolean
+  children?: DashboardNavItem[]
   // Shows a lock until the user has access to this paywalled feature.
   premiumFeature?: PremiumFeatureKey
 }
@@ -66,36 +67,51 @@ export function getDashboardNav(
    * only mixed in for authors/editors.
    */
   const shared: DashboardNavItem[] = [
+    /**
+     * Bookmarks will be added to the profile header nav and have it's own pages.
+     * Bookmarks will only be accessible through the profile header and not the main dashboard nav.
+     * Bookmarks can only be viewed by account holder (another users bookmarks will never be accessible).
     {
       label: 'Bookmarks',
       to: '/dashboard/bookmarks',
       icon: Bookmark,
     },
+    */
+    
+    /** 
+     * Comments can be moved to analytics overview page for all roles, all it's showing are the comment analytics.
+     * View a comment through this page will be removed.
+     * Comments will be refactored to only show analytics and metrics. 
     {
       label: 'My Comments',
       to: '/dashboard/comments',
       icon: MessageSquare,
     },
+    */
+
+    /*
+    *Notifications will have a page link 'ALL notiffications' instead of being a nav item.
+    *Notification toasts regarding workspace and article approvals will only be shown in dashboard page (This helps notifcations stay less annoying and more contextual).
     {
       label: 'Notifications',
       to: '/dashboard/notifications',
       icon: Bell,
     },
-    {
-      label: 'Help Center / Support',
-      to: '/dashboard/help',
-      icon: CircleHelp,
-    },
+    */
     {
       label: 'Settings',
       to: '/dashboard/settings',
       icon: Settings,
     },
+    // Following can be refactored, into the profile header. When number of following is toggled, it will display a page of the users that they follow.
+    /** 
     {
       label: 'Following',
       to: '/dashboard/following',
       icon: Users,
     },
+
+    */
   ]
 
   // Only authors/editors get a video studio and are bound by the
@@ -206,16 +222,16 @@ export function getDashboardNav(
       dashboardItem,
       ...sortByLabel([
         ...shared,
-        ...videosAndGuidelines,
 
         // Editorial Workflow
+         /**Workspace Review Queue will be moved to the Workspace section with its own pages */
         {
-          label: 'Review Queue',
+          label: 'Workspace Review Queue',
           to: '/dashboard/review',
           icon: FileText,
         },
         {
-          label: 'Pending Approvals',
+          label: 'Article Approvals',
           to: '/dashboard/approvals',
           icon: ClipboardCheck,
         },
@@ -224,14 +240,18 @@ export function getDashboardNav(
           to: '/dashboard/flagged',
           icon: Flag,
         },
+        /**Editorial Calendar will be moved to workspace section with its own pages
+         * The workflow stage is can only be 'reviewing, fact-checking and scheduled, when published it will automacially be set to published and cannot be updated. Editor should never be able to edit the status from draft and submitted.'.
+         * The Editoral deadline should set automatically based on the workflow stage and workflow progress.
+         */
         {
           label: 'Editorial Calendar',
           to: '/dashboard/calendar',
           icon: CalendarDays,
         },
         {
-          label: 'Team Assignments',
-          to: '/dashboard/assignments',
+          label: 'Workspace',
+          to: '/dashboard/work-space',
           icon: Handshake,
         },
 
@@ -241,37 +261,45 @@ export function getDashboardNav(
           to: '/dashboard/corrections',
           icon: FileCheck2,
         },
+         /**Fact-checking Oversight will be moved to the Workspace section with its own pages */
         {
           label: 'Fact Check Oversight',
           to: '/dashboard/fact-check-oversight',
           icon: ShieldCheck,
         },
+        /**Investigation oversight will be moved to workspace with its own pages. */
         {
           label: 'Investigation Oversight',
           to: '/author/investigations/review-queue',
           icon: BriefcaseBusiness,
         },
+         /**Source Verification will be moved to the Workspace section with its own pages.
+          * This will be for editors to confirm or deny the verification of the sources used in articles.
+          * Verfied(for sources that are verified)
+          * Unverified(for sources that are not verified).
+          * Analytics (for tracking the time taken for verification and the overall verification status of sources).
+          */
         {
-          label: 'Source Verification Tools',
+          label: 'Source Verification',
           to: '/dashboard/source-verification',
           icon: SearchCheck,
         },
 
-        // Performance & Quality
+        // Editorial Analytics: one group, so the analytics pages are nested rather than listed flat
         {
-          label: 'Author Performance Metrics',
-          to: '/dashboard/authors/metrics',
-          icon: Users,
-        },
-        {
-          label: 'Content Quality Dashboard',
-          to: '/dashboard/content-quality',
-          icon: BarChart3,
-        },
-        {
-          label: 'Analytics',
+          label: 'Editorial Analytics',
           to: '/dashboard/analytics',
           icon: BarChart3,
+          children: [
+            { label: 'Overview', to: '/dashboard/analytics', icon: BarChart3, end: true },
+            { label: 'Author Performance', to: '/dashboard/authors/metrics', icon: Users },
+            { label: 'Content Quality', to: '/dashboard/content-quality', icon: FileCheck2 },
+            { label: 'Editorial Workflow', to: '/dashboard/editorial-workflow', icon: ClipboardCheck },
+            { label: 'Fact-Check Analytics', to: '/dashboard/fact-check-analytics', icon: ShieldCheck },
+            { label: 'Investigation Analytics', to: '/dashboard/investigation-analytics', icon: BriefcaseBusiness },
+            { label: 'Article Performance', to: '/dashboard/article-performance', icon: FileText },
+            { label: 'Reports & Exports', to: '/dashboard/reports', icon: ScrollText },
+          ],
         },
       ]),
     ]

@@ -7,10 +7,10 @@ import {
   getOption,
   hasFlag,
   printHelp,
-} from '../utils/arguments.js'
+} from '../../utils/arguments.js'
 
-import { log } from '../utils/logger.js'
-import { listFiles, PROJECT_ROOT } from '../utils/file-system.js'
+import { log } from '../../utils/logger.js'
+import { listFiles, PROJECT_ROOT } from '../../utils/file-system.js'
 
 const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx']
 

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Link } from 'react-router-dom'
-import { Lock, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
-import { hasPremiumAccess, isPremiumUser } from '@/features/billing/utils/plan'
+import { isPremiumUser } from '@/features/billing/utils/plan'
 import { FreePlanUsageWidget } from '@/features/readers/components/FreePlanUsageWidget'
 import { getDashboardNav } from '../constants/dashboardNav'
+import { DashboardNavEntry } from './DashboardNavEntry'
 import { UserAvatar } from './UserAvatar'
 import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 
@@ -40,32 +41,8 @@ export function DashboardSidebar() {
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
-        {nav.map(({ label, to, icon: Icon, end, premiumFeature }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            title={collapsed ? label : undefined}
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 rounded-lg text-sm transition-colors ${
-                collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2'
-              } ${
-                isActive
-                  ? 'bg-brand-gradient text-on-brand font-medium'
-                  : 'text-text-muted hover:text-text hover:bg-surface-2'
-              }`
-            }
-          >
-            <Icon className="w-4 h-4 shrink-0" />
-            {!collapsed && (
-              <span className="flex flex-1 items-center justify-between gap-2 truncate">
-                {label}
-                {premiumFeature && !hasPremiumAccess(user, premiumFeature) && (
-                  <Lock className="w-3.5 h-3.5 shrink-0 text-text-dim" />
-                )}
-              </span>
-            )}
-          </NavLink>
+        {nav.map((item) => (
+          <DashboardNavEntry key={item.to} item={item} user={user} collapsed={collapsed} />
         ))}
       </nav>
 

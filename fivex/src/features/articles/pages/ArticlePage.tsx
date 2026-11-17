@@ -23,6 +23,7 @@ import { getArticleDetailBySlug } from '../data/mockArticleDetails'
 import { publicArticlesApi } from '../api/publicArticles.api'
 import { adaptPublicArticleDetail } from '../utils/adaptPublicArticle'
 import { useArticleEngagement } from '../hooks/useArticleEngagement'
+import { useArticleViewTracking } from '../hooks/useArticleViewTracking'
 import { articleShareUrl } from '../utils/shareLinks'
 
 export function ArticlePage() {
@@ -53,6 +54,8 @@ export function ArticlePage() {
   const [mockReposted, setMockReposted] = useState(false)
   const [mockBookmarked, setMockBookmarked] = useState(false)
   const { toggleLike, toggleDislike, share, toggleBookmark } = useArticleEngagement(realArticle?.id, slug)
+  // Only real, backend-backed articles are recorded. Mock stories have no backend record.
+  useArticleViewTracking(isRealArticle ? realArticle?.id : undefined)
 
   // The story's fact-check comes from the real claim records. Mock stories have none behind them, so they are
   // shown as not fact-checked rather than with invented results.

@@ -6,12 +6,12 @@
  * Read-only analyzer for existing admin feature modules.
  *
  * Usage:
- *   node scripts/maintenance/audit-admin.js
- *   node scripts/maintenance/audit-admin.js --dry-run
- *   node scripts/maintenance/audit-admin.js --json
- *   node scripts/maintenance/audit-admin.js --write-report
- *   node scripts/maintenance/audit-admin.js --admin-root=src/features/admin
- *   node scripts/maintenance/audit-admin.js --src-root=src
+ *   node scripts/maintenance/frontend/audit-admin.js
+ *   node scripts/maintenance/frontend/audit-admin.js --dry-run
+ *   node scripts/maintenance/frontend/audit-admin.js --json
+ *   node scripts/maintenance/frontend/audit-admin.js --write-report
+ *   node scripts/maintenance/frontend/audit-admin.js --admin-root=src/features/admin
+ *   node scripts/maintenance/frontend/audit-admin.js --src-root=src
  *
  * Safety:
  *   - Never modifies source files.
@@ -22,7 +22,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { PROJECT_ROOT } from '../utils/file-system.js'
+import { PROJECT_ROOT } from '../../utils/file-system.js'
 
 const args = process.argv.slice(2)
 

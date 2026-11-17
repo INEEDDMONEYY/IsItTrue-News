@@ -79,3 +79,8 @@ export const updateEditorialWorkflowSchema = z.object({
 })
 
 export type UpdateEditorialWorkflowInput = z.infer<typeof updateEditorialWorkflowSchema>
+
+export const readingTimeSchema = z.object({
+  viewId: z.string().regex(/^[a-f\d]{24}$/i, 'viewId must be a valid view id.'),
+  seconds: z.number().finite().min(0).max(24 * 60 * 60),
+})

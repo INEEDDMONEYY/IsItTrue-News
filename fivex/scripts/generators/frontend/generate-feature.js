@@ -4,10 +4,10 @@
  * IITNews Feature Generator
  *
  * Usage:
- * node scripts/generators/generate-feature.js --feature=advertising
- * node scripts/generators/generate-feature.js --feature=analytics --dry-run
- * node scripts/generators/generate-feature.js --feature=analytics --layers=pages,components,types
- * node scripts/generators/generate-feature.js --feature=reader-dashboard --root=src/features
+ * node scripts/generators/frontend/generate-feature.js --feature=advertising
+ * node scripts/generators/frontend/generate-feature.js --feature=analytics --dry-run
+ * node scripts/generators/frontend/generate-feature.js --feature=analytics --layers=pages,components,types
+ * node scripts/generators/frontend/generate-feature.js --feature=reader-dashboard --root=src/features
  *
  * Paths resolve from the fivex project root, so the script can run from any directory.
  *
@@ -20,8 +20,8 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../utils/file-system.js'
-import { toCamelCase, toPascalCase, validateFeatureName } from '../utils/templates.js'
+import { PROJECT_ROOT, resolveSourceRoot, toProjectRelative, writeFileIfMissing } from '../../utils/file-system.js'
+import { toCamelCase, toPascalCase, validateFeatureName } from '../../utils/templates.js'
 
 const args = process.argv.slice(2)
 
