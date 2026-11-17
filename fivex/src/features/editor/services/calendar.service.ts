@@ -21,14 +21,12 @@ export const editorialCalendarService = {
     if (workflow.kind === 'article') {
       await editorialCalendarApi.updateArticle(workflow.id, {
         editorialStage: workflow.stage,
-        editorialDeadline: workflow.deadline,
       })
       return
     }
 
     await editorialCalendarApi.updateInvestigation(workflow.id, {
       workflowStage: workflow.stage,
-      editorialDeadline: workflow.deadline,
     })
   },
 }

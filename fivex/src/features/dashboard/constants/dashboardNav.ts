@@ -12,20 +12,15 @@ import {
   FolderLock,
   Handshake,
   LayoutDashboard,
-  MessageSquare,
   PencilLine,
-  SearchCheck,
   Settings,
   ShieldCheck,
   Target,
   TvMinimalPlay,
   Users,
   UserPen,
-  Bookmark,
   Flag,
   CalendarDays,
-  Bell,
-  CircleHelp,
   Megaphone,
   ScrollText,
   Sparkles,
@@ -223,67 +218,24 @@ export function getDashboardNav(
       ...sortByLabel([
         ...shared,
 
-        // Editorial Workflow
-         /**Workspace Review Queue will be moved to the Workspace section with its own pages */
+        // Editorial Workspace: one group, so the hub and its oversight pages are nested under it
         {
-          label: 'Workspace Review Queue',
-          to: '/dashboard/review',
-          icon: FileText,
-        },
-        {
-          label: 'Article Approvals',
-          to: '/dashboard/approvals',
-          icon: ClipboardCheck,
-        },
-        {
-          label: 'Flagged Articles',
-          to: '/dashboard/flagged',
-          icon: Flag,
-        },
-        /**Editorial Calendar will be moved to workspace section with its own pages
-         * The workflow stage is can only be 'reviewing, fact-checking and scheduled, when published it will automacially be set to published and cannot be updated. Editor should never be able to edit the status from draft and submitted.'.
-         * The Editoral deadline should set automatically based on the workflow stage and workflow progress.
-         */
-        {
-          label: 'Editorial Calendar',
-          to: '/dashboard/calendar',
-          icon: CalendarDays,
-        },
-        {
-          label: 'Workspace',
+          label: 'Editorial Workspace',
           to: '/dashboard/work-space',
           icon: Handshake,
+          children: [
+            { label: 'Workspace Hub', to: '/dashboard/work-space', icon: Handshake, end: true },
+            /**The workflow stage can only be reviewing, fact-checking or scheduled. Published is set automatically and cannot be edited, and the editor cannot edit draft or submitted. The deadline is set from the workflow stage. */
+            { label: 'Editorial Calendar', to: '/dashboard/calendar', icon: CalendarDays },
+            { label: 'Workspace Review Queue', to: '/dashboard/review', icon: FileText },
+            { label: 'Article Approvals', to: '/dashboard/approvals', icon: ClipboardCheck },
+            { label: 'Fact Check Oversight', to: '/dashboard/fact-check-oversight', icon: ShieldCheck },
+            { label: 'Investigation Oversight', to: '/dashboard/investigation-oversight', icon: BriefcaseBusiness },
+            { label: 'Corrections Management', to: '/dashboard/corrections', icon: FileCheck2 },
+            { label: 'Flagged Articles', to: '/dashboard/flagged', icon: Flag },
+          ],
         },
-
-        // Corrections & Verification
-        {
-          label: 'Corrections Management',
-          to: '/dashboard/corrections',
-          icon: FileCheck2,
-        },
-         /**Fact-checking Oversight will be moved to the Workspace section with its own pages */
-        {
-          label: 'Fact Check Oversight',
-          to: '/dashboard/fact-check-oversight',
-          icon: ShieldCheck,
-        },
-        /**Investigation oversight will be moved to workspace with its own pages. */
-        {
-          label: 'Investigation Oversight',
-          to: '/author/investigations/review-queue',
-          icon: BriefcaseBusiness,
-        },
-         /**Source Verification will be moved to the Workspace section with its own pages.
-          * This will be for editors to confirm or deny the verification of the sources used in articles.
-          * Verfied(for sources that are verified)
-          * Unverified(for sources that are not verified).
-          * Analytics (for tracking the time taken for verification and the overall verification status of sources).
-          */
-        {
-          label: 'Source Verification',
-          to: '/dashboard/source-verification',
-          icon: SearchCheck,
-        },
+         /**Source Verification is hidden until a source model exists (src/features/sources pages are empty, no backend module). */
 
         // Editorial Analytics: one group, so the analytics pages are nested rather than listed flat
         {
@@ -358,4 +310,37 @@ export function getDashboardNav(
     ]),
   ]
 }
+
+export interface DashboardBreadcrumb {
+  label: string
+  to: string
+}
+
+const matchesPath = (item: DashboardNavItem, pathname: string) =>
+  item.end ? pathname === item.to : pathname === item.to || pathname.startsWith(`${item.to}/`)
+
+/**
+ * Builds the breadcrumb trail for the current path from the same tree the sidebar renders.
+ * Groups always appear before their matched child, so Dashboard > Editorial Workspace > Workspace Hub
+ * shows where a page sits in the hierarchy.
+ */
+export function getDashboardBreadcrumbs(role: string | undefined, pathname: string): DashboardBreadcrumb[] {
+  const [root, ...items] = getDashboardNav(role)
+  const trail: DashboardBreadcrumb[] = [{ label: root.label, to: root.to }]
+
+  for (const item of items) {
+    const child = item.children?.find((candidate) => matchesPath(candidate, pathname))
+    if (child) {
+      trail.push({ label: item.label, to: item.to }, { label: child.label, to: child.to })
+      return trail
+    }
+    if (matchesPath(item, pathname)) {
+      trail.push({ label: item.label, to: item.to })
+      return trail
+    }
+  }
+
+  return trail
+}
+
 

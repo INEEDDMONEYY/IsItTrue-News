@@ -43,6 +43,12 @@ export const userService = {
     return userRepository.findAll()
   },
 
+  // Editor accounts only, reduced to id and name for assignment pickers.
+  async listEditors() {
+    const editors = await userRepository.findEditors()
+    return editors.map((editor) => ({ id: String(editor._id), name: editor.name }))
+  },
+
   async createUser(input: { name: string; email: string; password: string; role: Role }) {
     const existing = await userRepository.findByEmail(input.email)
     if (existing) {

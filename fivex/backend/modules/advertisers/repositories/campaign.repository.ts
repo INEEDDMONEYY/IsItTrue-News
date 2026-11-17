@@ -151,6 +151,10 @@ export const campaignRepository = {
       .limit(500)
   },
 
+  countByStatus(advertiserId: string, status: CampaignStatus): Promise<number> {
+    return Campaign.countDocuments({ advertiser: advertiserId, status })
+  },
+
   async budgetsByStatus(advertiserId: string): Promise<{ status: CampaignStatus; count: number; budgetCents: number }[]> {
     const rows = await Campaign.aggregate<{ _id: CampaignStatus; count: number; budgetCents: number }>([
       { $match: { advertiser: toObjectId(advertiserId) } },

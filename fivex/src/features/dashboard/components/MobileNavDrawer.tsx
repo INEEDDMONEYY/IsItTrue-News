@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { getDashboardNav } from '../constants/dashboardNav'
+import { useDashboardNavCounts } from '../hooks/useDashboardNavCounts'
 import { DashboardNavEntry } from './DashboardNavEntry'
 import { UserAvatar } from './UserAvatar'
 import logo from '@/assets/icons/isittrue-icon-dark.jpg'
@@ -17,6 +18,7 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
   const { user } = useAuth()
   const { pathname } = useLocation()
   const nav = getDashboardNav(user?.role)
+  const navCounts = useDashboardNavCounts()
 
   useEffect(() => {
     onClose()
@@ -69,7 +71,7 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
 
         <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
           {nav.map((item) => (
-            <DashboardNavEntry key={item.to} item={item} user={user} variant="drawer" />
+            <DashboardNavEntry key={item.to} item={item} user={user} counts={navCounts} variant="drawer" />
           ))}
         </nav>
 

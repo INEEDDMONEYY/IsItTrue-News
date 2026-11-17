@@ -10,6 +10,7 @@ import type {
   UpdateArticleInput,
   UpdateArticleStatusInput,
   UpdateEditorialWorkflowInput,
+  UpdateArticleAssigneeInput,
 } from '../validations/article.validation.js'
 import type { ArticleDocument } from '../models/Article.js'
 
@@ -175,6 +176,13 @@ export const articleController = {
     const input = req.body as UpdateEditorialWorkflowInput
     await articleService.updateEditorialWorkflow(req.params.id, user, input)
     res.status(200).json({ message: 'Editorial workflow updated.' })
+  }),
+
+  assignArticle: asyncHandler(async (req: Request, res: Response) => {
+    const user = requireUser(req)
+    const { assigneeId } = req.body as UpdateArticleAssigneeInput
+    await articleService.assignArticle(req.params.id, user, assigneeId)
+    res.status(200).json({ message: 'Article assignee updated.' })
   }),
 
   approve: asyncHandler(async (req: Request, res: Response) => {

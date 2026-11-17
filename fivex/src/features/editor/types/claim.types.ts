@@ -87,6 +87,7 @@ export interface Claim {
   evidenceFlag?: { reason: string; flaggedAt: string }
   article: { id: string; title: string; slug: string; status: string } | null
   assignee?: ClaimPerson | null
+  dueAt?: string
   createdBy?: ClaimPerson | null
   reviewedBy?: ClaimPerson | null
   reviewedAt?: string

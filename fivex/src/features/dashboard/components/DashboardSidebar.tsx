@@ -5,6 +5,7 @@ import { useAuth } from '@/app/providers/AuthProvider'
 import { isPremiumUser } from '@/features/billing/utils/plan'
 import { FreePlanUsageWidget } from '@/features/readers/components/FreePlanUsageWidget'
 import { getDashboardNav } from '../constants/dashboardNav'
+import { useDashboardNavCounts } from '../hooks/useDashboardNavCounts'
 import { DashboardNavEntry } from './DashboardNavEntry'
 import { UserAvatar } from './UserAvatar'
 import logo from '@/assets/icons/isittrue-icon-dark.jpg'
@@ -14,6 +15,7 @@ const COLLAPSE_STORAGE_KEY = 'itt-dashboard-sidebar-collapsed'
 export function DashboardSidebar() {
   const { user } = useAuth()
   const nav = getDashboardNav(user?.role)
+  const navCounts = useDashboardNavCounts()
   const premium = isPremiumUser(user)
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -42,7 +44,7 @@ export function DashboardSidebar() {
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
         {nav.map((item) => (
-          <DashboardNavEntry key={item.to} item={item} user={user} collapsed={collapsed} />
+          <DashboardNavEntry key={item.to} item={item} user={user} counts={navCounts} collapsed={collapsed} />
         ))}
       </nav>
 

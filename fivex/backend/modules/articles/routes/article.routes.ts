@@ -10,6 +10,7 @@ import {
   requestChangesSchema,
   toggleRequirementSchema,
   updateArticleSchema,
+  updateArticleAssigneeSchema,
   updateArticleStatusSchema,
   updateEditorialWorkflowSchema,
 } from '../validations/article.validation.js'
@@ -110,6 +111,15 @@ router.patch(
   authorize(ROLES.EDITOR, ROLES.ADMIN),
   validate(updateEditorialWorkflowSchema),
   articleController.updateEditorialWorkflow,
+)
+
+// Editor/admin: set or clear the editor account responsible for an article.
+router.patch(
+  '/:id/assignee',
+  authenticate,
+  authorize(ROLES.EDITOR, ROLES.ADMIN),
+  validate(updateArticleAssigneeSchema),
+  articleController.assignArticle,
 )
 
 router.post('/:id/view', optionalAuthenticate, articleController.recordView)

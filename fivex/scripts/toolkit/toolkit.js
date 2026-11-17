@@ -11,6 +11,8 @@ import { runMaintenance, countFindings, renderMaintenance, writeReport } from '.
 import { runValidation, renderValidation, runStaticChecks } from './commands/validate.js'
 import { runEditorialAnalytics } from './commands/editorial-analytics.js'
 import { runAnalyticsMaintenance, countAnalyticsFindings, renderAnalyticsMaintenance } from './commands/editorial-analytics-maintain.js'
+import { runEditorWorkspace } from './commands/editor-workspace.js'
+import { runGlobalLocation } from './commands/global-location.js'
 import { PROJECT_ROOT } from '../utils/file-system.js'
 
 const USAGE = `IsItTrue toolkit
@@ -27,6 +29,13 @@ Maintenance (read-only):
                  (opt-in) adds routes only for pages that already exist.
   editorial-analytics-scan [--json]
                  Delegates to the import, route and unused-file checks, filtered to Editorial Analytics.
+  editor-workspace [--section=<ids>] [--dry-run] [--register]
+                 Inspects Editor Workspace sections and checks every sidebar link resolves to a route.
+                 --register (opt-in) adds routes only for pages that already exist.
+  global-location [--dry-run] [--register]
+                 Validates the location contract and seed, then creates the locations backend module,
+                 frontend feature, and seed copy. Never overwrites files. Reports header status only.
+                 --register (opt-in) mounts /api/locations in backend/app.ts.
 
 Maintenance (read-only):
   maintain       [--json] [--report=<file>]   Duplicates, missing tests, unregistered routers, guards, contracts.
@@ -81,6 +90,31 @@ export function execute(argv) {
     try {
       const { exitCode, output } = runEditorialAnalytics({
         sections: typeof flags.section === 'string' ? flags.section : undefined,
+        dryRun: Boolean(flags['dry-run']),
+        register: Boolean(flags.register),
+      })
+      return { exitCode, output }
+    } catch (error) {
+      return { exitCode: 2, output: `Error: ${error.message}` }
+    }
+  }
+
+  if (command === 'editor-workspace') {
+    try {
+      const { exitCode, output } = runEditorWorkspace({
+        sections: typeof flags.section === 'string' ? flags.section : undefined,
+        dryRun: Boolean(flags['dry-run']),
+        register: Boolean(flags.register),
+      })
+      return { exitCode, output }
+    } catch (error) {
+      return { exitCode: 2, output: `Error: ${error.message}` }
+    }
+  }
+
+  if (command === 'global-location') {
+    try {
+      const { exitCode, output } = runGlobalLocation({
         dryRun: Boolean(flags['dry-run']),
         register: Boolean(flags.register),
       })

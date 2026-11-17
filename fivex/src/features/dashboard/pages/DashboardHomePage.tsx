@@ -2,6 +2,7 @@ import { FilePlus2, ShieldCheck, BookMarked, BarChart3, FileText, Users, CreditC
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useAuthorArticles } from '@/features/authors/hooks/useAuthorArticles'
 import { QuickLinkCard } from '@/components/cards'
+import { EditorDashboardOverview } from '@/features/editor/components/EditorDashboardOverview'
 
 function AuthorOverview() {
   const { articles } = useAuthorArticles()
@@ -36,12 +37,7 @@ function AuthorOverview() {
 }
 
 function EditorOverview() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <QuickLinkCard to="/dashboard/review" label="Review Queue" icon={ShieldCheck} />
-      <QuickLinkCard to="/dashboard/analytics" label="Analytics" icon={FileText} />
-    </div>
-  )
+  return <EditorDashboardOverview />
 }
 
 function ReaderOverview() {

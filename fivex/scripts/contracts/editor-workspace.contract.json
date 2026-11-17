@@ -1,0 +1,60 @@
+{
+  "resource": "EditorWorkspace",
+  "description": "Endpoints read by the Editor Dashboard Workspace. Mirrors the endpoints declared in scripts/toolkit/lib/editor-workspace.js; the test suite fails if they drift.",
+  "operations": [
+    {
+      "name": "listArticleEditorialWorkflow",
+      "method": "GET",
+      "path": "/api/articles/editorial-workflow",
+      "description": "Articles with editorial stage and deadline for the Editorial Calendar."
+    },
+    {
+      "name": "listInvestigationEditorialWorkflow",
+      "method": "GET",
+      "path": "/api/investigations/editorial-workflow",
+      "description": "Investigations with workflow stage and deadline for the Editorial Calendar."
+    },
+    {
+      "name": "listClaims",
+      "method": "GET",
+      "path": "/api/claims",
+      "description": "Claims under fact-check oversight."
+    },
+    {
+      "name": "listFactCheckArticles",
+      "method": "GET",
+      "path": "/api/claims/articles",
+      "description": "Articles with fact-check status."
+    },
+    {
+      "name": "listInvestigationReviewQueue",
+      "method": "GET",
+      "path": "/api/investigations/review-queue",
+      "description": "Investigations awaiting an editorial publish decision. Editor and admin only."
+    },
+    {
+      "name": "listCorrections",
+      "method": "GET",
+      "path": "/api/corrections",
+      "description": "Correction and flag records, used by the Flagged Articles view."
+    },
+    {
+      "name": "listEditors",
+      "method": "GET",
+      "path": "/api/users/editors",
+      "description": "Editor accounts (id and name only) that articles can be assigned to. Editor and admin only."
+    },
+    {
+      "name": "assignArticle",
+      "method": "PATCH",
+      "path": "/api/articles/:id/assignee",
+      "description": "Sets or clears the editor assigned to an article. Editor and admin only; the assignee must be an editor account."
+    }
+  ],
+  "missingBackend": [
+    {
+      "section": "source-verification",
+      "reason": "No source model or sources backend module exists."
+    }
+  ]
+}

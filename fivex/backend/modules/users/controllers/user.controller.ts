@@ -27,6 +27,12 @@ export const userController = {
     res.status(200).json({ users })
   }),
 
+  // Editor/admin: editor accounts (id and name only) for assigning articles.
+  listEditors: asyncHandler(async (_req: Request, res: Response) => {
+    const editors = await userService.listEditors()
+    res.status(200).json({ editors })
+  }),
+
   // Admin-only: create a new account with an explicit role (e.g. another admin).
   create: asyncHandler(async (req: Request, res: Response) => {
     const input = req.body as CreateUserInput

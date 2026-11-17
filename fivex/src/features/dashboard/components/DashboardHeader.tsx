@@ -1,23 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Bell, ChevronDown, ExternalLink, LogOut, Menu, Settings, UserRound } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
-import { getDashboardNav } from '../constants/dashboardNav'
 import { notificationsApi } from '@/features/notifications/api/notifications.api'
 import { NOTIFICATIONS_QUERY_KEY } from '@/features/notifications/hooks/useNotifications'
+import { DashboardBreadcrumbs } from './DashboardBreadcrumbs'
 import { UserAvatar } from './UserAvatar'
-
-function useCurrentSectionLabel(role: string | undefined): string {
-  const { pathname } = useLocation()
-  const nav = getDashboardNav(role)
-  const match = nav.find((item) => (item.end ? pathname === item.to : pathname.startsWith(item.to)))
-  return match?.label ?? 'Dashboard'
-}
 
 export function DashboardHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const { user, logout } = useAuth()
-  const sectionLabel = useCurrentSectionLabel(user?.role)
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -55,9 +47,10 @@ export function DashboardHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
       >
         <Menu className="w-5 h-5" />
       </button>
-      <span className="text-sm font-medium text-heading truncate">{sectionLabel}</span>
+      <div className="min-w-0 flex-1">
+        <DashboardBreadcrumbs role={user?.role} />
+      </div>
 
-      <div className="flex-1" />
 
       <Link
         to="/"

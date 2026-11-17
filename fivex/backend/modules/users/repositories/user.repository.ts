@@ -26,6 +26,10 @@ export const userRepository = {
     )
   },
 
+  async findEditors(): Promise<Pick<UserDocument, '_id' | 'name'>[]> {
+    return User.find({ role: ROLES.EDITOR }).select('name').sort({ name: 1 })
+  },
+
   async findById(id: string): Promise<UserDocument | null> {
     return User.findById(id)
   },

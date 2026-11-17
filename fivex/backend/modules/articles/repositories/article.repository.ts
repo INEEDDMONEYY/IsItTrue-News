@@ -80,10 +80,11 @@ export const articleRepository = {
   async findEditorialWorkflow(): Promise<ArticleDocument[]> {
     return Article.find()
       .select(
-        '_id title slug category status factCheckStatus editorialStage editorialDeadline submittedAt publishedAt createdAt updatedAt author',
+        '_id title slug category status factCheckStatus editorialStage editorialDeadline submittedAt publishedAt createdAt updatedAt author assignee',
       )
       .sort({ editorialDeadline: 1, updatedAt: -1 })
       .populate('author', 'name')
+      .populate('assignee', 'name')
   },
 
   // Drafts an editor has sent back and the author hasn't resubmitted yet.
@@ -219,20 +220,21 @@ export const articleRepository = {
     await Article.updateOne({ _id: id }, { $set: set })
   },
 
+  async updateAssignee(id: string, assigneeId: string | null): Promise<void> {
+    await Article.updateOne({ _id: id }, { $set: { assignee: assigneeId } })
+  },
+
   async updateEditorialWorkflow(
     id: string,
-    workflow: { editorialStage: ArticleEditorialStage; editorialDeadline: string | null },
+    workflow: { editorialStage: ArticleEditorialStage; editorialDeadline: Date },
   ): Promise<void> {
     await Article.updateOne(
       { _id: id },
       {
         $set: {
           editorialStage: workflow.editorialStage,
-          ...(workflow.editorialDeadline
-            ? { editorialDeadline: new Date(`${workflow.editorialDeadline}T00:00:00.000Z`) }
-            : {}),
+          editorialDeadline: workflow.editorialDeadline,
         },
-        ...(workflow.editorialDeadline === null ? { $unset: { editorialDeadline: 1 } } : {}),
       },
     )
   },

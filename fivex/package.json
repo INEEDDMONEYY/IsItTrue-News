@@ -13,6 +13,7 @@
     "server:start": "node dist-server/server.js",
     "server:typecheck": "tsc -p backend/tsconfig.json --noEmit",
     "seed:admin": "tsx backend/scripts/createAdmin.ts",
+    "locations:backfill": "tsx backend/scripts/backfillArticleLocations.ts",
     "mail:test": "tsx backend/scripts/sendTestEmail.ts",
     "toolkit": "node scripts/toolkit/toolkit.js"
   },

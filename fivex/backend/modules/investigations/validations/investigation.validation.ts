@@ -54,7 +54,6 @@ export type AddInvestigationCommentInput = z.infer<typeof addInvestigationCommen
 
 export const updateEditorialWorkflowSchema = z.object({
   workflowStage: z.enum(INVESTIGATION_WORKFLOW_STAGES),
-  editorialDeadline: z.string().date().nullable(),
 })
 
 export type UpdateEditorialWorkflowInput = z.infer<typeof updateEditorialWorkflowSchema>

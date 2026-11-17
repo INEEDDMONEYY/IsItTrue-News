@@ -18,6 +18,11 @@ export const campaignsApi = {
     return data
   },
 
+  getNavCounts: async (): Promise<Record<string, number>> => {
+    const { data } = await apiClient.get<{ counts: Record<string, number> }>(`${BASE}/nav-counts`)
+    return data.counts
+  },
+
   list: async (filter: { status?: CampaignStatus; q?: string } = {}): Promise<AdvertiserCampaign[]> => {
     const { data } = await apiClient.get<{ campaigns: AdvertiserCampaign[] }>(`${BASE}/campaigns`, {
       params: { status: filter.status || undefined, q: filter.q || undefined },

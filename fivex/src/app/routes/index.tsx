@@ -68,6 +68,7 @@ import { EditArticlePage } from '@/features/authors/pages/EditArticlePage'
 import { FactCheckSubmissionPage } from '@/features/authors/pages/FactCheckSubmissionPage'
 import { PendingApprovalsPage } from '@/features/editor/pages/PendingApprovalsPage'
 import { CorrectionsManagementPage } from '@/features/corrections/pages/CorrectionsManagementPage'
+import { EditorWorkspacePage } from '@/features/editor/pages/EditorWorkspacePage'
 import { ReviewQueuePage } from '@/features/editor/pages/ReviewQueuePage'
 import { EditorialCalendarPage } from '@/features/editor/pages/EditorialCalendarPage'
 import { AuthorPerformancePage } from '@/features/editor/analytics/pages/AuthorPerformancePage'
@@ -252,6 +253,9 @@ export const router = createBrowserRouter([
           { path: 'review', element: <ReviewQueuePage /> },
           { path: 'calendar', element: <EditorialCalendarPage /> },
           { path: 'fact-check-oversight', element: <FactCheckOversightPage /> },
+          { path: 'investigation-oversight', element: <InvestigationReviewPage /> },
+          { path: 'work-space', element: <EditorWorkspacePage /> },
+          { path: 'flagged', element: <CorrectionsManagementPage /> },
           { path: 'approvals', element: <PendingApprovalsPage /> },
           { path: 'corrections', element: <CorrectionsManagementPage /> },
           { path: 'analytics', element: <DashboardAnalyticsPage /> },

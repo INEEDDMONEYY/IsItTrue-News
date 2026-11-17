@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { ARTICLE_STATUSES } from '../constants/articleStatus.js'
-import { ARTICLE_EDITORIAL_STAGES } from '../constants/editorialWorkflow.js'
+import { EDITOR_SETTABLE_ARTICLE_STAGES } from '../constants/editorialWorkflow.js'
 
 // Same ceiling the request parser enforces (see middleware/articleBodyParser.ts), stated as a readable error.
 const MAX_BODY_CHARACTERS = 200_000
@@ -73,12 +73,19 @@ export const toggleRequirementSchema = z.object({
 
 export type ToggleRequirementInput = z.infer<typeof toggleRequirementSchema>
 
+// The deadline is computed on the server (see resolveEditorialDeadline), so clients send only the stage.
 export const updateEditorialWorkflowSchema = z.object({
-  editorialStage: z.enum(ARTICLE_EDITORIAL_STAGES),
-  editorialDeadline: z.string().date().nullable(),
+  editorialStage: z.enum(EDITOR_SETTABLE_ARTICLE_STAGES),
 })
 
 export type UpdateEditorialWorkflowInput = z.infer<typeof updateEditorialWorkflowSchema>
+
+// null clears the assignment.
+export const updateArticleAssigneeSchema = z.object({
+  assigneeId: z.string().regex(/^[a-f\d]{24}$/i, 'assigneeId must be a valid user id.').nullable(),
+})
+
+export type UpdateArticleAssigneeInput = z.infer<typeof updateArticleAssigneeSchema>
 
 export const readingTimeSchema = z.object({
   viewId: z.string().regex(/^[a-f\d]{24}$/i, 'viewId must be a valid view id.'),

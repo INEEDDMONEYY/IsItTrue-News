@@ -7,6 +7,7 @@ import { userRepository } from '../../users/repositories/user.repository.js'
 import { investigationRepository } from '../repositories/investigation.repository.js'
 import { INVESTIGATION_STATUSES } from '../constants/investigationStatus.js'
 import type { InvestigationWorkflowStage } from '../constants/editorialWorkflow.js'
+import { resolveEditorialDeadline } from '../../../shared/constants/editorialDeadline.js'
 import type { InvestigationDocument } from '../models/Investigation.js'
 import type {
   CreateInvestigationInput,
@@ -154,7 +155,7 @@ export const investigationService = {
   async updateEditorialWorkflow(
     id: string,
     actingUser: ActingUser,
-    workflow: { workflowStage: InvestigationWorkflowStage; editorialDeadline: string | null },
+    workflow: { workflowStage: InvestigationWorkflowStage },
   ) {
     if (!isPrivilegedRole(actingUser.role)) {
       throw new AppError('Only an editor or admin can update editorial workflow.', 403)
@@ -163,9 +164,11 @@ export const investigationService = {
     if (!investigation) throw new AppError('Investigation not found.', 404)
     await investigationRepository.updateEditorialWorkflow(id, {
       workflowStage: workflow.workflowStage,
-      editorialDeadline: workflow.editorialDeadline
-        ? new Date(`${workflow.editorialDeadline}T00:00:00.000Z`)
-        : null,
+      editorialDeadline: resolveEditorialDeadline({
+        previousStage: investigation.workflowStage ?? null,
+        previousDeadline: investigation.editorialDeadline ?? null,
+        nextStage: workflow.workflowStage,
+      }),
     })
   },
 

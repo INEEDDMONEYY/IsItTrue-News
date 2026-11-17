@@ -48,6 +48,8 @@ export interface IArticle {
   reviewRequirements: IReviewRequirement[]
   editorialStage?: ArticleEditorialStage
   editorialDeadline?: Date
+  // Editor account responsible for this article's editorial work. Editor accounts only.
+  assignee?: Types.ObjectId | null
   correctionsCount: number
   corrections: IPublishedCorrection[]
   factCheckStatus: ArticleFactCheckStatus
@@ -131,6 +133,7 @@ const articleSchema = new Schema<IArticle>(
     reviewNote: { type: String, trim: true, maxlength: 500 },
     editorialStage: { type: String, enum: ARTICLE_EDITORIAL_STAGES },
     editorialDeadline: { type: Date },
+    assignee: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
     reviewRequirements: {
       type: [
         new Schema(

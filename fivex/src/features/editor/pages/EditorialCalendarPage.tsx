@@ -235,7 +235,7 @@ function CalendarPanel({
       </p>
       <div className="mt-6">
         <h3 className="mb-1 text-base font-semibold text-heading">Unscheduled workflow</h3>
-        <p className="mb-3 text-sm text-text-muted">Set a deadline on an article or investigation to add it to this calendar.</p>
+        <p className="mb-3 text-sm text-text-muted">Deadlines are set automatically (30 days) when an article or investigation enters a new stage.</p>
         {unscheduledItems.length ? (
           <div className="grid gap-3 lg:grid-cols-2">
             {unscheduledItems.map((item) => (
@@ -266,7 +266,7 @@ function EditorialBoard({
     <section aria-label="Editorial board">
       <div className="mb-3">
         <h2 className="text-lg font-semibold text-heading">Editorial board</h2>
-        <p className="text-sm text-text-muted">Move article workflow records through each editorial stage and attach a deadline.</p>
+        <p className="text-sm text-text-muted">Move article workflow records through each editorial stage. Deadlines are set automatically.</p>
       </div>
       <div className="grid gap-3 overflow-x-auto pb-2 md:grid-cols-2 2xl:grid-cols-3">
         {articleStages.map((stage) => {
@@ -304,7 +304,7 @@ function InvestigationTimeline({
     <section aria-label="Investigation timeline">
       <div className="mb-3">
         <h2 className="text-lg font-semibold text-heading">Investigation timeline</h2>
-        <p className="text-sm text-text-muted">Track each investigation’s current phase and keep its deadline on the investigation record.</p>
+        <p className="text-sm text-text-muted">Track each investigation’s current phase. Its 30-day deadline is set automatically when the phase changes.</p>
       </div>
       <div className="grid gap-3">
         {investigationStages.map((stage, index) => {

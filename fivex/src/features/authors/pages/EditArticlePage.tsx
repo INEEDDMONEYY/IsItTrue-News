@@ -7,6 +7,7 @@ import { ArticleForm, type ArticleFormIntent, type ArticleFormValues } from '../
 import { ReviewFeedbackPanel } from '../components/ReviewFeedbackPanel'
 import { hasReviewFeedback } from '../utils/reviewFeedback'
 import { DRAFTS_QUERY_KEY } from '../hooks/useMyDrafts'
+import { ArticleLocationsEditor } from '@/features/locations/components/ArticleLocationsEditor'
 
 export function EditArticlePage() {
   const { id = '' } = useParams<{ id: string }>()
@@ -127,6 +128,10 @@ export function EditArticlePage() {
         error={saveMutation.error}
         onSubmit={(values, intent) => saveMutation.mutate({ values, intent })}
       />
+
+      <div className="mt-6 max-w-2xl">
+        <ArticleLocationsEditor articleId={id} isEditor={false} />
+      </div>
     </div>
   )
 }

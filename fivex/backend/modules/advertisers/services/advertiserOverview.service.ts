@@ -54,6 +54,12 @@ function describe(campaign: CampaignDocument): Pick<ActivityItem, 'type' | 'titl
 }
 
 export const advertiserOverviewService = {
+  // Keyed by sidebar path. Only rejected campaigns count, since they are the ones waiting on the advertiser to edit.
+  async getNavCounts(advertiserId: string): Promise<Record<string, number>> {
+    const rejected = await campaignRepository.countByStatus(advertiserId, CAMPAIGN_STATUSES.REJECTED)
+    return { '/advertiser/campaigns': rejected }
+  },
+
   async getOverview(advertiserId: string) {
     await advertiserCampaignService.completeEnded(advertiserId)
     const [stats, recent] = await Promise.all([

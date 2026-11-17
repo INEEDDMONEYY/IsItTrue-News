@@ -26,6 +26,10 @@ const router = Router()
 // of what the frontend shows or hides.
 router.get('/', authenticate, authorize(ROLES.ADMIN), userController.list)
 
+// Editor/admin: editor accounts (id and name only) for assigning articles.
+// Declared before "/:id" routes so "/editors" is not matched as an id.
+router.get('/editors', authenticate, authorize(ROLES.EDITOR, ROLES.ADMIN), userController.listEditors)
+
 // Admin-only: create a new account with an explicit role (e.g. another admin).
 router.post('/', authenticate, authorize(ROLES.ADMIN), validate(createUserSchema), userController.create)
 

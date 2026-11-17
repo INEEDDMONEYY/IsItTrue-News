@@ -9,6 +9,11 @@ export const ARTICLE_EDITORIAL_STAGES = [
 
 export type ArticleEditorialStage = (typeof ARTICLE_EDITORIAL_STAGES)[number]
 
+// Mirrors EDITOR_SETTABLE_ARTICLE_STAGES on the backend. Draft, submitted and
+// published are set by the submission and publish flows, not by the editor.
+export const EDITOR_SETTABLE_ARTICLE_STAGES = ['reviewing', 'fact_checking', 'scheduled'] as const
+export type EditorSettableArticleStage = (typeof EDITOR_SETTABLE_ARTICLE_STAGES)[number]
+
 export const INVESTIGATION_WORKFLOW_STAGES = [
   'research',
   'interviews',
@@ -46,7 +51,7 @@ interface WorkflowItem {
   editorialDeadline?: string
   createdAt: string
   updatedAt: string
-  author?: { name?: string } | null
+  author?: { id?: string; name?: string } | null
 }
 
 export interface ArticleWorkflowItem extends WorkflowItem {
@@ -54,6 +59,13 @@ export interface ArticleWorkflowItem extends WorkflowItem {
   editorialStage: ArticleEditorialStage
   category?: string
   factCheckStatus?: string
+  assignee?: { id?: string; name?: string } | null
+}
+
+// Editor account that can be assigned an article (id and name only).
+export interface EditorAccount {
+  id: string
+  name: string
 }
 
 export interface InvestigationWorkflowItem extends WorkflowItem {
@@ -63,16 +75,15 @@ export interface InvestigationWorkflowItem extends WorkflowItem {
 
 export type EditorialCalendarItem = ArticleWorkflowItem | InvestigationWorkflowItem
 
+// The server computes editorial deadlines (30 days from each stage change), so updates send only the stage.
 export type EditorialWorkflowUpdate =
   | {
       kind: 'article'
       id: string
-      stage: ArticleEditorialStage
-      deadline: string | null
+      stage: EditorSettableArticleStage
     }
   | {
       kind: 'investigation'
       id: string
       stage: InvestigationWorkflowStage
-      deadline: string | null
     }

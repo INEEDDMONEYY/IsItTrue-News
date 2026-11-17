@@ -23,6 +23,9 @@ import { useAdvertiserAuth } from '@/app/providers/AdvertiserAuthProvider'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { SearchBar } from '@/features/search/components/SearchBar'
 import { CategoryChipBar } from './CategoryChipBar'
+import { LocationModal } from '@/features/locations/components/LocationModal'
+import { useReaderLocation } from '@/features/locations/hooks/useReaderLocation'
+import { GLOBAL_LOCATION_ID } from '@/features/locations/types/location.types'
 
 import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 import animatedLogo from '@/assets/isittrue-profile-animation.svg'
@@ -53,6 +56,10 @@ export function Header() {
 
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [locationOpen, setLocationOpen] = useState(false)
+  const reader = useReaderLocation()
+  const locationLabel =
+    reader.location?.name ?? (reader.preference.locationId === GLOBAL_LOCATION_ID ? 'Global edition' : 'Set Location')
 
   const closeMobileMenu = () => setMobileOpen(false)
 
@@ -86,9 +93,10 @@ export function Header() {
             <button
               type="button"
               className="flex items-center gap-1 transition-colors hover:text-text"
+              onClick={() => setLocationOpen(true)}
             >
               <MapPin className="h-3.5 w-3.5" />
-              Set Location
+              {locationLabel}
             </button>
 
             <button
@@ -285,9 +293,10 @@ export function Header() {
                       <button
                         type="button"
                         className="flex min-w-0 items-center justify-center gap-2 rounded-xl border border-border bg-bg px-3 py-2.5 text-xs font-medium text-heading transition-colors hover:border-accent-border"
+                        onClick={() => setLocationOpen(true)}
                       >
                         <MapPin className="h-3.5 w-3.5 shrink-0 text-accent" />
-                        Set Location
+                        {locationLabel}
                       </button>
 
                       <button
@@ -491,6 +500,7 @@ export function Header() {
       <div className="hidden bg-bg md:block">
         <CategoryChipBar />
       </div>
+      <LocationModal open={locationOpen} onClose={() => setLocationOpen(false)} reader={reader} />
     </header>
   )
 }

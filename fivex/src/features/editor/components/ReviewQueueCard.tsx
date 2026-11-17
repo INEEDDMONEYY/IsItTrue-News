@@ -3,6 +3,7 @@ import { Check, ChevronDown, ListPlus, Loader2, MessageSquareWarning, Trash2 } f
 import DOMPurify from 'dompurify'
 import { ReviewFeedbackPanel } from '@/features/authors/components/ReviewFeedbackPanel'
 import { hasReviewFeedback } from '@/features/authors/utils/reviewFeedback'
+import { ArticleLocationsEditor } from '@/features/locations/components/ArticleLocationsEditor'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import type { PendingArticle } from '../types/reviewQueue.types'
 
@@ -197,6 +198,7 @@ export function ReviewQueueCard({ article, onApprove, onRequestChanges }: Review
               </ul>
             </div>
           )}
+          <ArticleLocationsEditor articleId={article.id} isEditor />
         </div>
       )}
     </article>

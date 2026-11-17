@@ -50,6 +50,7 @@ router.post(
 router.post('/auth/reset-password', authRateLimiter, validate(resetPasswordSchema), advertiserController.resetPassword)
 
 router.get('/overview', authenticateAdvertiser, advertiserController.overview)
+router.get('/nav-counts', authenticateAdvertiser, advertiserController.navCounts)
 // Public: the price list is shown to signed-out visitors too, and prices are only ever decided here.
 router.get('/pricing', advertiserWorkspaceController.pricing)
 

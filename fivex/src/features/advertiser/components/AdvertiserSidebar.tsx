@@ -11,6 +11,8 @@ import {
   Settings,
   CircleHelp,
 } from 'lucide-react'
+import { NavCountBadge } from '@/features/dashboard/components/NavCountBadge'
+import { useAdvertiserNavCounts } from '../hooks/useAdvertiserNavCounts'
 
 interface AdvertiserSidebarProps {
   onNavigate?: () => void
@@ -67,6 +69,7 @@ const accountLinks = [
 export function AdvertiserSidebar({
   onNavigate,
 }: AdvertiserSidebarProps) {
+  const navCounts = useAdvertiserNavCounts()
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
       isActive
@@ -107,7 +110,10 @@ export function AdvertiserSidebar({
                 className={linkClass}
               >
                 <Icon className="h-[18px] w-[18px] shrink-0" />
-                <span>{label}</span>
+                <span className="flex flex-1 items-center justify-between gap-2">
+                  {label}
+                  <NavCountBadge count={navCounts[path] ?? 0} />
+                </span>
               </NavLink>
             ))}
           </div>

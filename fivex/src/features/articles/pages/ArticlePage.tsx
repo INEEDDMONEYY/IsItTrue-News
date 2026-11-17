@@ -9,7 +9,6 @@ import { LoaderState } from '@/components/loaders/LoaderState'
 import { SignUpPromptModal } from '@/components/modals/SignUpPromptModal'
 import { EngagementBar } from '../components/EngagementBar'
 import { FactCheckPanel } from '../components/FactCheckPanel'
-import { ArticleTags } from '../components/ArticleTags'
 import { useArticleFactCheck } from '@/features/fact-checks/hooks/usePublicFactChecks'
 import { NOT_FACT_CHECKED } from '@/features/fact-checks/utils/notFactChecked'
 import { CommentSection } from '../components/CommentSection'
@@ -19,6 +18,8 @@ import { ArticleBodyHtml } from '../components/ArticleBody'
 import { LockedArticleRest } from '../components/LockedArticleRest'
 import { sanitizeArticleHtml, scrambleText } from '../utils/articleBody'
 import { ArticleSources } from '../components/ArticleSources'
+import { ArticleLocations } from '@/features/locations/components/ArticleLocations'
+import { RecommendedArticles } from '../components/RecommendedArticles'
 import { getArticleDetailBySlug } from '../data/mockArticleDetails'
 import { publicArticlesApi } from '../api/publicArticles.api'
 import { adaptPublicArticleDetail } from '../utils/adaptPublicArticle'
@@ -123,6 +124,7 @@ export function ArticlePage() {
         authorId={isRealArticle ? article.author.id : undefined}
         publishedAt={article.publishedAt}
         readTimeMinutes={article.readTimeMinutes}
+        tags={article.tags}
       />
 
       <ArticleMediaCarousel
@@ -233,11 +235,11 @@ export function ArticlePage() {
         </div>
       )}
 
-      <ArticleTags tags={article.tags} />
-
       {!isAnonLocked && article.sourceLinks && article.sourceLinks.length > 0 && (
         <ArticleSources links={article.sourceLinks} />
       )}
+
+      {isRealArticle && !isAnonLocked && realArticle && <ArticleLocations articleId={realArticle.id} />}
 
       <FactCheckPanel
         ref={factCheckRef}
@@ -251,6 +253,8 @@ export function ArticlePage() {
         comments={article.comments}
         articleId={isRealArticle ? realArticle?.id : undefined}
       />
+
+      <RecommendedArticles currentArticleId={isRealArticle ? realArticle?.id : undefined} />
 
       {signUpPrompt && (
         <SignUpPromptModal

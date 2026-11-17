@@ -1,0 +1,80 @@
+{
+  "resource": "global-location",
+  "description": "Shared geographic data foundation for reader location preferences and article geographic metadata. Identifiers are <prefix>:<code>, never display names. Status: proposed; the generator scaffolds these pieces and nothing is registered in the app unless --register is passed.",
+  "standards": {
+    "countries": "ISO 3166-1 alpha-2",
+    "subdivisions": "ISO 3166-2",
+    "regions": "UN M49 (continents and subregions)",
+    "coordinates": "WGS 84 latitude and longitude, decimal degrees",
+    "timezones": "IANA time zone identifiers"
+  },
+  "levels": [
+    { "id": "global", "prefix": "global", "maxPublicPrecision": "region" },
+    { "id": "continent", "prefix": "continent", "maxPublicPrecision": "region" },
+    { "id": "subregion", "prefix": "subregion", "maxPublicPrecision": "region" },
+    { "id": "country", "prefix": "country", "maxPublicPrecision": "country" },
+    { "id": "admin_division", "prefix": "admin_division", "maxPublicPrecision": "subdivision" },
+    { "id": "city", "prefix": "city", "maxPublicPrecision": "city" },
+    { "id": "district", "prefix": "district", "maxPublicPrecision": "city" },
+    { "id": "place", "prefix": "place", "maxPublicPrecision": "hidden" }
+  ],
+  "precisionLevels": ["hidden", "region", "country", "subdivision", "city"],
+  "relationshipTypes": [
+    { "id": "primary", "singular": true, "maxPrecision": "city", "allowedLevels": null },
+    { "id": "event", "singular": false, "maxPrecision": "city", "allowedLevels": null },
+    { "id": "coverage", "singular": false, "maxPrecision": "city", "allowedLevels": null },
+    { "id": "region", "singular": false, "maxPrecision": "region", "allowedLevels": ["global", "continent", "subregion"] },
+    { "id": "country", "singular": false, "maxPrecision": "country", "allowedLevels": ["country"] },
+    { "id": "dateline", "singular": true, "maxPrecision": "city", "allowedLevels": null },
+    { "id": "subject", "singular": false, "maxPrecision": "subdivision", "allowedLevels": null }
+  ],
+  "selectionMethods": ["manual", "device", "approximate", "global"],
+  "associationStatuses": ["proposed", "approved", "rejected"],
+  "confidenceLevels": ["confirmed", "uncertain"],
+  "providers": {
+    "default": "local",
+    "options": ["local", "geonames"],
+    "geonames": {
+      "license": "CC BY 4.0",
+      "attributionRequired": true,
+      "envVar": "GEONAMES_USERNAME",
+      "cacheRequired": true
+    },
+    "ipApproximate": {
+      "defaultEnabled": false,
+      "rawIpStored": false,
+      "hashAlgorithm": "HMAC-SHA256",
+      "envVar": "LOCATION_IP_HASH_SECRET",
+      "resultPrecision": "country"
+    }
+  },
+  "privacyRules": [
+    "Public responses never include coordinates.",
+    "Public precision is capped by both the location level and the relationship type.",
+    "Only approved associations appear in public responses.",
+    "Device coordinates are used for one request and are not stored.",
+    "The reader's selected location is never written to article metadata."
+  ],
+  "searchRules": [
+    "Selected reader location ranks results; it never excludes them.",
+    "Exact matches rank above administrative parent or child matches, which rank above regional matches.",
+    "An article with several associations matches each of them once."
+  ],
+  "seoMapping": {
+    "status": "documentation-only",
+    "schemaOrg": ["NewsArticle.contentLocation", "NewsArticle.spatialCoverage", "Place"],
+    "rule": "Only approved public precision is exposed. Reader location is never used."
+  },
+  "operations": [
+    { "name": "searchLocations", "method": "GET", "path": "/api/locations/search" },
+    { "name": "browseLocations", "method": "GET", "path": "/api/locations/browse" },
+    { "name": "getLocation", "method": "GET", "path": "/api/locations/:locationId" },
+    { "name": "nearestLocation", "method": "POST", "path": "/api/locations/nearest" },
+    { "name": "approximateLocation", "method": "GET", "path": "/api/locations/approximate" },
+    { "name": "getReaderPreference", "method": "GET", "path": "/api/locations/preference" },
+    { "name": "saveReaderPreference", "method": "PUT", "path": "/api/locations/preference" },
+    { "name": "getPublicArticleLocations", "method": "GET", "path": "/api/locations/articles/:articleId/associations" },
+    { "name": "getReviewArticleLocations", "method": "GET", "path": "/api/locations/articles/:articleId/associations/review" },
+    { "name": "saveArticleLocations", "method": "PUT", "path": "/api/locations/articles/:articleId/associations" }
+  ]
+}

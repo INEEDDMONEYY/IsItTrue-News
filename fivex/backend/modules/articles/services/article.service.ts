@@ -7,9 +7,11 @@ import { slugify } from '../../../utils/slug.js'
 import { articleRepository } from '../repositories/article.repository.js'
 import { userRepository } from '../../users/repositories/user.repository.js'
 import { ARTICLE_STATUSES, type ArticleStatus } from '../constants/articleStatus.js'
-import type { ArticleEditorialStage } from '../constants/editorialWorkflow.js'
+import type { EditorSettableArticleStage } from '../constants/editorialWorkflow.js'
+import { resolveEditorialDeadline } from '../../../shared/constants/editorialDeadline.js'
 import type { ArticleDocument } from '../models/Article.js'
 import { tagService } from '../../tags/services/tag.service.js'
+import { approveProposedAssociations } from '../../locations/services/location.service.js'
 import { categoryService } from '../../categories/services/category.service.js'
 import { notificationService } from '../../notifications/services/notification.service.js'
 import { articleAuditService, actionForTransition } from './articleAudit.service.js'
@@ -254,17 +256,42 @@ export const articleService = {
   async updateEditorialWorkflow(
     id: string,
     actingUser: ActingUser,
-    workflow: { editorialStage: ArticleEditorialStage; editorialDeadline: string | null },
+    workflow: { editorialStage: EditorSettableArticleStage },
   ) {
     if (actingUser.role !== ROLES.EDITOR && actingUser.role !== ROLES.ADMIN) {
       throw new AppError('Only an editor or admin can update editorial workflow.', 403)
     }
     const article = await articleRepository.findById(id)
     if (!article) throw new AppError('Article not found.', 404)
+    const currentStage = article.editorialStage ?? null
+    if (currentStage === 'published') {
+      throw new AppError('Published articles cannot change editorial stage.', 409)
+    }
+    const editorialDeadline = resolveEditorialDeadline({
+      previousStage: currentStage,
+      previousDeadline: article.editorialDeadline ?? null,
+      nextStage: workflow.editorialStage,
+    })
     await articleRepository.updateEditorialWorkflow(id, {
       editorialStage: workflow.editorialStage,
-      editorialDeadline: workflow.editorialDeadline,
+      editorialDeadline,
     })
+  },
+
+  async assignArticle(id: string, actingUser: ActingUser, assigneeId: string | null) {
+    if (actingUser.role !== ROLES.EDITOR && actingUser.role !== ROLES.ADMIN) {
+      throw new AppError('Only an editor or admin can assign articles.', 403)
+    }
+    const article = await articleRepository.findById(id)
+    if (!article) throw new AppError('Article not found.', 404)
+    if (assigneeId) {
+      const assignee = await userRepository.findById(assigneeId)
+      if (!assignee) throw new AppError('Assignee not found.', 404)
+      if (assignee.role !== ROLES.EDITOR) {
+        throw new AppError('Articles can only be assigned to editor accounts.', 400)
+      }
+    }
+    await articleRepository.updateAssignee(id, assigneeId)
   },
 
   async listPublished() {
@@ -496,6 +523,7 @@ export const articleService = {
     }
 
     await articleRepository.recordReview(id, { status: ARTICLE_STATUSES.PUBLISHED, reviewerId: reviewer.id })
+    await approveProposedAssociations(id, reviewer.id)
     await articleAuditService.record({
       article,
       actor: reviewer,

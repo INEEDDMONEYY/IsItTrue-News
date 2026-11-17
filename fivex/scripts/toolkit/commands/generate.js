@@ -34,7 +34,7 @@ function resolveOptions(opts) {
 }
 
 /** Adds the backend module's import and `app.use` mount. Idempotent per mount path. */
-function appRegistrationPatch({ name, backendDir, scope }) {
+export function appRegistrationPatch({ name, backendDir, scope }) {
   const Routes = `${toCamel(name)}Routes`
   const mount = apiBasePath(name, scope)
   const importLine = `import { ${Routes} } from './${backendDir}/routes/${name}.routes.js'\n`

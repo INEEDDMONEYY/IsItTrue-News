@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import dayjs from '@/lib/dayjs'
 import { VerdictBadge } from '@/features/fact-checks/components/VerdictBadge'
 import type { PublicVerdict } from '@/features/fact-checks/types/publicFactCheck.types'
+import { ArticleTags } from './ArticleTags'
+import type { ArticleTag } from '../types/articleDetail.types'
 
 interface ArticleHeaderProps {
   category: string
@@ -13,10 +15,13 @@ interface ArticleHeaderProps {
   authorId?: string
   publishedAt: string
   readTimeMinutes: number
+  tags?: ArticleTag[]
+  // Off in the author's preview, where leaving the page would lose work.
+  tagsLinked?: boolean
 }
 
-// The top of a published article: category, fact-check verdict, headline and byline. Shared by the public
-// article page and the author's preview so the two always look the same.
+// The top of a published article: category, fact-check verdict, centered headline, centered byline and tags.
+// Shared by the public article page and the author's preview so the two always look the same.
 export function ArticleHeader({
   category,
   verdict,
@@ -25,6 +30,8 @@ export function ArticleHeader({
   authorId,
   publishedAt,
   readTimeMinutes,
+  tags,
+  tagsLinked,
 }: ArticleHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -33,9 +40,9 @@ export function ArticleHeader({
         {verdict && <VerdictBadge verdict={verdict} />}
       </div>
 
-      <h1 className="text-2xl md:text-3xl font-semibold text-heading leading-snug">{title}</h1>
+      <h1 className="text-center text-2xl md:text-3xl font-semibold text-heading leading-snug">{title}</h1>
 
-      <div className="flex items-center gap-2 text-sm text-text-muted">
+      <div className="flex flex-wrap items-center justify-center gap-2 text-center text-sm text-text-muted">
         {authorId ? (
           <Link
             to={`/authors/${authorId}`}
@@ -51,6 +58,8 @@ export function ArticleHeader({
         <span>·</span>
         <span>{readTimeMinutes} min read</span>
       </div>
+
+      <ArticleTags tags={tags} linked={tagsLinked} />
     </div>
   )
 }

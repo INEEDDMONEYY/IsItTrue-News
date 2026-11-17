@@ -82,4 +82,9 @@ export const advertiserController = {
     const overview = await advertiserOverviewService.getOverview(requireAdvertiser(req).id)
     res.status(200).json(overview)
   }),
+
+  navCounts: asyncHandler(async (req: Request, res: Response) => {
+    const counts = await advertiserOverviewService.getNavCounts(requireAdvertiser(req).id)
+    res.status(200).json({ counts })
+  }),
 }

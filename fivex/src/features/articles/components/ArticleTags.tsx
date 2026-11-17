@@ -15,8 +15,8 @@ export function ArticleTags({ tags, linked = true }: ArticleTagsProps) {
   if (!tags || tags.length === 0) return null
 
   return (
-    <section aria-label="Tags" className="flex flex-wrap items-center gap-2">
-      <ul className="flex flex-wrap gap-2">
+    <section aria-label="Tags" className="flex flex-wrap items-center justify-center gap-2">
+      <ul className="flex flex-wrap justify-center gap-2">
         {tags.map((tag) => (
           <li key={tag.slug}>
             {linked ? (

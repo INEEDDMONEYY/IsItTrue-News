@@ -77,18 +77,15 @@ export const investigationRepository = {
 
   async updateEditorialWorkflow(
     id: string,
-    workflow: { workflowStage: InvestigationWorkflowStage; editorialDeadline: Date | null },
+    workflow: { workflowStage: InvestigationWorkflowStage; editorialDeadline: Date },
   ): Promise<void> {
     await Investigation.updateOne(
       { _id: id },
       {
         $set: {
           workflowStage: workflow.workflowStage,
-          ...(workflow.editorialDeadline
-            ? { editorialDeadline: new Date(`${workflow.editorialDeadline}T00:00:00.000Z`) }
-            : {}),
+          editorialDeadline: workflow.editorialDeadline,
         },
-        ...(workflow.editorialDeadline === null ? { $unset: { editorialDeadline: 1 } } : {}),
       },
     )
   },

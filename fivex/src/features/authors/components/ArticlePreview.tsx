@@ -5,7 +5,6 @@ import { ArticleBodyHtml } from '@/features/articles/components/ArticleBody'
 import { sanitizeArticleHtml } from '@/features/articles/utils/articleBody'
 import { ArticleSources } from '@/features/articles/components/ArticleSources'
 import { FactCheckPanel } from '@/features/articles/components/FactCheckPanel'
-import { ArticleTags } from '@/features/articles/components/ArticleTags'
 import { NOT_FACT_CHECKED } from '@/features/fact-checks/utils/notFactChecked'
 import { adaptPublicArticleDetail } from '@/features/articles/utils/adaptPublicArticle'
 import { ArticleCard } from '@/features/home/components/ArticleCard'
@@ -57,6 +56,8 @@ export function ArticlePreview({ values, author }: ArticlePreviewProps) {
               authorId={article.author.id}
               publishedAt={article.publishedAt}
               readTimeMinutes={article.readTimeMinutes}
+              tags={article.tags}
+              tagsLinked={false}
             />
 
             <ArticleCover src={article.thumbnailUrl} alt={article.title} />
@@ -68,9 +69,6 @@ export function ArticlePreview({ values, author }: ArticlePreviewProps) {
                 Nothing written yet. Go back to editing to add the text of your story.
               </p>
             )}
-
-            {/* Not links here: following one would take the author away from unsaved work. */}
-            <ArticleTags tags={article.tags} linked={false} />
 
             {article.sourceLinks && article.sourceLinks.length > 0 && <ArticleSources links={article.sourceLinks} />}
 

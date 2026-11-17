@@ -41,6 +41,8 @@ import { promotionalCodeRoutes } from './modules/promotionalCodes/routes/promoti
 import { advertisementRoutes } from './modules/advertisement/routes/advertisement.routes.js'
 import { publicAdRoutes } from './modules/advertisers/routes/publicAd.routes.js'
 
+import { locationsRoutes } from './modules/locations/routes/locations.routes.js'
+import { dashboardNavRoutes } from './modules/dashboard/routes/dashboardNav.routes.js'
 export function createApp(): Express {
   const app = express()
 
@@ -112,6 +114,8 @@ export function createApp(): Express {
   app.use('/api/advertiser', advertiserRoutes)
   app.use('/api/ads', publicAdRoutes)
 
+  app.use('/api/locations', locationsRoutes)
+  app.use('/api/dashboard', dashboardNavRoutes)
   app.use(notFound)
   app.use(errorHandler)
 
