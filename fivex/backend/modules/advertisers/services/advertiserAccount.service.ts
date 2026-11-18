@@ -2,8 +2,10 @@ import { logger } from '../../../config/logger.js'
 import { mailService } from '../../../mail/mail.service.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { comparePassword, hashPassword } from '../../../utils/password.js'
+import { CAMPAIGN_PLACEMENTS } from '../constants/advertiser.js'
 import type { AdvertiserDocument } from '../models/Advertiser.js'
 import { advertiserRepository } from '../repositories/advertiser.repository.js'
+import { campaignRepository } from '../repositories/campaign.repository.js'
 import type {
   ChangePasswordInput,
   UpdateNotificationsInput,
@@ -15,11 +17,29 @@ function accountNotFound(): AppError {
   return new AppError('Account not found.', 404)
 }
 
+export interface AdvertiserVisibility {
+  vendorDirectoryListed: boolean
+  homepageSponsor: boolean
+  newsletterSponsor: boolean
+}
+
 export const advertiserAccountService = {
   async updateProfile(advertiserId: string, input: UpdateProfileInput): Promise<AdvertiserDocument> {
     const advertiser = await advertiserRepository.updateProfile(advertiserId, input)
     if (!advertiser) throw accountNotFound()
     return advertiser
+  },
+
+  // Derived from live campaigns, so an advertiser can't claim a status they haven't bought.
+  async visibility(advertiserId: string, now: Date = new Date()): Promise<AdvertiserVisibility> {
+    const live = new Set(await campaignRepository.livePlacementsFor(advertiserId, now))
+    return {
+      vendorDirectoryListed:
+        live.has(CAMPAIGN_PLACEMENTS.VENDOR_LISTING) || live.has(CAMPAIGN_PLACEMENTS.PREMIUM_VENDOR_LISTING),
+      homepageSponsor:
+        live.has(CAMPAIGN_PLACEMENTS.HOMEPAGE_SPONSOR) || live.has(CAMPAIGN_PLACEMENTS.EXCLUSIVE_HOMEPAGE_SPONSOR),
+      newsletterSponsor: live.has(CAMPAIGN_PLACEMENTS.NEWSLETTER_SPONSOR),
+    }
   },
 
   async uploadLogo(advertiserId: string, file: Express.Multer.File | undefined): Promise<AdvertiserDocument> {

@@ -50,6 +50,7 @@ export function NewslettersPage() {
       </div>
 
       <AdSlot placement="newsletter" />
+      <AdSlot placement="newsletter_sponsor" />
       <AdSlot placement="header" page="newsletter" />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
@@ -78,7 +79,8 @@ export function NewslettersPage() {
         </div>
       </div>
       <aside className="lg:sticky lg:top-6">
-        <AdSlot placement="sidepage" />
+        <AdSlot placement="sidepage" page="newsletter" />
+        <AdSlot placement="section_ad" page="newsletter" />
       </aside>
       </div>
     </div>

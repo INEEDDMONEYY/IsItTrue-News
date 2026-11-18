@@ -12,17 +12,26 @@ export const STATUS_LABELS: Record<CampaignStatus, string> = {
 
 export const PLACEMENT_LABELS: Record<CampaignPlacement, string> = {
   header: 'Header',
-  selected_page: 'Selected Page Ad',
+  selected_page: 'Category Sponsor',
   sidepage: 'Sidepage Ad',
   newsletter: 'Newsletter',
   footer: 'Footer',
+  vendor_listing: 'Vendor Listing',
+  premium_vendor_listing: 'Premium Vendor Listing',
+  homepage_sponsor: 'Homepage Sponsor',
+  exclusive_homepage_sponsor: 'Exclusive Homepage Sponsor',
+  newsletter_sponsor: 'Newsletter Sponsor',
+  sponsored_article: 'Sponsored Article',
+  section_ad: 'Section Ad',
 }
 
-const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+// Whole-dollar amounts show without cents; amounts with cents always show two decimals.
+const wholeDollars = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+const withCents = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
 // Budgets are stored in cents; dividing here (not summing floats) keeps the displayed amount exact.
 export function formatMoney(cents: number): string {
-  return money.format(cents / 100)
+  return cents % 100 === 0 ? wholeDollars.format(cents / 100) : withCents.format(cents / 100)
 }
 
 export function formatCount(value: number): string {

@@ -192,7 +192,8 @@ export function FactChecksPage() {
             <Pagination page={data.page} totalPages={data.totalPages} onPageChange={(next) => update({ page: next })} />
           </div>
           <aside className="lg:sticky lg:top-6">
-            <AdSlot placement="sidepage" />
+            <AdSlot placement="sidepage" page="fact_checks" />
+            <AdSlot placement="section_ad" page="fact_checks" />
           </aside>
         </div>
       )}

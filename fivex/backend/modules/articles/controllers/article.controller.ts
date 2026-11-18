@@ -3,6 +3,7 @@ import { asyncHandler } from '../../../utils/asyncHandler.js'
 import { AppError } from '../../../shared/errors/AppError.js'
 import { scrambledRemainder, truncateToParagraphs } from '../../../utils/htmlPreview.js'
 import { articleService, toPublicTeaser } from '../services/article.service.js'
+import { buildForYouFeed } from '../services/forYou.service.js'
 import type {
   CreateArticleInput,
   RequestChangesInput,
@@ -127,6 +128,14 @@ export const articleController = {
     const requested = Number.parseInt(String(req.query.limit ?? ''), 10)
     const limit = Number.isFinite(requested) ? Math.min(Math.max(requested, 1), 20) : 6
     const articles = await articleService.listTrendingPublished(limit)
+    res.status(200).json({ articles })
+  }),
+
+  // Public: the For You feed. Personalized when signed in, trending otherwise.
+  listForYou: asyncHandler(async (req: Request, res: Response) => {
+    const requested = Number.parseInt(String(req.query.limit ?? ''), 10)
+    const limit = Number.isFinite(requested) ? Math.min(Math.max(requested, 1), 20) : 6
+    const articles = await buildForYouFeed(req.user?.id, limit)
     res.status(200).json({ articles })
   }),
 

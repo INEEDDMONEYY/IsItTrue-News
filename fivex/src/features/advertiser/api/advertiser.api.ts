@@ -4,6 +4,7 @@ import type {
   AdvertiserCredentials,
   AdvertiserNotifications,
   AdvertiserRegistration,
+  AdvertiserVisibility,
   UpdateProfileInput,
 } from '../types/advertiser.types'
 
@@ -54,6 +55,11 @@ export const advertiserApi = {
   updateProfile: async (input: UpdateProfileInput): Promise<AdvertiserAccount> => {
     const { data } = await apiClient.put<{ advertiser: AdvertiserAccount }>('/api/advertiser/profile', input)
     return data.advertiser
+  },
+
+  getVisibility: async (): Promise<AdvertiserVisibility> => {
+    const { data } = await apiClient.get<{ visibility: AdvertiserVisibility }>('/api/advertiser/profile/visibility')
+    return data.visibility
   },
 
   uploadLogo: async (file: File): Promise<AdvertiserAccount> => {

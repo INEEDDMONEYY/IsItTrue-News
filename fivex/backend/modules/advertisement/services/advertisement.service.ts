@@ -13,13 +13,13 @@ import {
 import {
   BUNDLES,
   CAMPAIGN_DURATIONS,
-  CAMPAIGN_RATES_CENTS,
   MAX_NEWSLETTER_SENDS,
   NEWSLETTER_SEND_CENTS,
   NEWSLETTER_WINDOW_DAYS,
   PLACEMENT_LABELS,
 } from '../../advertisers/constants/pricing.js'
 import { ctr } from '../../advertisers/services/advertiserReport.service.js'
+import { pricingCatalog } from '../../advertisers/services/advertiserPricing.js'
 import {
   adminAdvertisementRepository,
   type AdvertiserLeanRow,
@@ -290,8 +290,8 @@ export const advertisementService = {
   // Read-only. Prices, rules, and bundles are code constants, so this page cannot change them yet.
   settings() {
     return {
+      placementPrices: pricingCatalog.placements,
       campaignDurations: CAMPAIGN_DURATIONS,
-      rates: CAMPAIGN_RATES_CENTS,
       newsletter: {
         sendCents: NEWSLETTER_SEND_CENTS,
         windowDays: NEWSLETTER_WINDOW_DAYS,

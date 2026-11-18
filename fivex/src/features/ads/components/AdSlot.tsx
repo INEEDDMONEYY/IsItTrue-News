@@ -15,11 +15,26 @@ const RATIO: Record<AdRequest['placement'], string> = {
   sidepage: '300 / 250',
   selected_page: '1200 / 628',
   newsletter: '600 / 300',
+  vendor_listing: '600 / 300',
+  premium_vendor_listing: '600 / 300',
+  homepage_sponsor: '970 / 250',
+  exclusive_homepage_sponsor: '1200 / 400',
+  newsletter_sponsor: '600 / 300',
+  sponsored_article: '1200 / 628',
+  section_ad: '600 / 300',
+}
+
+function SponsoredLabel({ advertiserName }: { advertiserName: string }) {
+  return (
+    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-dim">
+      Sponsored{advertiserName && ` · ${advertiserName}`}
+    </p>
+  )
 }
 
 function Cta({ label }: { label: string }) {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white">
+    <span className="inline-flex shrink-0 items-center rounded-md bg-black px-3 py-1.5 text-xs font-semibold text-white">
       {label || 'Learn more'}
     </span>
   )
@@ -46,7 +61,7 @@ function AdCreative({ ad, className, split }: { ad: PublicAd; className: string;
     <>
       {ad.placement === 'header' || ad.placement === 'footer' ? (
         !ad.imageUrl && (
-          <div className="flex items-center justify-between gap-3 rounded-md border border-dashed border-border bg-accent-bg px-4 py-3">
+          <div className="flex items-center justify-between gap-3 rounded-md bg-accent-bg px-4 py-3">
             <p className="truncate text-sm font-semibold text-heading">{ad.headline}</p>
             <Cta label={ad.ctaLabel} />
           </div>
@@ -71,20 +86,20 @@ function AdCreative({ ad, className, split }: { ad: PublicAd; className: string;
         </div>
       )}
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-text-dim">Sponsored</p>
+        <SponsoredLabel advertiserName={ad.advertiserName} />
         {copy}
       </div>
     </>
   ) : (
     <>
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-text-dim">Sponsored</p>
+      <SponsoredLabel advertiserName={ad.advertiserName} />
       <AdImage ad={ad} />
       {copy}
     </>
   )
 
   const layoutClass = split ? 'sm:flex-row sm:items-center sm:gap-4' : ''
-  const frame = `flex flex-col gap-2 overflow-hidden rounded-xl border border-border bg-card p-3 ${layoutClass} ${className}`
+  const frame = `flex flex-col gap-2 overflow-hidden rounded-xl bg-card p-3 ${layoutClass} ${className}`
   if (!ad.destinationUrl) {
     return (
       <div ref={setNode} className={frame}>
@@ -98,7 +113,7 @@ function AdCreative({ ad, className, split }: { ad: PublicAd; className: string;
       href={adClickUrl(ad.campaignId)}
       target="_blank"
       rel="noopener noreferrer sponsored"
-      className={`${frame} transition-colors hover:border-accent-border`}
+      className={`${frame} transition-opacity hover:opacity-90`}
     >
       {body}
     </a>

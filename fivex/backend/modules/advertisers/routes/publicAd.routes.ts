@@ -5,6 +5,7 @@ import { publicAdController } from '../controllers/publicAd.controller.js'
 const router = Router()
 
 router.get('/', publicAdController.getAd)
+router.get('/vendors', publicAdController.getVendors)
 router.post('/:campaignId/impressions', adTrackingRateLimiter, publicAdController.recordImpression)
 router.get('/:campaignId/click', adTrackingRateLimiter, publicAdController.recordClick)
 

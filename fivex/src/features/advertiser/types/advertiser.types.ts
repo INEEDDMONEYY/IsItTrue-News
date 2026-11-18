@@ -18,6 +18,26 @@ export interface AdvertiserProfile {
   billingEmail: string
   logoUrl?: string
   address: AdvertiserAddress
+  categories: string[]
+  listingTitle: string
+  listingDescription: string
+  featuredProduct: string
+  services: string
+  socialLinks: AdvertiserSocialLinks
+}
+
+export interface AdvertiserSocialLinks {
+  linkedin: string
+  facebook: string
+  instagram: string
+  x: string
+  youtube: string
+}
+
+export interface AdvertiserVisibility {
+  vendorDirectoryListed: boolean
+  homepageSponsor: boolean
+  newsletterSponsor: boolean
 }
 
 export interface AdvertiserNotifications {
@@ -50,7 +70,19 @@ export interface AdvertiserRegistration {
 
 export type CampaignStatus = 'draft' | 'pending_review' | 'active' | 'paused' | 'rejected' | 'completed'
 
-export type CampaignPlacement = 'header' | 'selected_page' | 'sidepage' | 'newsletter' | 'footer'
+export type CampaignPlacement =
+  | 'header'
+  | 'selected_page'
+  | 'sidepage'
+  | 'newsletter'
+  | 'footer'
+  | 'vendor_listing'
+  | 'premium_vendor_listing'
+  | 'homepage_sponsor'
+  | 'exclusive_homepage_sponsor'
+  | 'newsletter_sponsor'
+  | 'sponsored_article'
+  | 'section_ad'
 
 export type AdTargetPage =
   | 'home'
@@ -71,8 +103,9 @@ export interface CampaignCreative {
   imageAsset?: string
 }
 
-// Run length for single placements. Newsletter ignores it and runs for a 30-day window.
-export type CampaignDuration = 7 | 30
+// Run length in days. Newsletter ignores it and runs for a 30-day window.
+export const CAMPAIGN_DURATIONS = [7, 14, 30, 90, 180, 365] as const
+export type CampaignDuration = (typeof CAMPAIGN_DURATIONS)[number]
 
 export interface AdvertiserCampaign {
   id: string
@@ -121,10 +154,13 @@ export interface CampaignInput {
 export interface BundleInput {
   bundleId: string
   name: string
+  durationDays: CampaignDuration
   creative: Omit<CampaignInput['creative'], 'imageAssetId'>
   images: Partial<Record<CampaignPlacement, string | null>>
   targetPages: AdTargetPage[]
   targetCategories: string[]
+  // Required when the bundle includes a Section Ad.
+  sectionSlot: SectionSlotId | null
   startDate: string | null
   submit: boolean
 }
@@ -140,7 +176,7 @@ export interface PricingPlacement {
   placement: CampaignPlacement
   label: string
   unit: 'flat' | 'per_page' | 'per_send'
-  // Keyed by run length in days. Newsletter uses the per-send price for both.
+  // Keyed by run length in days. Newsletter uses the per-send price for every duration.
   prices: Record<CampaignDuration, number>
 }
 
@@ -149,11 +185,13 @@ export interface PricingBundle {
   name: string
   tagline: string
   description: string
-  priceCents: number
-  individualValueCents: number
-  savingsCents: number
+  // Pages included in the bundle's Category Sponsor and Sidepage placements; extra pages are charged.
+  categorySponsors: number
+  monthlyPriceCents: number
+  // Keyed by run length in days.
+  prices: Record<CampaignDuration, number>
+  individualValues: Record<CampaignDuration, number>
   recommended: boolean
-  durationDays: 30
   placements: { placement: CampaignPlacement; label: string }[]
 }
 
@@ -215,6 +253,32 @@ export interface AdvertiserAnalytics {
       endDate: string | null
     }
   >
+}
+
+export interface AdSlotPageAvailability {
+  page: string
+  label: string
+  capacity: number
+  taken: number
+  open: number
+}
+
+export type SectionSlotId = 'home_for_you' | 'article_local' | 'fact_checks_investigations' | 'videos_newsletter' | 'categories'
+
+export interface SectionSlotAvailability {
+  id: SectionSlotId
+  label: string
+  taken: number
+  open: number
+}
+
+export interface AdSlotAvailability {
+  placement: CampaignPlacement
+  label: string
+  capacity: number
+  pages: AdSlotPageAvailability[]
+  categoryTaken: Record<string, number>
+  sections?: SectionSlotAvailability[]
 }
 
 export interface AdvertiserBilling {

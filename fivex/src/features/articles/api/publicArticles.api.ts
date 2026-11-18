@@ -1,6 +1,9 @@
 import { apiClient } from '@/api/client'
 import type { PublicArticle } from '../types/publicArticle.types'
 
+/** A For You teaser: the public article plus the reason it was picked. */
+export type ForYouArticle = PublicArticle & { reason: string }
+
 /**
  * Read-only, public article listing endpoints — backed by the real
  * /api/articles/category/:slug and /api/articles/tag/:slug routes. Used by
@@ -22,6 +25,13 @@ export const publicArticlesApi = {
 
   listTrending: async (limit = 6): Promise<PublicArticle[]> => {
     const { data } = await apiClient.get<{ articles: PublicArticle[] }>('/api/articles/trending', {
+      params: { limit },
+    })
+    return data.articles
+  },
+
+  listForYou: async (limit = 6): Promise<ForYouArticle[]> => {
+    const { data } = await apiClient.get<{ articles: ForYouArticle[] }>('/api/articles/for-you', {
       params: { limit },
     })
     return data.articles

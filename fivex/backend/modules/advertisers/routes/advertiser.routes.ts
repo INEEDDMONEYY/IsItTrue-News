@@ -15,7 +15,6 @@ import { advertiserWorkspaceController } from '../controllers/advertiserWorkspac
 import {
   bundleInputSchema,
   campaignEditInputSchema,
-  campaignInputSchema,
   changePasswordSchema,
   registerAdvertiserSchema,
   renameAssetSchema,
@@ -59,7 +58,6 @@ const workspace = Router()
 workspace.use(authenticateAdvertiser)
 
 workspace.get('/campaigns', advertiserWorkspaceController.listCampaigns)
-workspace.post('/campaigns', validate(campaignInputSchema), advertiserWorkspaceController.createCampaign)
 workspace.post('/campaigns/bundle', validate(bundleInputSchema), advertiserWorkspaceController.createBundle)
 workspace.get('/campaigns/:id', advertiserWorkspaceController.getCampaign)
 workspace.put('/campaigns/:id', validate(campaignEditInputSchema), advertiserWorkspaceController.updateCampaign)
@@ -74,8 +72,10 @@ workspace.delete('/library/:id', advertiserWorkspaceController.deleteAsset)
 
 workspace.get('/analytics', advertiserWorkspaceController.analytics)
 workspace.get('/billing', advertiserWorkspaceController.billing)
+workspace.get('/slots', advertiserWorkspaceController.slots)
 
 workspace.put('/profile', validate(updateProfileSchema), advertiserWorkspaceController.updateProfile)
+workspace.get('/profile/visibility', advertiserWorkspaceController.profileVisibility)
 workspace.post('/profile/logo', adImageUpload.single('file'), advertiserWorkspaceController.uploadLogo)
 workspace.delete('/profile/logo', advertiserWorkspaceController.removeLogo)
 

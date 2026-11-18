@@ -1,7 +1,19 @@
 import { apiClient } from '@/api/client'
 import { API_BASE_URL } from '@/config/env'
 
-export type PublicAdPlacement = 'header' | 'footer' | 'sidepage' | 'selected_page' | 'newsletter'
+export type PublicAdPlacement =
+  | 'header'
+  | 'footer'
+  | 'sidepage'
+  | 'selected_page'
+  | 'newsletter'
+  | 'homepage_sponsor'
+  | 'exclusive_homepage_sponsor'
+  | 'newsletter_sponsor'
+  | 'sponsored_article'
+  | 'vendor_listing'
+  | 'premium_vendor_listing'
+  | 'section_ad'
 
 export type PublicAdPage =
   | 'home'
@@ -21,6 +33,7 @@ export interface PublicAd {
   ctaLabel: string
   destinationUrl: string
   imageUrl?: string
+  advertiserName: string
 }
 
 export interface AdRequest {

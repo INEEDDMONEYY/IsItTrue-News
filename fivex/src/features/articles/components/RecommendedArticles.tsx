@@ -9,9 +9,11 @@ export function RecommendedArticles({ currentArticleId }: { currentArticleId?: s
   return (
     <section className="flex flex-col gap-4 border-t border-border pt-8">
       <h2 className="text-lg font-semibold text-heading">Recommended for you</h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
         {articles.map((article) => (
-          <ArticleCard key={article.id} article={article} />
+          <div key={article.id} className="w-72 shrink-0 snap-start sm:w-80">
+            <ArticleCard article={article} />
+          </div>
         ))}
       </div>
     </section>

@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { campaignsApi } from '../api/campaigns.api'
-import type { BundleInput, CampaignEditInput, CampaignInput, CampaignStatus } from '../types/advertiser.types'
+import type { BundleInput, CampaignEditInput, CampaignStatus } from '../types/advertiser.types'
 import { ADVERTISER_QUERY_KEY } from './useAdvertiserOverview'
 
 const CAMPAIGNS_KEY = [...ADVERTISER_QUERY_KEY, 'campaigns'] as const
@@ -37,11 +37,11 @@ function useInvalidateAdvertiser() {
   return () => queryClient.invalidateQueries({ queryKey: ADVERTISER_QUERY_KEY })
 }
 
-export function useSaveCampaign(id?: string) {
+export function useUpdateCampaign(id: string | undefined) {
   const invalidate = useInvalidateAdvertiser()
   return useMutation({
-    mutationFn: (input: CampaignInput | CampaignEditInput) =>
-      id ? campaignsApi.update(id, input as CampaignEditInput) : campaignsApi.create(input as CampaignInput),
+    // The form only saves through this hook when editing an existing campaign.
+    mutationFn: (input: CampaignEditInput) => campaignsApi.update(id as string, input),
     onSuccess: invalidate,
   })
 }

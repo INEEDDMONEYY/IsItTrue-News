@@ -128,7 +128,7 @@ export function Header() {
           </button>
 
           <Link to="/" className="flex shrink-0 items-center gap-2">
-            <picture>
+            <picture className="hidden sm:block">
               <source media="(prefers-reduced-motion: reduce)" srcSet={logo} />
               <img
                 src={animatedLogo}
@@ -138,6 +138,10 @@ export function Header() {
                 className="size-10 rounded-lg ring-1 ring-border"
               />
             </picture>
+
+            <span className="font-brand text-xl font-bold tracking-tight text-heading sm:hidden">
+              IITNews
+            </span>
 
             <span className="hidden text-lg font-semibold tracking-tight text-heading sm:block">
               IsItTrueNews
@@ -293,7 +297,10 @@ export function Header() {
                       <button
                         type="button"
                         className="flex min-w-0 items-center justify-center gap-2 rounded-xl border border-border bg-bg px-3 py-2.5 text-xs font-medium text-heading transition-colors hover:border-accent-border"
-                        onClick={() => setLocationOpen(true)}
+                        onClick={() => {
+                          closeMobileMenu()
+                          setLocationOpen(true)
+                        }}
                       >
                         <MapPin className="h-3.5 w-3.5 shrink-0 text-accent" />
                         {locationLabel}
@@ -497,7 +504,7 @@ export function Header() {
       </div>
 
       {/* Trending topics */}
-      <div className="hidden bg-bg md:block">
+      <div className="bg-bg">
         <CategoryChipBar />
       </div>
       <LocationModal open={locationOpen} onClose={() => setLocationOpen(false)} reader={reader} />

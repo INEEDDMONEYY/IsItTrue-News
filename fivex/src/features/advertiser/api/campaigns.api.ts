@@ -5,7 +5,6 @@ import type {
   AdvertiserOverview,
   BundleInput,
   CampaignEditInput,
-  CampaignInput,
   CampaignStatus,
   PricingCatalog,
 } from '../types/advertiser.types'
@@ -42,11 +41,6 @@ export const campaignsApi = {
 
   get: async (id: string): Promise<AdvertiserCampaign> => {
     const { data } = await apiClient.get<{ campaign: AdvertiserCampaign }>(`${BASE}/campaigns/${encodeURIComponent(id)}`)
-    return data.campaign
-  },
-
-  create: async (input: CampaignInput): Promise<AdvertiserCampaign> => {
-    const { data } = await apiClient.post<{ campaign: AdvertiserCampaign }>(`${BASE}/campaigns`, input)
     return data.campaign
   },
 

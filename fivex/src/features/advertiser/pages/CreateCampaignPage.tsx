@@ -11,28 +11,30 @@ import { AdvertiserPageHeader } from '../components/AdvertiserPageHeader'
 import { useCategories } from '@/features/categories/hooks/useCategories'
 import { AssetPicker } from '../components/AssetPicker'
 import { CampaignStatusBadge } from '../components/CampaignStatusBadge'
-import { useCampaign, useCreateBundle, usePricing, useSaveCampaign } from '../hooks/useCampaigns'
-import type {
-  AdTargetPage,
-  AdvertiserCampaign,
-  BundleInput,
-  CampaignDuration,
-  CampaignEditInput,
-  CampaignInput,
-  CampaignPlacement,
-  CampaignStatus,
-  PricingCatalog,
+import { useAdSlots } from '../hooks/useAdSlots'
+import { useCampaign, useCreateBundle, usePricing, useUpdateCampaign } from '../hooks/useCampaigns'
+import {
+  CAMPAIGN_DURATIONS,
+  type AdTargetPage,
+  type AdvertiserCampaign,
+  type BundleInput,
+  type CampaignDuration,
+  type CampaignEditInput,
+  type CampaignPlacement,
+  type CampaignStatus,
+  type PricingCatalog,
+  type SectionSlotId,
 } from '../types/advertiser.types'
 import { resolveAssetUrl } from '../utils/assetUrl'
 import { formatMoney, toDateInput } from '../utils/format'
 import { PLACEMENT_SPECS, PLACEMENT_SPEC_BY_ID, TARGET_PAGE_OPTIONS, type PlacementSpec } from '../utils/placements'
 
 const EDITABLE: CampaignStatus[] = ['draft', 'pending_review', 'paused', 'rejected']
-const DURATIONS: CampaignDuration[] = [7, 30]
 // Mirrors the server's NEWSLETTER_WINDOW_DAYS and MAX_NEWSLETTER_SENDS.
 const NEWSLETTER_WINDOW_DAYS = 30
 const MAX_NEWSLETTER_SENDS = 12
-const BUNDLE_DURATION = 30
+// Placements sold per page or category. Each page or category holds one ad per placement.
+const PER_PAGE_PLACEMENTS: CampaignPlacement[] = ['selected_page', 'sidepage']
 
 type PurchaseMode = 'single' | 'bundle'
 
@@ -57,6 +59,7 @@ interface FormState {
   bundleImages: Partial<Record<CampaignPlacement, ImageChoice>>
   targetPages: AdTargetPage[]
   targetCategories: string[]
+  sectionSlot: SectionSlotId | null
   startDate: string
 }
 
@@ -67,7 +70,8 @@ function pageCountFor(form: FormState): number {
 
 function initialState(campaign?: AdvertiserCampaign): FormState {
   return {
-    mode: 'single',
+    // New purchases are always bundles. Existing single placements stay editable as single.
+    mode: campaign ? 'single' : 'bundle',
     bundleId: null,
     name: campaign?.name ?? '',
     placement: campaign?.placement ?? 'header',
@@ -81,6 +85,7 @@ function initialState(campaign?: AdvertiserCampaign): FormState {
     bundleImages: {},
     targetPages: campaign?.targetPages ?? [],
     targetCategories: campaign?.targetCategories ?? [],
+    sectionSlot: null,
     startDate: toDateInput(campaign?.startDate),
   }
 }
@@ -127,6 +132,9 @@ function requirementsFor(form: FormState, catalog: PricingCatalog): Requirements
 function submissionProblems(form: FormState, requirements: Requirements, editing: boolean): string[] {
   const problems: string[] = []
   if (form.mode === 'bundle' && !form.bundleId) problems.push('Choose a campaign bundle.')
+  if (!editing && form.mode === 'bundle' && requirements.specs.some((spec) => spec.id === 'section_ad') && !form.sectionSlot) {
+    problems.push('Choose a Section Ad slot.')
+  }
   if (!form.name.trim()) problems.push('Name your campaign.')
   if (!form.headline.trim()) problems.push('Add a headline.')
   if (requirements.bodyRequired && !form.body.trim()) problems.push('Add body text for this placement.')
@@ -145,10 +153,10 @@ function submissionProblems(form: FormState, requirements: Requirements, editing
   return problems
 }
 
-// Days the campaign runs from its start date. Newsletter and bundles use fixed windows.
+// Days the campaign runs from its start date. Single newsletters use a fixed window.
 function runDaysFor(form: FormState): number {
-  if (form.mode === 'bundle') return BUNDLE_DURATION
-  return form.placement === 'newsletter' ? NEWSLETTER_WINDOW_DAYS : form.durationDays
+  if (form.mode === 'single' && form.placement === 'newsletter') return NEWSLETTER_WINDOW_DAYS
+  return form.durationDays
 }
 
 // Prices shown to the advertiser. The server recalculates everything on save.
@@ -157,12 +165,20 @@ function priceLinesFor(form: FormState, catalog: PricingCatalog): { label: strin
   if (form.mode === 'bundle') {
     const bundle = catalog.bundles.find((item) => item.id === form.bundleId)
     if (!bundle) return []
-    const lines = [{ label: `${bundle.name} (30 days)`, cents: bundle.priceCents }]
-    const selectedPage = catalog.placements.find((item) => item.placement === 'selected_page')
-    if (selectedPage && pageCount > 1) {
+    const lines = [{ label: `${bundle.name} (${form.durationDays} days)`, cents: bundle.prices[form.durationDays] }]
+    // Mirrors the server: pages beyond the bundle's included pages are charged for each per-page placement it holds.
+    const extraPages = Math.max(0, pageCount - bundle.categorySponsors)
+    const perPageRate = bundle.placements
+      .filter((item) => PER_PAGE_PLACEMENTS.includes(item.placement))
+      .reduce(
+        (sum, item) =>
+          sum + (catalog.placements.find((rate) => rate.placement === item.placement)?.prices[form.durationDays] ?? 0),
+        0,
+      )
+    if (extraPages > 0 && perPageRate > 0) {
       lines.push({
-        label: `Extra pages (${pageCount - 1} × ${formatMoney(selectedPage.prices[BUNDLE_DURATION])})`,
-        cents: (pageCount - 1) * selectedPage.prices[BUNDLE_DURATION],
+        label: `Extra pages (${extraPages} × ${formatMoney(perPageRate)} per page)`,
+        cents: extraPages * perPageRate,
       })
     }
     return lines
@@ -175,11 +191,11 @@ function priceLinesFor(form: FormState, catalog: PricingCatalog): { label: strin
     return [
       {
         label: `${spec.label} (${form.sends} ${form.sends === 1 ? 'send' : 'sends'})`,
-        cents: rate.prices[30] * form.sends,
+        cents: rate.prices[form.durationDays] * form.sends,
       },
     ]
   }
-  if (form.placement === 'selected_page') {
+  if (PER_PAGE_PLACEMENTS.includes(form.placement)) {
     return [
       {
         label: `${spec.label} (${pageCount} ${pageCount === 1 ? 'page' : 'pages'}, ${form.durationDays} days)`,
@@ -200,20 +216,6 @@ function creativeFields(form: FormState, imageAssetId: string | null) {
   }
 }
 
-function toInput(form: FormState, requirements: Requirements, submit: boolean): CampaignInput {
-  return {
-    name: form.name.trim(),
-    placement: form.placement,
-    creative: creativeFields(form, form.image?.assetId ?? null),
-    targetPages: requirements.targeted ? form.targetPages : [],
-    targetCategories: requirements.targeted ? form.targetCategories : [],
-    durationDays: form.durationDays,
-    sends: form.placement === 'newsletter' ? form.sends : 1,
-    startDate: form.startDate || null,
-    submit,
-  }
-}
-
 // Editing only changes the name and creative. The server ignores any paid terms sent with it.
 function toEditInput(form: FormState, submit: boolean): CampaignEditInput {
   return {
@@ -231,10 +233,12 @@ function toBundleInput(form: FormState, submit: boolean): BundleInput {
   return {
     bundleId: form.bundleId ?? '',
     name: form.name.trim(),
+    durationDays: form.durationDays,
     creative: creativeFields(form, null),
     images,
     targetPages: form.targetPages,
     targetCategories: form.targetCategories,
+    sectionSlot: form.sectionSlot,
     startDate: form.startDate || null,
     submit,
   }
@@ -269,13 +273,31 @@ function Section({ title, description, children }: { title: string; description?
 function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; catalog: PricingCatalog }) {
   const navigate = useNavigate()
   const { advertiser } = useAdvertiserAuth()
-  const save = useSaveCampaign(campaign?.id)
+  const updateCampaign = useUpdateCampaign(campaign?.id)
   const createBundle = useCreateBundle()
   const [form, setForm] = useState<FormState>(() => initialState(campaign))
   const [pickerPlacement, setPickerPlacement] = useState<CampaignPlacement | null>(null)
   const [showProblems, setShowProblems] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { categories, isLoading: categoriesLoading } = useCategories()
+  const { data: slots } = useAdSlots()
+  const headerSlot = slots?.find((slot) => slot.placement === 'header')
+  const sectionSlots = slots?.find((slot) => slot.placement === 'section_ad')?.sections ?? []
+  // The per-page placements in this purchase. A category is only open if every one of them is open there.
+  const perPagePlacementsInPurchase = (
+    form.mode === 'bundle'
+      ? (catalog.bundles.find((item) => item.id === form.bundleId)?.placements ?? []).map((item) => item.placement)
+      : [form.placement]
+  ).filter((placement) => PER_PAGE_PLACEMENTS.includes(placement))
+  // Null until slot availability loads, so nothing is disabled on a guess.
+  const categoryOpen = (slug: string) => {
+    const open = perPagePlacementsInPurchase.map((placement) => {
+      const slot = slots?.find((item) => item.placement === placement)
+      return slot ? Math.max(slot.capacity - (slot.categoryTaken[slug] ?? 0), 0) : null
+    })
+    return open.length === 0 || open.includes(null) ? null : Math.min(...(open as number[]))
+  }
+  const isCategorySoldOut = (slug: string) => categoryOpen(slug) === 0 && !form.targetCategories.includes(slug)
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((prev) => ({ ...prev, [key]: value }))
   // Editing keeps the paid terms from the original purchase; only the name and creative can change.
@@ -285,13 +307,14 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
   const priceLines = useMemo(() => priceLinesFor(form, catalog), [form, catalog])
   const bundle = catalog.bundles.find((item) => item.id === form.bundleId)
   const isBundle = form.mode === 'bundle'
-  const pending = save.isPending || createBundle.isPending
+  const pending = updateCampaign.isPending || createBundle.isPending
   const brand = advertiser?.businessName ?? ''
   const today = dayjs().format('YYYY-MM-DD')
   const runDays = runDaysFor(form)
   const endLabel = form.startDate ? dayjs(form.startDate).add(runDays - 1, 'day').format('MMM D, YYYY') : null
-  const pageRate = catalog.placements.find((item) => item.placement === 'selected_page')?.prices[isBundle ? BUNDLE_DURATION : form.durationDays] ?? 0
+  const pageRate = catalog.placements.find((item) => item.placement === 'selected_page')?.prices[form.durationDays] ?? 0
   const totalCents = priceLines.reduce((sum, line) => sum + line.cents, 0)
+  const bundleSavingsCents = bundle ? bundle.individualValues[form.durationDays] - bundle.prices[form.durationDays] : 0
   const previewPlacements: CampaignPlacement[] = isBundle
     ? (bundle?.placements.map((item) => item.placement) ?? [])
     : [form.placement]
@@ -326,7 +349,7 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
     }
 
     const onError = (err: unknown) => setError(getErrorMessage(err, 'Could not save the campaign.'))
-    if (isBundle && !campaign) {
+    if (!campaign) {
       createBundle.mutate(toBundleInput(form, submit), {
         onSuccess: () => {
           const notice = submit
@@ -339,7 +362,7 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
       return
     }
 
-    save.mutate(campaign ? toEditInput(form, submit) : toInput(form, requirements, submit), {
+    updateCampaign.mutate(toEditInput(form, submit), {
       onSuccess: (saved) => {
         const notice =
           saved.status === 'active'
@@ -367,9 +390,10 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
       form.targetCategories.includes(slug) ? form.targetCategories.filter((s) => s !== slug) : [...form.targetCategories, slug],
     )
 
-  const allCategorySlugs = categories.map((category) => category.slug)
-  const allCategoriesSelected = allCategorySlugs.length > 0 && allCategorySlugs.every((slug) => form.targetCategories.includes(slug))
-  const toggleAllCategories = () => update('targetCategories', allCategoriesSelected ? [] : allCategorySlugs)
+  const selectableCategorySlugs = categories.map((category) => category.slug).filter((slug) => !isCategorySoldOut(slug))
+  const allCategoriesSelected =
+    selectableCategorySlugs.length > 0 && selectableCategorySlugs.every((slug) => form.targetCategories.includes(slug))
+  const toggleAllCategories = () => update('targetCategories', allCategoriesSelected ? [] : selectableCategorySlugs)
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-6">
@@ -377,29 +401,10 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
         title="1. Choose what to run"
         description={
           isBundle
-            ? 'Bundles share one creative across every placement they include, and run for 30 days.'
+            ? `Bundles share one creative across every placement they include, and run for ${form.durationDays} days.`
             : 'Every option below previews your current ad. Fill in the details further down and the previews update as you type.'
         }
       >
-        {!campaign && (
-          <div role="group" aria-label="Purchase type" className="mb-5 inline-flex rounded-xl border border-border p-1">
-            {(['single', 'bundle'] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                aria-pressed={form.mode === mode}
-                // Targets are chosen per purchase, so switching modes must not carry pages or categories across.
-                onClick={() => setForm((prev) => ({ ...prev, mode, targetPages: [], targetCategories: [] }))}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                  form.mode === mode ? 'bg-accent text-white' : 'text-text-muted hover:text-heading'
-                }`}
-              >
-                {mode === 'single' ? 'Single placement' : 'Bundles'}
-              </button>
-            ))}
-          </div>
-        )}
-
         {campaign && (
           <p className="mb-5 rounded-xl bg-accent-bg px-4 py-3 text-sm text-text-muted">
             Placement, pages, duration, sends and dates are locked to your original payment. You can update the name and
@@ -409,6 +414,7 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
         )}
 
         {isBundle ? (
+          <>
           <div role="radiogroup" aria-label="Campaign bundle" className="grid grid-cols-1 gap-4 xl:grid-cols-3">
             {catalog.bundles.map((option) => {
               const selected = option.id === form.bundleId
@@ -434,14 +440,15 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
                       <CheckCircle2 className="h-5 w-5 shrink-0 text-accent" aria-hidden="true" />
                     ) : null}
                   </div>
-                  <p className="mt-3 text-2xl font-bold text-heading">{formatMoney(option.priceCents)}</p>
+                  <p className="mt-3 text-2xl font-bold text-heading">{formatMoney(option.prices[form.durationDays])}</p>
                   <p className="text-xs text-text-muted">
-                    Individual value {formatMoney(option.individualValueCents)} · Save {formatMoney(option.savingsCents)}
+                    Individual value {formatMoney(option.individualValues[form.durationDays])} · Save{' '}
+                    {formatMoney(option.individualValues[form.durationDays] - option.prices[form.durationDays])}
                   </p>
                   <ul className="mt-3 space-y-1 text-xs text-text-muted">
                     {option.placements.map((item) => (
                       <li key={item.placement}>
-                        • {item.label} ({item.placement === 'newsletter' ? 'one distribution' : '30 days'})
+                        • {item.label} ({item.placement === 'newsletter' ? 'one distribution' : `${form.durationDays} days`})
                       </li>
                     ))}
                   </ul>
@@ -450,6 +457,82 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
               )
             })}
           </div>
+          {bundle && (
+            <div className="mt-5 rounded-2xl border border-border bg-bg p-4">
+              <p className="text-sm font-medium text-heading">What {bundle.name} includes</p>
+              <p className="mt-0.5 text-xs text-text-muted">
+                Included placements are locked to this bundle. Placements not in it are shown for reference.
+              </p>
+              <fieldset disabled className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                <legend className="sr-only">Placements in {bundle.name}</legend>
+                {catalog.placements.map((item) => {
+                  const included = bundle.placements.find((p) => p.placement === item.placement)
+                  const isHeader = item.placement === 'header'
+                  const headerOpen = headerSlot?.pages[0]?.open
+                  let status = included ? 'Included' : 'Not included'
+                  if (included && isHeader && headerSlot && headerOpen !== undefined) {
+                    status =
+                      headerOpen === 0
+                        ? 'Included · header sold out'
+                        : `Included · ${Math.max(headerOpen - 1, 0)} of ${headerSlot.capacity} header slots left after this`
+                  }
+                  if (included && item.placement === 'section_ad') {
+                    const chosen = sectionSlots.find((section) => section.id === form.sectionSlot)
+                    status = chosen ? `Included · ${chosen.label}` : 'Included · choose a slot below'
+                  }
+                  return (
+                    <label
+                      key={item.placement}
+                      className={`flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm ${
+                        included ? 'text-heading' : 'text-text-dim opacity-60'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(included)}
+                        disabled
+                        readOnly
+                        className="h-4 w-4 accent-[var(--color-accent)]"
+                      />
+                      <span className="min-w-0 flex-1 truncate">{included?.label ?? item.label}</span>
+                      <span className="shrink-0 text-xs text-text-muted">{status}</span>
+                    </label>
+                  )
+                })}
+              </fieldset>
+              {bundle.placements.some((item) => item.placement === 'section_ad') && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-heading">Section Ad slot</p>
+                  <p className="mt-0.5 text-xs text-text-muted">
+                    Each slot covers a group of sections. Sold slots can't be chosen.
+                  </p>
+                  <div role="radiogroup" aria-label="Section Ad slot" className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {sectionSlots.map((section) => {
+                      const selected = form.sectionSlot === section.id
+                      const soldOut = section.open === 0 && !selected
+                      return (
+                        <button
+                          key={section.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          disabled={soldOut}
+                          onClick={() => update('sectionSlot', section.id)}
+                          className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-sm text-heading transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                            selected ? 'border-accent bg-accent-bg ring-2 ring-accent' : 'border-border bg-bg hover:border-accent-border'
+                          }`}
+                        >
+                          <span className="min-w-0 truncate">{section.label}</span>
+                          <span className="shrink-0 text-xs text-text-muted">{soldOut ? 'Sold' : 'Open'}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          </>
         ) : (
           <div role="radiogroup" aria-label="Ad placement" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {PLACEMENT_SPECS.map((option) => {
@@ -608,7 +691,7 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
           {requirements.targeted && (
             <Section
               title="4. Pages"
-              description={`A Selected Page Ad only appears on the pages you choose. Each page is $${(pageRate / 100).toFixed(0)} for ${BUNDLE_DURATION} days${isBundle ? '' : ` or the duration you pick`}; the first page is included in bundles.`}
+              description={`A Category Sponsor only appears on the pages you choose. Each extra page is $${(pageRate / 100).toFixed(0)} for ${form.durationDays} days; each bundle includes its Category Sponsor pages.`}
             >
               <fieldset disabled={locked}>
                 <legend className="sr-only">Pages to show this ad on</legend>
@@ -654,20 +737,32 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
                 <fieldset disabled={locked} className="mt-2">
                   <legend className="sr-only">Article categories to show this ad on</legend>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {categories.map((category) => (
-                      <label
-                        key={category.slug}
-                        className="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm text-heading hover:bg-surface disabled:cursor-not-allowed"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={form.targetCategories.includes(category.slug)}
-                          onChange={() => toggleCategory(category.slug)}
-                          className="h-4 w-4 accent-[var(--color-accent)]"
-                        />
-                        {category.name}
-                      </label>
-                    ))}
+                    {categories.map((category) => {
+                      const open = categoryOpen(category.slug)
+                      const soldOut = isCategorySoldOut(category.slug)
+                      return (
+                        <label
+                          key={category.slug}
+                          className={`flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm text-heading ${
+                            soldOut ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-surface'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={form.targetCategories.includes(category.slug)}
+                            disabled={soldOut}
+                            onChange={() => toggleCategory(category.slug)}
+                            className="h-4 w-4 accent-[var(--color-accent)]"
+                          />
+                          <span className="min-w-0 flex-1 truncate">{category.name}</span>
+                          {open !== null && (
+                            <span className={`shrink-0 text-xs ${soldOut ? 'font-medium text-text-muted' : 'text-text-dim'}`}>
+                              {soldOut ? 'Sold out' : `${open} open`}
+                            </span>
+                          )}
+                        </label>
+                      )
+                    })}
                   </div>
                 </fieldset>
               )}
@@ -676,12 +771,8 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
 
           <Section title={`${requirements.targeted ? '5' : '4'}. Duration & schedule`}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {isBundle ? (
-                <Field label="Duration" hint="Bundles run for 30 days.">
-                  <p className={`${inputClass} text-text-muted`}>30 days</p>
-                </Field>
-              ) : form.placement === 'newsletter' ? (
-                <Field label="Newsletter sends" hint={`Each send is $${(catalog.placements.find((p) => p.placement === 'newsletter')?.prices[30] ?? 0) / 100} and runs within a ${NEWSLETTER_WINDOW_DAYS}-day window.`}>
+              {form.placement === 'newsletter' && !isBundle ? (
+                <Field label="Newsletter sends" hint={`Each send is ${formatMoney(catalog.placements.find((p) => p.placement === 'newsletter')?.prices[form.durationDays] ?? 0)} and runs within a ${NEWSLETTER_WINDOW_DAYS}-day window.`}>
                   <input
                     className={inputClass}
                     type="number"
@@ -694,14 +785,23 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
                   />
                 </Field>
               ) : (
-                <Field label="Duration" hint={form.placement === 'selected_page' ? 'Price per page for this duration.' : undefined}>
+                <Field
+                  label="Duration"
+                  hint={
+                    isBundle
+                      ? 'Bundle prices scale with the run length.'
+                      : form.placement === 'selected_page'
+                        ? 'Price per page for this duration.'
+                        : undefined
+                  }
+                >
                   <select
                     className={inputClass}
                     value={form.durationDays}
                     disabled={locked}
                     onChange={(e) => update('durationDays', Number(e.target.value) as CampaignDuration)}
                   >
-                    {DURATIONS.map((days) => (
+                    {CAMPAIGN_DURATIONS.map((days) => (
                       <option key={days} value={days}>
                         {days} days
                       </option>
@@ -762,7 +862,7 @@ function CampaignForm({ campaign, catalog }: { campaign?: AdvertiserCampaign; ca
             </div>
             {isBundle && bundle && (
               <p className="mt-2 text-xs text-emerald-600">
-                You save {formatMoney(bundle.savingsCents)} compared with buying these placements individually.
+                You save {formatMoney(bundleSavingsCents)} compared with buying these placements individually.
               </p>
             )}
             <p className="mt-2 text-xs text-text-dim">Payment is collected after approval.</p>
@@ -866,7 +966,7 @@ export function CreateCampaignPage() {
       <div className="mx-auto w-full max-w-7xl">
         <AdvertiserPageHeader
           title="Create advertisement"
-          description="Preview your ad in the Header, Selected Page, Sidepage, Newsletter and Footer placements, then pick the one that fits."
+          description="Preview your ad in the Header, Category Sponsor, Sidepage, Newsletter and Footer placements, then pick the one that fits."
         >
           {back}
         </AdvertiserPageHeader>

@@ -13,6 +13,29 @@ export interface LiveCampaign {
   _id: Types.ObjectId
   placement: ICampaign['placement']
   creative: ICampaign['creative']
+  advertiser: { businessName: string } | null
+  startDate: Date
+}
+
+export interface LiveVendorAdvertiser {
+  businessName: string
+  profile?: {
+    logoUrl?: string
+    website?: string
+    categories?: string[]
+    listingTitle?: string
+    listingDescription?: string
+    featuredProduct?: string
+    services?: string
+    socialLinks?: Record<string, string>
+  }
+}
+
+export interface LiveVendorCampaign {
+  _id: Types.ObjectId
+  placement: ICampaign['placement']
+  startDate: Date
+  advertiser: LiveVendorAdvertiser | null
 }
 
 export interface CampaignListFilter {
@@ -64,8 +87,36 @@ export const campaignRepository = {
       startDate: { $lte: now },
       endDate: { $gte: now },
     })
-      .select('_id placement creative')
+      .select('_id placement creative advertiser startDate')
+      .populate<{ advertiser: { businessName: string } | null }>('advertiser', 'businessName')
       .lean<LiveCampaign[]>()
+  },
+
+  // Live vendor listing campaigns, with the advertiser's public directory profile for the listing card.
+  async findLiveVendors(placements: string[], now: Date): Promise<LiveVendorCampaign[]> {
+    return Campaign.find({
+      placement: { $in: placements },
+      status: CAMPAIGN_STATUSES.ACTIVE,
+      startDate: { $lte: now },
+      endDate: { $gte: now },
+    })
+      .select('_id placement startDate advertiser')
+      .populate<{ advertiser: LiveVendorAdvertiser | null }>(
+        'advertiser',
+        'businessName profile.logoUrl profile.website profile.categories profile.listingTitle profile.listingDescription profile.featuredProduct profile.services profile.socialLinks',
+      )
+      .lean<LiveVendorCampaign[]>()
+  },
+
+  // Placements of this advertiser's campaigns that are live right now.
+  async livePlacementsFor(advertiserId: string, now: Date): Promise<string[]> {
+    const placements = await Campaign.distinct('placement', {
+      advertiser: advertiserId,
+      status: CAMPAIGN_STATUSES.ACTIVE,
+      startDate: { $lte: now },
+      endDate: { $gte: now },
+    })
+    return placements as string[]
   },
 
   // Increments a serving counter only while the campaign is live, so tracking can't inflate paused or ended ads.

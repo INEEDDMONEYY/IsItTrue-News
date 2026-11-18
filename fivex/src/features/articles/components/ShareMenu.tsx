@@ -90,13 +90,13 @@ export function ShareMenu({ url, title, count, shared = false, countsShare, onSh
         aria-expanded={open}
         aria-haspopup="true"
         aria-label={`Share this article. ${count} ${count === 1 ? 'share' : 'shares'}`}
-        className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
+        className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors ${
           shared
             ? 'bg-verified/10 text-verified border-verified/30'
             : 'border-border text-heading hover:border-accent-border hover:text-accent'
         }`}
       >
-        <Share2 className="w-4 h-4" />
+        <Share2 className="w-3.5 h-3.5" />
         {formatCount(count)}
       </button>
 

@@ -4,7 +4,7 @@ import { PageScrollEffects } from '@/components/navigation/PageScrollEffects'
 import { Header } from '@/components/navigation/Header'
 import { Footer } from '@/components/navigation/Footer'
 import { BannerBar } from '@/components/banners/BannerBar'
-import { AdSlot } from '@/features/ads/components/AdSlot'
+import { VendorListingSection } from '@/features/vendors/components/VendorListingSection'
 
 export function MainLayout() {
   // The homepage spans the full viewport width; other pages keep the 1400px container.
@@ -20,10 +20,8 @@ export function MainLayout() {
         <PageTransition effect="bands">
           <Outlet />
         </PageTransition>
+        <VendorListingSection />
       </main>
-      <div className={containerClass}>
-        <AdSlot placement="footer" className="mt-10" />
-      </div>
       <Footer />
     </div>
   )

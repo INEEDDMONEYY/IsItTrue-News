@@ -59,34 +59,34 @@ export function EngagementBar({
       <button
         onClick={onLike}
         aria-pressed={liked}
-        className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
+        className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors ${
           liked
             ? 'bg-brand-gradient text-on-brand border-transparent'
             : 'border-border text-heading hover:border-accent-border hover:text-accent'
         }`}
       >
-        <ThumbsUp className="w-4 h-4" />
+        <ThumbsUp className="w-3.5 h-3.5" />
         {formatCount(likes)}
       </button>
 
       <button
         onClick={onDislike}
         aria-pressed={disliked}
-        className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
+        className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors ${
           disliked
             ? 'bg-card-2 text-heading border-border'
             : 'border-border text-heading hover:border-accent-border hover:text-accent'
         }`}
       >
-        <ThumbsDown className="w-4 h-4" />
+        <ThumbsDown className="w-3.5 h-3.5" />
         {formatCount(dislikes)}
       </button>
 
       <button
         onClick={onCommentClick}
-        className="flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border border-border text-heading hover:border-accent-border hover:text-accent transition-colors"
+        className="flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full border border-border text-heading hover:border-accent-border hover:text-accent transition-colors"
       >
-        <MessageCircle className="w-4 h-4" />
+        <MessageCircle className="w-3.5 h-3.5" />
         {formatCount(commentsCount)}
       </button>
 
@@ -103,7 +103,7 @@ export function EngagementBar({
         onClick={onBookmark}
         aria-pressed={bookmarked}
         title={bookmarkInactive ? 'Sign up to bookmark stories' : undefined}
-        className={`flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border transition-colors ${
+        className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors ${
           bookmarkInactive
             ? 'border-border text-text-dim opacity-60 hover:opacity-100'
             : bookmarked
@@ -111,15 +111,15 @@ export function EngagementBar({
               : 'border-border text-heading hover:border-accent-border hover:text-accent'
         }`}
       >
-        <Bookmark className={`w-4 h-4 ${bookmarked && !bookmarkInactive ? 'fill-current' : ''}`} />
+        <Bookmark className={`w-3.5 h-3.5 ${bookmarked && !bookmarkInactive ? 'fill-current' : ''}`} />
         {formatCount(bookmarks)}
       </button>
 
       <button
         onClick={onFactCheckClick}
-        className="ml-auto flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full border border-accent-border text-accent hover:bg-accent-bg transition-colors"
+        className="ml-auto flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full border border-accent-border text-accent hover:bg-accent-bg transition-colors"
       >
-        <ShieldCheck className="w-4 h-4" />
+        <ShieldCheck className="w-3.5 h-3.5" />
         Fact-check status
       </button>
     </div>

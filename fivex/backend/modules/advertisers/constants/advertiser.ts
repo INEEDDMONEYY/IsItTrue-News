@@ -45,8 +45,15 @@ export const CAMPAIGN_PLACEMENTS = {
   HEADER: 'header',
   SELECTED_PAGE: 'selected_page',
   SIDEPAGE: 'sidepage',
+  SECTION_AD: 'section_ad',
   NEWSLETTER: 'newsletter',
   FOOTER: 'footer',
+  VENDOR_LISTING: 'vendor_listing',
+  PREMIUM_VENDOR_LISTING: 'premium_vendor_listing',
+  HOMEPAGE_SPONSOR: 'homepage_sponsor',
+  EXCLUSIVE_HOMEPAGE_SPONSOR: 'exclusive_homepage_sponsor',
+  NEWSLETTER_SPONSOR: 'newsletter_sponsor',
+  SPONSORED_ARTICLE: 'sponsored_article',
 } as const
 
 export type CampaignPlacement = (typeof CAMPAIGN_PLACEMENTS)[keyof typeof CAMPAIGN_PLACEMENTS]
@@ -59,8 +66,15 @@ export const PLACEMENT_REQUIREMENTS: Record<CampaignPlacement, { imageRequired: 
   header: { imageRequired: true, bodyRequired: false },
   selected_page: { imageRequired: false, bodyRequired: true },
   sidepage: { imageRequired: true, bodyRequired: false },
+  section_ad: { imageRequired: true, bodyRequired: false },
   newsletter: { imageRequired: false, bodyRequired: true },
   footer: { imageRequired: true, bodyRequired: false },
+  vendor_listing: { imageRequired: false, bodyRequired: true },
+  premium_vendor_listing: { imageRequired: true, bodyRequired: true },
+  homepage_sponsor: { imageRequired: true, bodyRequired: false },
+  exclusive_homepage_sponsor: { imageRequired: true, bodyRequired: false },
+  newsletter_sponsor: { imageRequired: false, bodyRequired: true },
+  sponsored_article: { imageRequired: false, bodyRequired: true },
 }
 
 // Site pages a "Selected Page" ad can be shown on. Each article category is chosen separately (see targetCategories).

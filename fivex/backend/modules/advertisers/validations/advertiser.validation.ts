@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { passwordSchema } from '../../auth/validations/auth.validation.js'
 import { AD_TARGET_PAGES, ALL_CAMPAIGN_PLACEMENTS, type CampaignPlacement } from '../constants/advertiser.js'
-import { BUNDLES, MAX_NEWSLETTER_SENDS, type BundleDefinition } from '../constants/pricing.js'
+import { BUNDLES, CAMPAIGN_DURATIONS, MAX_NEWSLETTER_SENDS, type BundleDefinition, type CampaignDuration } from '../constants/pricing.js'
+import { SECTION_SLOT_IDS } from '../constants/slots.js'
 
 type BundleId = BundleDefinition['id']
 
@@ -55,7 +56,13 @@ const targetCategoriesSchema = z
   .default([])
   .transform((slugs) => [...new Set(slugs)])
 
-const durationSchema = z.union([z.literal(7), z.literal(30)])
+// The Section Ad slot the advertiser picks. Needed only when the bundle includes a Section Ad.
+const sectionSlotSchema = z.enum(SECTION_SLOT_IDS).nullable().default(null)
+
+const durationSchema = z.custom<CampaignDuration>(
+  (days) => (CAMPAIGN_DURATIONS as readonly unknown[]).includes(days),
+  'Choose a valid campaign length',
+)
 const sendsSchema = z.number().int().min(1, 'Choose at least one send').max(MAX_NEWSLETTER_SENDS, 'Too many sends')
 
 // Drafts may be incomplete, so only shape and length are checked here; what a submission needs is checked by
@@ -66,6 +73,7 @@ export const campaignInputSchema = z.object({
   creative: creativeInputSchema,
   targetPages: targetPagesSchema,
   targetCategories: targetCategoriesSchema,
+  sectionSlot: sectionSlotSchema,
   durationDays: durationSchema.default(30),
   sends: sendsSchema.default(1),
   startDate: isoDateSchema.nullable().default(null),
@@ -79,10 +87,12 @@ export type CampaignInput = z.infer<typeof campaignInputSchema>
 export const bundleInputSchema = z.object({
   bundleId: z.enum(BUNDLES.map((bundle) => bundle.id) as [BundleId, ...BundleId[]]),
   name: z.string().trim().min(1, 'Campaign name is required').max(120, 'Campaign name is too long'),
+  durationDays: durationSchema,
   creative: creativeTextSchema.default({}),
   images: z.record(z.enum(ALL_CAMPAIGN_PLACEMENTS as [CampaignPlacement, ...CampaignPlacement[]]), objectIdSchema.nullable()).default({}),
   targetPages: targetPagesSchema,
   targetCategories: targetCategoriesSchema,
+  sectionSlot: sectionSlotSchema,
   startDate: isoDateSchema.nullable().default(null),
   submit: z.boolean().default(false),
 })
@@ -127,6 +137,20 @@ export const updateProfileSchema = z.object({
     .union([z.literal(''), z.string().trim().toLowerCase().email('Please provide a valid billing email').max(254)])
     .default(''),
   address: addressSchema.default({}),
+  categories: z.array(z.string().trim().min(1, 'Categories cannot be blank').max(60)).max(10, 'Add up to 10 categories').default([]),
+  listingTitle: z.string().trim().max(120, 'Listing title must be 120 characters or fewer').default(''),
+  listingDescription: z.string().trim().max(500, 'Listing description must be 500 characters or fewer').default(''),
+  featuredProduct: z.string().trim().max(200, 'Featured product must be 200 characters or fewer').default(''),
+  services: z.string().trim().max(1000, 'Services must be 1000 characters or fewer').default(''),
+  socialLinks: z
+    .object({
+      linkedin: optionalHttpUrl,
+      facebook: optionalHttpUrl,
+      instagram: optionalHttpUrl,
+      x: optionalHttpUrl,
+      youtube: optionalHttpUrl,
+    })
+    .default({}),
 })
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>

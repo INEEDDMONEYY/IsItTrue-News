@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { AdSlot } from '@/features/ads/components/AdSlot'
 import logo from '@/assets/icons/isittrue-icon-dark.jpg'
 
 const FOOTER_COLUMNS = [
@@ -32,9 +33,9 @@ const FOOTER_COLUMNS = [
   {
     title: 'Company',
     links: [
-      { label: 'Advertisement', to: '/ads' },
+      { label: 'Advertise With Us', to: '/ads' },
       { label: 'About Us', to: '/about' },
-      { label: 'Become an Contributor', to: '/become-a-contributor' },
+      //{ label: 'Become an Contributor', to: '/become-a-contributor' },
       { label: 'Become an Author', to: '/become-author' },
       { label: 'Become an Editor', to: '/become-editor' },
       { label: 'Careers', to: '/careers' },
@@ -58,6 +59,9 @@ const FOOTER_COLUMNS = [
 export function Footer() {
   return (
     <footer className="border-t border-border mt-16">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 pt-6">
+        <AdSlot placement="footer" />
+      </div>
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-12 grid grid-cols-2 md:grid-cols-5 gap-8">
         <div className="col-span-2 md:col-span-1">
           <Link to="/" className="inline-flex items-center gap-2 mb-3">

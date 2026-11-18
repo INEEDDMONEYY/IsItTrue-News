@@ -29,6 +29,12 @@ export const publicAdController = {
     res.status(200).json({ ad })
   }),
 
+  // Lists every live vendor. Cards come from the advertiser's directory profile, not the ad creative.
+  getVendors: asyncHandler(async (_req: Request, res: Response) => {
+    const vendors = await publicAdService.vendorListings()
+    res.status(200).json({ vendors })
+  }),
+
   recordImpression: asyncHandler(async (req: Request, res: Response) => {
     const campaignId = req.params.campaignId
     const counted = Types.ObjectId.isValid(campaignId) && (await publicAdService.recordImpression(campaignId))

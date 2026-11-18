@@ -3,7 +3,7 @@ import { AdvertisementBackendGap } from '../components/AdvertisementBackendGap'
 import { AdvertisementQueryState, AdvertisementStatCard } from '../components/AdvertisementPrimitives'
 import { useAdvertisementSettings } from '../hooks/useAdvertisement'
 import { requireAdvertisementSection } from '../utils/advertisementSections'
-import { PLACEMENT_LABELS, formatMoney } from '@/features/advertiser/utils/format'
+import { formatMoney } from '@/features/advertiser/utils/format'
 
 const section = requireAdvertisementSection('settings')
 
@@ -20,7 +20,7 @@ export function AdvertisementSettingsPage() {
               Campaign approval is {data.autoApproveCampaigns ? 'automatic' : 'manual'}. Values below are read-only.
             </p>
             <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-foreground">Placement pricing (per campaign)</h2>
+              <h2 className="text-lg font-semibold text-foreground">Placement pricing (per campaign, prorated by length)</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="border-b text-xs uppercase text-muted-foreground">
@@ -34,16 +34,18 @@ export function AdvertisementSettingsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(Object.keys(data.rates) as Array<keyof typeof data.rates>).map((placement) => (
-                      <tr key={placement} className="border-b">
-                        <td className="py-2 pr-4 font-medium">{PLACEMENT_LABELS[placement]}</td>
-                        {data.campaignDurations.map((days) => (
-                          <td key={days} className="py-2 pr-4">
-                            {formatMoney(data.rates[placement][String(days) as '7' | '30'])}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
+                    {data.placementPrices
+                      .filter((row) => row.unit !== 'per_send')
+                      .map((row) => (
+                        <tr key={row.placement} className="border-b">
+                          <td className="py-2 pr-4 font-medium">{row.label}</td>
+                          {data.campaignDurations.map((days) => (
+                            <td key={days} className="py-2 pr-4">
+                              {formatMoney(row.prices[String(days)])}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -59,7 +61,7 @@ export function AdvertisementSettingsPage() {
                 {data.bundles.map((bundle) => (
                   <li key={bundle.id} className="rounded-lg border p-4">
                     <p className="font-medium">
-                      {bundle.name} · {formatMoney(bundle.priceCents)}
+                      {bundle.name} · {formatMoney(bundle.priceCents)}/month
                       {bundle.recommended ? <span className="ml-2 text-xs text-muted-foreground">recommended</span> : null}
                     </p>
                     <p className="text-sm text-muted-foreground">{bundle.description}</p>

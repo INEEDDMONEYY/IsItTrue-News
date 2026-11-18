@@ -6,11 +6,11 @@ import { advertiserAccountService } from '../services/advertiserAccount.service.
 import { advertiserCampaignService } from '../services/advertiserCampaign.service.js'
 import { advertiserLibraryService } from '../services/advertiserLibrary.service.js'
 import { advertiserReportService } from '../services/advertiserReport.service.js'
+import { advertiserSlotService } from '../services/advertiserSlots.service.js'
 import { pricingCatalog } from '../services/advertiserPricing.js'
 import type {
   BundleInput,
   CampaignEditInput,
-  CampaignInput,
   ChangePasswordInput,
   UpdateNotificationsInput,
   UpdateProfileInput,
@@ -37,11 +37,6 @@ export const advertiserWorkspaceController = {
   getCampaign: asyncHandler(async (req: Request, res: Response) => {
     const campaign = await advertiserCampaignService.get(advertiserId(req), param(req, 'id'))
     res.status(200).json({ campaign })
-  }),
-
-  createCampaign: asyncHandler(async (req: Request, res: Response) => {
-    const campaign = await advertiserCampaignService.create(advertiserId(req), req.body as CampaignInput)
-    res.status(201).json({ campaign })
   }),
 
   createBundle: asyncHandler(async (req: Request, res: Response) => {
@@ -102,9 +97,17 @@ export const advertiserWorkspaceController = {
     res.status(200).json(await advertiserReportService.billing(advertiserId(req)))
   }),
 
+  slots: asyncHandler(async (_req: Request, res: Response) => {
+    res.status(200).json({ slots: await advertiserSlotService.availability() })
+  }),
+
   updateProfile: asyncHandler(async (req: Request, res: Response) => {
     const advertiser = await advertiserAccountService.updateProfile(advertiserId(req), req.body as UpdateProfileInput)
     res.status(200).json({ advertiser })
+  }),
+
+  profileVisibility: asyncHandler(async (req: Request, res: Response) => {
+    res.status(200).json({ visibility: await advertiserAccountService.visibility(advertiserId(req)) })
   }),
 
   uploadLogo: asyncHandler(async (req: Request, res: Response) => {

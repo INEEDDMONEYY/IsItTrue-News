@@ -8,6 +8,8 @@ import {
   type CampaignPlacement,
   type CampaignStatus,
 } from '../constants/advertiser.js'
+import { CAMPAIGN_DURATIONS } from '../constants/pricing.js'
+import { SECTION_SLOT_IDS, type SectionSlotId } from '../constants/slots.js'
 
 export interface ICampaignCreative {
   headline: string
@@ -29,6 +31,8 @@ export interface ICampaign {
   targetPages: AdTargetPage[]
   // Category slugs. Each chosen category is billed as one page.
   targetCategories: string[]
+  // Only used by the "Section Ad" placement: the section slot the ad holds.
+  sectionSlot?: SectionSlotId
   // Money is stored in cents so totals never pick up floating-point error. It holds the server-computed price.
   budgetCents: number
   durationDays: number
@@ -70,8 +74,9 @@ const campaignSchema = new Schema<ICampaign>(
     creative: { type: creativeSchema, default: () => ({}) },
     targetPages: { type: [{ type: String, enum: AD_TARGET_PAGES }], default: [] },
     targetCategories: { type: [String], default: [] },
+    sectionSlot: { type: String, enum: SECTION_SLOT_IDS },
     budgetCents: { type: Number, default: 0, min: 0 },
-    durationDays: { type: Number, enum: [7, 30], default: 30 },
+    durationDays: { type: Number, enum: CAMPAIGN_DURATIONS, default: 30 },
     sends: { type: Number, default: 1, min: 1 },
     // Bundle ids are "<bundle id>-<uuid>", at most 19 + 1 + 36 characters.
     bundleId: { type: String, maxlength: 64 },

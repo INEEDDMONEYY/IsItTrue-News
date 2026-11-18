@@ -6,18 +6,20 @@ import { Category } from '../../categories/models/Category.js'
 import {
   ALL_CAMPAIGN_STATUSES,
   CAMPAIGN_PLACEMENTS,
+  COMMITTED_CAMPAIGN_STATUSES,
   CAMPAIGN_STATUSES,
   EDITABLE_CAMPAIGN_STATUSES,
   PLACEMENT_REQUIREMENTS,
   type CampaignPlacement,
   type CampaignStatus,
 } from '../constants/advertiser.js'
-import { NEWSLETTER_WINDOW_DAYS, PLACEMENT_LABELS, type CampaignDuration } from '../constants/pricing.js'
-import type { CampaignDocument, ICampaign } from '../models/Campaign.js'
+import { NEWSLETTER_WINDOW_DAYS, PER_PAGE_PLACEMENTS, PLACEMENT_LABELS, type CampaignDuration } from '../constants/pricing.js'
+import { SECTION_SLOTS, type SectionSlotId } from '../constants/slots.js'
+import { Campaign, type CampaignDocument, type ICampaign } from '../models/Campaign.js'
 import { adAssetRepository } from '../repositories/adAsset.repository.js'
 import { campaignRepository } from '../repositories/campaign.repository.js'
 import type { BundleInput, CampaignEditInput, CampaignInput } from '../validations/advertiser.validation.js'
-import { allocateBundle, findBundle, priceForPlacement } from './advertiserPricing.js'
+import { allocateBundle, findBundle } from './advertiserPricing.js'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const MAX_CAMPAIGN_NAME = 120
@@ -56,6 +58,38 @@ function bundleItemName(name: string, placement: CampaignPlacement): string {
   return `${name.slice(0, MAX_CAMPAIGN_NAME - suffix.length)}${suffix}`
 }
 
+// A Section Ad holds one of the five section slots. A slot already held by a committed campaign can't be bought again.
+async function assertSectionSlotOpen(slot: SectionSlotId | null): Promise<void> {
+  if (!slot) throw new AppError('Choose a section for your Section Ad.', 400)
+  if (!SECTION_SLOTS.some((item) => item.id === slot)) throw new AppError('That section is not available.', 400)
+  const taken = await Campaign.exists({
+    placement: CAMPAIGN_PLACEMENTS.SECTION_AD,
+    sectionSlot: slot,
+    status: { $in: COMMITTED_CAMPAIGN_STATUSES },
+    endDate: { $gte: new Date() },
+  })
+  if (taken) throw new AppError('That section is already sold for this period. Please choose another.', 409)
+}
+
+// Category Sponsor and Sidepage hold one ad per page or category. A page or category already held by a committed
+// campaign of the same placement can't be bought again.
+async function assertPagesOpen(placements: CampaignPlacement[], pages: string[], categories: string[]): Promise<void> {
+  const overlaps = [
+    ...(pages.length > 0 ? [{ targetPages: { $in: pages } }] : []),
+    ...(categories.length > 0 ? [{ targetCategories: { $in: categories } }] : []),
+  ]
+  if (overlaps.length === 0) return
+  for (const placement of placements.filter((item) => PER_PAGE_PLACEMENTS.includes(item))) {
+    const taken = await Campaign.exists({
+      placement,
+      status: { $in: COMMITTED_CAMPAIGN_STATUSES },
+      endDate: { $gte: new Date() },
+      $or: overlaps,
+    })
+    if (taken) throw new AppError('Some of the pages or categories you chose are already sold. Please choose again.', 409)
+  }
+}
+
 function assertId(id: string): void {
   if (!Types.ObjectId.isValid(id)) throw notFound()
 }
@@ -77,8 +111,8 @@ function creativeProblems(
   if (!creative.ctaLabel) problems.push('Add a button label.')
   if (!creative.destinationUrl) problems.push('Add the destination URL readers are sent to.')
   if (requirements.imageRequired && !hasImage) problems.push('Choose an image from your Ad Library for this placement.')
-  if (placement === CAMPAIGN_PLACEMENTS.SELECTED_PAGE && selectedPageCount(targets) === 0) {
-    problems.push('Choose at least one page or category for a Selected Page ad.')
+  if (PER_PAGE_PLACEMENTS.includes(placement) && selectedPageCount(targets) === 0) {
+    problems.push(`Choose at least one page or category for a ${PLACEMENT_LABELS[placement]}.`)
   }
   return problems
 }
@@ -110,14 +144,15 @@ function reviewFields(submit: boolean, now: Date): Partial<ICampaign> {
 }
 
 interface CampaignPricing {
-  priceCents?: number
-  bundleId?: string
+  priceCents: number
+  bundleId: string
 }
 
+// Campaigns are only created through bundles, so the price always comes from the bundle allocation.
 async function buildCampaignFields(
   advertiserId: string,
   input: CampaignInput,
-  pricing: CampaignPricing = {},
+  pricing: CampaignPricing,
 ): Promise<Partial<ICampaign>> {
   const image = await resolveOwnedImage(advertiserId, input.creative.imageAssetId)
 
@@ -125,7 +160,8 @@ async function buildCampaignFields(
   const days = runDays(input.placement, input.durationDays)
   const end = start ? endDateFor(start, days) : null
 
-  const targetCategories = input.placement === CAMPAIGN_PLACEMENTS.SELECTED_PAGE ? input.targetCategories : []
+  const isPerPage = PER_PAGE_PLACEMENTS.includes(input.placement)
+  const targetCategories = isPerPage ? input.targetCategories : []
   if (targetCategories.length > 0) {
     const existing = await Category.countDocuments({ slug: { $in: targetCategories } })
     if (existing !== targetCategories.length) {
@@ -153,16 +189,11 @@ async function buildCampaignFields(
       imageUrl: image.imageUrl,
       imageAsset: image.imageAsset,
     },
-    // Only a Selected Page ad is targeted; the other placements run site-wide.
-    targetPages: input.placement === CAMPAIGN_PLACEMENTS.SELECTED_PAGE ? input.targetPages : [],
+    // Only per-page placements are targeted; the other placements run site-wide.
+    targetPages: isPerPage ? input.targetPages : [],
     targetCategories,
-    budgetCents:
-      pricing.priceCents ??
-      priceForPlacement(input.placement, {
-        durationDays: input.durationDays,
-        pages: selectedPageCount(input),
-        sends: input.sends,
-      }),
+    sectionSlot: input.placement === CAMPAIGN_PLACEMENTS.SECTION_AD ? (input.sectionSlot ?? undefined) : undefined,
+    budgetCents: pricing.priceCents,
     durationDays: days,
     sends: input.placement === CAMPAIGN_PLACEMENTS.NEWSLETTER ? input.sends : 1,
     startDate: start ?? undefined,
@@ -209,19 +240,19 @@ export const advertiserCampaignService = {
     return campaign
   },
 
-  async create(advertiserId: string, input: CampaignInput): Promise<CampaignDocument> {
-    const fields = await buildCampaignFields(advertiserId, input)
-    return campaignRepository.create({ ...fields, advertiser: new Types.ObjectId(advertiserId) })
-  },
-
   // A bundle becomes one campaign per placement. They share a creative and a bundleId, and the bundle price is
   // split across them, so the bundle's total is what the advertiser pays.
   async createBundle(advertiserId: string, input: BundleInput): Promise<CampaignDocument[]> {
     const bundle = findBundle(input.bundleId)
     if (!bundle) throw new AppError('That bundle is not available.', 400)
 
+    if (bundle.placements.includes(CAMPAIGN_PLACEMENTS.SECTION_AD)) {
+      await assertSectionSlotOpen(input.sectionSlot)
+    }
+    await assertPagesOpen(bundle.placements, input.targetPages, input.targetCategories)
+
     const bundleId = `${bundle.id}-${randomUUID()}`
-    const allocations = allocateBundle(bundle, selectedPageCount(input))
+    const allocations = allocateBundle(bundle, selectedPageCount(input), input.durationDays)
     const fieldsList: Partial<ICampaign>[] = []
     const problems = new Set<string>()
 
@@ -232,8 +263,8 @@ export const advertiserCampaignService = {
         creative: { ...input.creative, imageAssetId: input.images[allocation.placement] ?? null },
         targetPages: input.targetPages,
         targetCategories: input.targetCategories,
-        // Bundles are sold as 30-day campaigns (see BUNDLES in constants/pricing.ts).
-        durationDays: 30,
+        sectionSlot: input.sectionSlot,
+        durationDays: input.durationDays,
         sends: 1,
         startDate: input.startDate,
         submit: input.submit,

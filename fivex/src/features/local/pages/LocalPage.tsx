@@ -72,7 +72,8 @@ export function LocalPage() {
           />
 
           <aside className="xl:sticky xl:top-6">
-            <AdSlot placement="sidepage" />
+            <AdSlot placement="sidepage" page="local" />
+            <AdSlot placement="section_ad" page="local" />
           </aside>
         </div>
       </div>

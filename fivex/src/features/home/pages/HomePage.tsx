@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom'
 import { FeaturedArticle } from '../components/FeaturedArticle'
 import { AdSlot } from '@/features/ads/components/AdSlot'
-import { CategoryChipBar } from '@/components/navigation/CategoryChipBar'
-import { LatestPostsList } from '../components/LatestPostsList'
 import { CategoryRow } from '../components/CategoryRow'
+import { LatestPostsList } from '../components/LatestPostsList'
 import { VideoSection } from '../components/VideoSection'
 import { useCategories } from '@/features/categories/hooks/useCategories'
 import { useLatestPosts } from '../hooks/useLatestPosts'
@@ -41,11 +40,8 @@ export function HomePage() {
 
   return (
     <div className="py-6 md:py-10 flex flex-col gap-10">
-      <div className="md:hidden">
-        <CategoryChipBar />
-      </div>
-
       <AdSlot placement="header" />
+      <AdSlot placement="exclusive_homepage_sponsor" page="home" />
 
       <section className="grid grid-cols-1 lg:grid-cols-[260px_1fr_320px] gap-6">
         <div className="flex flex-col gap-8">
@@ -58,7 +54,8 @@ export function HomePage() {
 
         <div className="flex flex-col gap-6">
           {/* Sits above the list so new posts push the list down, never the ad. */}
-          <AdSlot placement="sidepage" />
+          <AdSlot placement="sidepage" page="home" />
+          <AdSlot placement="section_ad" page="home" />
           <LatestPostsList
             articles={latestPosts.articles}
             isLoading={latestPosts.isLoading}
@@ -73,6 +70,8 @@ export function HomePage() {
 
       <VideoSection videos={homeVideos.videos} />
 
+      <AdSlot placement="sponsored_article" page="home" />
+      <AdSlot placement="homepage_sponsor" page="home" />
       <AdSlot placement="selected_page" page="home" layout="split" />
     </div>
   )

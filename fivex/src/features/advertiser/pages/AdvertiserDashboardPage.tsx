@@ -17,6 +17,8 @@ import { LoaderState } from '@/components/loaders/LoaderState'
 import { PageLoader } from '@/components/loaders/PageLoader'
 import { AdvertiserPageHeader } from '../components/AdvertiserPageHeader'
 import { AdvertiserStatCard } from '../components/AdvertiserStatCard'
+import { VendorListingPreview } from '../components/VendorListingPreview'
+import { useAdSlots } from '../hooks/useAdSlots'
 import { useAdvertiserOverview } from '../hooks/useAdvertiserOverview'
 import type { AdvertiserActivityType } from '../types/advertiser.types'
 import {
@@ -38,6 +40,7 @@ const activityIcons: Record<AdvertiserActivityType, typeof Megaphone> = {
 
 export function AdvertiserDashboardPage() {
   const overview = useAdvertiserOverview()
+  const slots = useAdSlots()
   const data = overview.data
 
   const stats = data
@@ -107,6 +110,9 @@ export function AdvertiserDashboardPage() {
           ))}
         </div>
       </section>
+
+      {/* Vendor listing preview */}
+      <VendorListingPreview />
 
       {/* Quick actions */}
       <section>
@@ -410,6 +416,40 @@ export function AdvertiserDashboardPage() {
           </Link>
         </div>
       </section>
+
+      {/* Ad slot availability */}
+      {slots.data && slots.data.length > 0 && (
+        <section className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+          <h2 className="text-base font-semibold text-foreground">Ad slot availability</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            See which placements remain open and where, before you buy.
+          </p>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {slots.data.map((slot) => (
+              <div key={slot.placement} className="min-w-0 rounded-xl border border-border p-4">
+                <p className="text-sm font-semibold text-foreground">{PLACEMENT_LABELS[slot.placement]}</p>
+                <ul className="mt-3 space-y-2">
+                  {slot.pages.map((page) => (
+                    <li key={page.page} className="flex items-center justify-between gap-3 text-xs">
+                      <span className="text-muted-foreground">{page.label}</span>
+                      <span
+                        className={
+                          page.open > 0
+                            ? 'font-medium text-emerald-600 dark:text-emerald-400'
+                            : 'font-medium text-destructive'
+                        }
+                      >
+                        {page.open > 0 ? `${page.open} of ${page.capacity} open` : 'Sold out'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
       </>
       )}
     </div>

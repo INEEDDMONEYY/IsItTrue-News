@@ -86,8 +86,8 @@ export function LocationModal({ open, onClose, reader }: LocationModalProps) {
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="set-location-title" className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-24">
-      <div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl">
+    <div role="dialog" aria-modal="true" aria-labelledby="set-location-title" className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 md:p-4 md:pt-24">
+      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-b-2xl bg-white p-5 shadow-xl md:max-h-none md:overflow-visible md:rounded-lg">
         <div className="flex items-center justify-between">
           <h2 id="set-location-title" className="text-lg font-semibold">Set location</h2>
           <button type="button" onClick={onClose} className="text-sm underline">Close</button>

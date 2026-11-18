@@ -45,9 +45,11 @@ export function CategoryPage() {
   return (
     <div className="py-6 md:py-10 flex flex-col gap-6">
       <div className="flex flex-col gap-1.5">
-        <Link to="/" className="text-xs text-text-muted hover:text-accent transition-colors w-fit">
-          &larr; Back to Home
-        </Link>
+      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-xs text-text-muted">
+        <Link to="/" className="hover:text-accent transition-colors">Home</Link>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page" className="text-heading">{category?.name ?? 'Category'}</span>
+      </nav>
         <h1 className="text-2xl md:text-3xl font-semibold text-heading">
           {category?.name ?? 'Category'}
         </h1>
@@ -84,7 +86,8 @@ export function CategoryPage() {
         </div>
 
         <aside className="lg:sticky lg:top-6">
-          <AdSlot placement="sidepage" />
+          <AdSlot placement="sidepage" category={slug} />
+          <AdSlot placement="section_ad" category={slug} />
         </aside>
       </div>
     </div>

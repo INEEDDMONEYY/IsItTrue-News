@@ -21,6 +21,20 @@ export interface IAdvertiserProfile {
   logoPublicId?: string
   logoStorage?: 'cloudinary' | 'local'
   address: IAdvertiserAddress
+  categories: string[]
+  listingTitle: string
+  listingDescription: string
+  featuredProduct: string
+  services: string
+  socialLinks: IAdvertiserSocialLinks
+}
+
+export interface IAdvertiserSocialLinks {
+  linkedin: string
+  facebook: string
+  instagram: string
+  x: string
+  youtube: string
 }
 
 export interface IAdvertiserNotifications {
@@ -53,6 +67,17 @@ export interface IAdvertiser {
 
 export type AdvertiserDocument = HydratedDocument<IAdvertiser>
 
+const socialLinksSchema = new Schema<IAdvertiserSocialLinks>(
+  {
+    linkedin: { type: String, trim: true, maxlength: 2048, default: '' },
+    facebook: { type: String, trim: true, maxlength: 2048, default: '' },
+    instagram: { type: String, trim: true, maxlength: 2048, default: '' },
+    x: { type: String, trim: true, maxlength: 2048, default: '' },
+    youtube: { type: String, trim: true, maxlength: 2048, default: '' },
+  },
+  { _id: false },
+)
+
 const addressSchema = new Schema<IAdvertiserAddress>(
   {
     line1: { type: String, trim: true, maxlength: 200, default: '' },
@@ -77,6 +102,12 @@ const profileSchema = new Schema<IAdvertiserProfile>(
     logoPublicId: { type: String },
     logoStorage: { type: String, enum: ['cloudinary', 'local'] },
     address: { type: addressSchema, default: () => ({}) },
+    categories: { type: [String], default: [] },
+    listingTitle: { type: String, trim: true, maxlength: 120, default: '' },
+    listingDescription: { type: String, trim: true, maxlength: 500, default: '' },
+    featuredProduct: { type: String, trim: true, maxlength: 200, default: '' },
+    services: { type: String, trim: true, maxlength: 1000, default: '' },
+    socialLinks: { type: socialLinksSchema, default: () => ({}) },
   },
   { _id: false },
 )

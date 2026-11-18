@@ -40,7 +40,7 @@ export function ArticleHeader({
         {verdict && <VerdictBadge verdict={verdict} />}
       </div>
 
-      <h1 className="text-center text-2xl md:text-3xl font-semibold text-heading leading-snug">{title}</h1>
+      <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-semibold text-heading leading-snug break-words">{title}</h1>
 
       <div className="flex flex-wrap items-center justify-center gap-2 text-center text-sm text-text-muted">
         {authorId ? (

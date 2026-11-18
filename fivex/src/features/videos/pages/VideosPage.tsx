@@ -296,7 +296,8 @@ export default function VideosPage() {
         </div>
 
         <aside className="lg:sticky lg:top-6">
-          <AdSlot placement="sidepage" />
+          <AdSlot placement="sidepage" page="videos" />
+          <AdSlot placement="section_ad" page="videos" />
         </aside>
       </div>
     </main>

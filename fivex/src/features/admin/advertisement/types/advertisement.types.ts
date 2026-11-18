@@ -2,7 +2,19 @@ export type AdvertiserStatus = 'pending' | 'active' | 'suspended'
 
 export type CampaignStatus = 'draft' | 'pending_review' | 'active' | 'paused' | 'rejected' | 'completed'
 
-export type CampaignPlacement = 'header' | 'selected_page' | 'sidepage' | 'newsletter' | 'footer'
+export type CampaignPlacement =
+  | 'header'
+  | 'selected_page'
+  | 'sidepage'
+  | 'newsletter'
+  | 'footer'
+  | 'vendor_listing'
+  | 'premium_vendor_listing'
+  | 'homepage_sponsor'
+  | 'exclusive_homepage_sponsor'
+  | 'newsletter_sponsor'
+  | 'sponsored_article'
+  | 'section_ad'
 
 export interface AdvertisementTotals {
   count: number
@@ -83,7 +95,12 @@ export interface AnalyticsSummary {
 
 export interface AdvertisementSettings {
   campaignDurations: number[]
-  rates: Record<Exclude<CampaignPlacement, 'newsletter'>, Record<'7' | '30', number>>
+  placementPrices: Array<{
+    placement: CampaignPlacement
+    label: string
+    unit: 'flat' | 'per_page' | 'per_send'
+    prices: Record<string, number>
+  }>
   newsletter: { sendCents: number; windowDays: number; maxSends: number }
   bundles: Array<{
     id: string

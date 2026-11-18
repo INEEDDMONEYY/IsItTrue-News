@@ -117,6 +117,18 @@ export const articleRepository = {
       .populate('author', 'name')
   },
 
+  // For You: published articles in the given categories, most-viewed first, skipping ones already engaged with.
+  async findPublishedInCategories(categories: string[], excludeIds: string[], limit: number): Promise<ArticleDocument[]> {
+    return Article.find({
+      status: ARTICLE_STATUSES.PUBLISHED,
+      category: { $in: categories },
+      _id: { $nin: excludeIds },
+    })
+      .sort({ views: -1, publishedAt: -1 })
+      .limit(limit)
+      .populate('author', 'name')
+  },
+
   async findPublishedByCategory(category: string): Promise<ArticleDocument[]> {
     return Article.find({ status: ARTICLE_STATUSES.PUBLISHED, category })
       .sort({ publishedAt: -1 })

@@ -62,6 +62,9 @@ router.get('/latest', articleController.listLatest)
 // Declared before "/:id" for the same reason as above.
 router.get('/trending', articleController.listTrending)
 
+// Public: For You feed. Uses the reader's identity when a token is present.
+router.get('/for-you', optionalAuthenticate, articleController.listForYou)
+
 // Public: published articles for a given category/tag page, looked up by
 // slug. Declared before "/:id" for the same reason as above.
 router.get('/category/:slug', articleController.listByCategory)

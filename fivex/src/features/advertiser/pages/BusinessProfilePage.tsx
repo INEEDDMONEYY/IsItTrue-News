@@ -5,7 +5,8 @@ import { useAdvertiserAuth } from '@/app/providers/AdvertiserAuthProvider'
 import { getErrorMessage } from '@/lib/getErrorMessage'
 import { advertiserApi } from '../api/advertiser.api'
 import { AdvertiserPageHeader } from '../components/AdvertiserPageHeader'
-import type { AdvertiserAccount, UpdateProfileInput } from '../types/advertiser.types'
+import { useAdvertiserVisibility } from '../hooks/useAdvertiserVisibility'
+import type { AdvertiserAccount, AdvertiserVisibility, UpdateProfileInput } from '../types/advertiser.types'
 import { resolveAssetUrl } from '../utils/assetUrl'
 
 const inputClass =
@@ -29,7 +30,54 @@ function toForm(account: AdvertiserAccount): UpdateProfileInput {
       postalCode: profile?.address?.postalCode ?? '',
       country: profile?.address?.country ?? '',
     },
+    categories: profile?.categories ?? [],
+    listingTitle: profile?.listingTitle ?? '',
+    listingDescription: profile?.listingDescription ?? '',
+    featuredProduct: profile?.featuredProduct ?? '',
+    services: profile?.services ?? '',
+    socialLinks: {
+      linkedin: profile?.socialLinks?.linkedin ?? '',
+      facebook: profile?.socialLinks?.facebook ?? '',
+      instagram: profile?.socialLinks?.instagram ?? '',
+      x: profile?.socialLinks?.x ?? '',
+      youtube: profile?.socialLinks?.youtube ?? '',
+    },
   }
+}
+
+const VISIBILITY_ROWS: { key: keyof AdvertiserVisibility; label: string; hint: string }[] = [
+  { key: 'vendorDirectoryListed', label: 'Vendor Directory Status', hint: 'Listed once a vendor listing campaign is live.' },
+  { key: 'homepageSponsor', label: 'Homepage Sponsor Status', hint: 'Active while a homepage sponsor campaign is live.' },
+  { key: 'newsletterSponsor', label: 'Newsletter Sponsor Status', hint: 'Active while a newsletter sponsor campaign is live.' },
+]
+
+function VisibilityCard() {
+  const { data, isPending, isError } = useAdvertiserVisibility()
+  return (
+    <Card title="Visibility" description="Set automatically from your live campaigns. You can't change these here.">
+      {isPending && <p className="text-sm text-text-muted">Loading visibility…</p>}
+      {isError && <p role="alert" className="text-sm text-red-600">Could not load your visibility status.</p>}
+      {data && (
+        <ul className="divide-y divide-border">
+          {VISIBILITY_ROWS.map((row) => (
+            <li key={row.key} className="flex flex-wrap items-center justify-between gap-2 py-3">
+              <div>
+                <p className="text-sm font-medium text-heading">{row.label}</p>
+                <p className="text-xs text-text-muted">{row.hint}</p>
+              </div>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  data[row.key] ? 'bg-emerald-500/10 text-emerald-600' : 'bg-surface text-text-muted'
+                }`}
+              >
+                {data[row.key] ? 'Active' : 'Not active'}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  )
 }
 
 function Field({ label, children, className = '' }: { label: string; children: ReactNode; className?: string }) {
@@ -120,6 +168,8 @@ function LogoCard({ account, onChange }: { account: AdvertiserAccount; onChange:
 
 function ProfileForm({ account, onChange }: { account: AdvertiserAccount; onChange: (account: AdvertiserAccount) => void }) {
   const [form, setForm] = useState<UpdateProfileInput>(() => toForm(account))
+  // Kept as text so commas typed mid-entry aren't dropped; split into a list on save.
+  const [categoriesText, setCategoriesText] = useState(() => form.categories.join(', '))
   const [saved, setSaved] = useState(false)
   const save = useMutation({ mutationFn: advertiserApi.updateProfile })
 
@@ -131,14 +181,23 @@ function ProfileForm({ account, onChange }: { account: AdvertiserAccount; onChan
     setSaved(false)
     setForm((prev) => ({ ...prev, address: { ...prev.address, [key]: value } }))
   }
+  const setSocial = (key: keyof UpdateProfileInput['socialLinks'], value: string) => {
+    setSaved(false)
+    setForm((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, [key]: value } }))
+  }
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()
     setSaved(false)
-    save.mutate(form, {
+    const categories = categoriesText
+      .split(',')
+      .map((category) => category.trim())
+      .filter(Boolean)
+    save.mutate({ ...form, categories }, {
       onSuccess: (updated) => {
         onChange(updated)
         setForm(toForm(updated))
+        setCategoriesText((updated.profile?.categories ?? []).join(', '))
         setSaved(true)
       },
     })
@@ -160,7 +219,48 @@ function ProfileForm({ account, onChange }: { account: AdvertiserAccount; onChan
           <Field label="Account email">
             <input className={`${inputClass} cursor-not-allowed opacity-70`} value={account.email} readOnly aria-readonly="true" />
           </Field>
-          <Field label="About your business" className="sm:col-span-2">
+        </div>
+      </Card>
+
+      <Card title="Directory information" description="Used for your vendor directory listing.">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Listing title" className="sm:col-span-2">
+            <input
+              className={inputClass}
+              maxLength={120}
+              value={form.listingTitle}
+              onChange={(e) => set('listingTitle', e.target.value)}
+              placeholder="A short headline for your listing"
+            />
+          </Field>
+          <Field label="Listing description" className="sm:col-span-2">
+            <textarea
+              className={`${inputClass} min-h-[72px] resize-y`}
+              maxLength={500}
+              value={form.listingDescription}
+              onChange={(e) => set('listingDescription', e.target.value)}
+            />
+            <span className="mt-1 block text-right text-xs font-normal text-text-dim">{form.listingDescription.length}/500</span>
+          </Field>
+          <Field label="Categories" className="sm:col-span-2">
+            <input
+              className={inputClass}
+              maxLength={600}
+              value={categoriesText}
+              onChange={(e) => {
+                setSaved(false)
+                setCategoriesText(e.target.value)
+              }}
+              placeholder="Comma separated, e.g. Health, Local business"
+            />
+          </Field>
+          <Field label="Featured product">
+            <input className={inputClass} maxLength={200} value={form.featuredProduct} onChange={(e) => set('featuredProduct', e.target.value)} />
+          </Field>
+          <Field label="Services">
+            <input className={inputClass} maxLength={1000} value={form.services} onChange={(e) => set('services', e.target.value)} />
+          </Field>
+          <Field label="Company overview" className="sm:col-span-2">
             <textarea
               className={`${inputClass} min-h-[96px] resize-y`}
               maxLength={1000}
@@ -169,8 +269,25 @@ function ProfileForm({ account, onChange }: { account: AdvertiserAccount; onChan
             />
             <span className="mt-1 block text-right text-xs font-normal text-text-dim">{form.description.length}/1000</span>
           </Field>
+          <Field label="LinkedIn">
+            <input className={inputClass} type="url" maxLength={2048} value={form.socialLinks.linkedin} onChange={(e) => setSocial('linkedin', e.target.value)} placeholder="https://linkedin.com/…" />
+          </Field>
+          <Field label="Facebook">
+            <input className={inputClass} type="url" maxLength={2048} value={form.socialLinks.facebook} onChange={(e) => setSocial('facebook', e.target.value)} placeholder="https://facebook.com/…" />
+          </Field>
+          <Field label="Instagram">
+            <input className={inputClass} type="url" maxLength={2048} value={form.socialLinks.instagram} onChange={(e) => setSocial('instagram', e.target.value)} placeholder="https://instagram.com/…" />
+          </Field>
+          <Field label="X">
+            <input className={inputClass} type="url" maxLength={2048} value={form.socialLinks.x} onChange={(e) => setSocial('x', e.target.value)} placeholder="https://x.com/…" />
+          </Field>
+          <Field label="YouTube">
+            <input className={inputClass} type="url" maxLength={2048} value={form.socialLinks.youtube} onChange={(e) => setSocial('youtube', e.target.value)} placeholder="https://youtube.com/…" />
+          </Field>
         </div>
       </Card>
+
+      <VisibilityCard />
 
       <Card title="Contact & billing">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

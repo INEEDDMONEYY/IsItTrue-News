@@ -42,7 +42,8 @@ export function InvestigationsPage() {
             ))}
           </div>
           <aside className="lg:sticky lg:top-6">
-            <AdSlot placement="sidepage" />
+            <AdSlot placement="sidepage" page="investigations" />
+            <AdSlot placement="section_ad" page="investigations" />
           </aside>
         </div>
       )}

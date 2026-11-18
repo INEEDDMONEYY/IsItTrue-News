@@ -62,7 +62,7 @@ function CreativeImage({ src, ratio, alt }: { src?: string; ratio: string; alt: 
 
 function Cta({ label }: { label: string }) {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-md bg-accent px-2 py-1 text-[10px] font-semibold text-white">
+    <span className="inline-flex shrink-0 items-center rounded-md bg-black px-2 py-1 text-[10px] font-semibold text-white">
       {label || 'Learn more'}
     </span>
   )

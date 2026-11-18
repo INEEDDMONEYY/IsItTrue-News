@@ -19,6 +19,7 @@ import { LockedArticleRest } from '../components/LockedArticleRest'
 import { sanitizeArticleHtml, scrambleText } from '../utils/articleBody'
 import { ArticleSources } from '../components/ArticleSources'
 import { ArticleLocations } from '@/features/locations/components/ArticleLocations'
+import { AdSlot } from '@/features/ads/components/AdSlot'
 import { RecommendedArticles } from '../components/RecommendedArticles'
 import { getArticleDetailBySlug } from '../data/mockArticleDetails'
 import { publicArticlesApi } from '../api/publicArticles.api'
@@ -234,6 +235,8 @@ export function ArticlePage() {
           )}
         </div>
       )}
+
+      {!isAnonLocked && <AdSlot placement="section_ad" page="article" />}
 
       {!isAnonLocked && article.sourceLinks && article.sourceLinks.length > 0 && (
         <ArticleSources links={article.sourceLinks} />

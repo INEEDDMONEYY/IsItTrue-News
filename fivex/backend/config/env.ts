@@ -68,6 +68,11 @@ const envSchema = z.object({
     z.string().trim().email('MAIL_REPLY_TO must be a plain email address, e.g. support@example.com').optional(),
   ),
 
+  // Stripe powers advertiser checkout. Leave both blank and paid purchases return "payments not configured"
+  // instead of creating campaigns for free. STRIPE_WEBHOOK_SECRET is the signing secret of the webhook endpoint.
+  STRIPE_SECRET_KEY: z.string().optional().default(''),
+  STRIPE_WEBHOOK_SECRET: z.string().optional().default(''),
+
   CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
   CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY is required'),
   CLOUDINARY_API_SECRET: z.string().min(1, 'CLOUDINARY_API_SECRET is required'),
